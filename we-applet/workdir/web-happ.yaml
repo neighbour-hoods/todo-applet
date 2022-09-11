@@ -1,0 +1,7 @@
+---
+manifest_version: "1"
+name: todo_applet-applet
+ui:
+  bundled: "../ui.zip"
+happ_manifest:
+  bundled: "./todo_applet-applet.happ"

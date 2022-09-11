@@ -1,0 +1,18 @@
+---
+manifest_version: "1"
+name: todo_lists
+integrity:
+  uuid: 00000000-0000-0000-0000-000000000000
+  properties: ~
+  origin_time: 2022-09-10T04:13:46.720Z
+  zomes:
+    - name: todo_integrity
+      bundled: ../../target/wasm32-unknown-unknown/release/todo_integrity.wasm
+
+coordinator:
+  zomes:
+    - name: todo
+      bundled: ../../target/wasm32-unknown-unknown/release/todo.wasm
+      dependencies:
+        - name: todo_integrity
+

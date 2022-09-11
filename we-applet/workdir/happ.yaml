@@ -1,0 +1,15 @@
+---
+manifest_version: "1"
+name: todo_applet-applet
+description: ~
+roles:
+  - id: todo_applet
+    provisioning:
+      strategy: create
+      deferred: false
+    dna:
+      bundled: "./todo_applet.dna"
+      properties: ~
+      network_seed: ~
+      version: ~
+      clone_limit: 100
