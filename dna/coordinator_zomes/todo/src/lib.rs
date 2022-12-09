@@ -86,7 +86,7 @@ pub fn get_lists(_: ()) -> ExternResult<Vec<String>> {
         if let Some(component) = leaf {
             let list: String = component
                 .try_into()
-                .map_err(|err: SerializedBytesError| wasm_error!(err.into()))?;
+                .map_err(|err| wasm_error!(WasmErrorInner::from(err)))?;
             lists.push(list.clone())
         }
     }
@@ -116,7 +116,7 @@ pub fn entry_from_record<T: TryFrom<SerializedBytes, Error = SerializedBytesErro
     Ok(record
         .entry()
         .to_app_option()
-        .map_err(|err| wasm_error!(err.into()))?
+        .map_err(|err| wasm_error!(WasmErrorInner::from(err)))?
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
             "Malformed task"
         ))))?)
