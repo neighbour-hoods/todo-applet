@@ -72,6 +72,17 @@ export default () => test("todo tasks CRUD tests", async (t) => {
     t.ok(createAction);
     await pause(100);
 
+    const task3 = {
+      task_description: "finish tests",
+      list: "inbox"
+    };
+    const createAction3 = await alice.cells[0].callZome({
+      zome_name: "todo",
+      fn_name: "add_task_to_list",
+      payload: task3,
+    });
+    t.ok(createAction);
+    await pause(100);
     const groceryTasks: any[] = await bob.cells[0].callZome({
       zome_name: "todo",
       fn_name: "get_tasks_in_list",
@@ -97,5 +108,13 @@ export default () => test("todo tasks CRUD tests", async (t) => {
     t.deepEqual(groceryTasks.length, 2)
     t.ok(updatedGroceryTasks.find(task => JSON.stringify(task) === JSON.stringify({ description: 'apples', status: { Complete: null } })))
     t.ok(updatedGroceryTasks.find(task => JSON.stringify(task) === JSON.stringify({ description: 'bananas', status: { Incomplete: null } })))
+
+    const allTasks: { [list: string]: Array<any> } = await bob.cells[0].callZome({
+      zome_name: "todo",
+      fn_name: "get_all_tasks",
+      payload: null,
+    });
+    t.deepEqual(allTasks["groceries"].length, 2)
+    t.deepEqual(allTasks["inbox"].length, 1)
   });
 });

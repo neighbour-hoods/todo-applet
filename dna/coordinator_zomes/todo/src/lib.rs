@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use hdk::prelude::*;
 use todo_integrity::{EntryTypes, LinkTypes, Task, TaskStatus};
 
@@ -120,4 +122,14 @@ pub fn entry_from_record<T: TryFrom<SerializedBytes, Error = SerializedBytesErro
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
             "Malformed task"
         ))))?)
+}
+
+#[hdk_extern]
+pub fn get_all_tasks(_:()) -> ExternResult<BTreeMap<String,Vec<Task>>> {
+    let mut all_tasks: BTreeMap<String,Vec<Task>> = BTreeMap::new();
+    let lists = get_lists(())?;
+    for list in lists {
+        all_tasks.insert(list.clone(), get_tasks_in_list(list)?);
+    }
+    Ok(all_tasks)
 }
