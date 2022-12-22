@@ -10,6 +10,7 @@ import '@material/mwc-circular-progress';
 
 import './components/todo_lists/todo/create-entry-def-0';
 import './components/todo_lists/todo/entry-def-0-detail';
+import './components/todo-list';
 import { appWebsocketContext, appInfoContext } from './contexts';
 
 @customElement('holochain-app')
@@ -51,6 +52,7 @@ export class HolochainApp extends LitElement {
     ${this.actionHash ? html`
       <entry-def-0-detail .actionHash=${this.actionHash}></entry-def-0-detail>
     ` : html``}
+      <todo-list></todo-list>
       </main>
     `;
   }

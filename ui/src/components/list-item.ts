@@ -4,6 +4,8 @@ import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
 
 export class ListItem extends ScopedElementsMixin(LitElement) {
+    @property()
+    
     render() {
         return html`
             <h1>hi</h1>
