@@ -14,6 +14,8 @@ import { HolochainClient, CellClient } from '@holochain-open-dev/cell-client';
 
 import { appWebsocketContext, appInfoContext, adminWebsocketContext, todoStoreContext } from './contexts';
 import { TodoStore } from './todo-store';
+import { Dimension, SensemakerService, SensemakerStore } from '@lightningrodlabs/we-applet';
+import { serializeHash } from '@holochain-open-dev/utils';
 
 export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   @state() loading = true;
@@ -59,8 +61,28 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     const todoCell = installedCells.find(
       c => c.role_id === 'todo_lists'
     ) as InstalledCell;
+    const sensemakerCell = installedCells.find(
+      c => c.role_id === 'sensemaker'
+    ) as InstalledCell;
+    console.log("todo cell", todoCell)
+    console.log("sensemaker cell", sensemakerCell)
 
-    const cellClient = new CellClient(client, todoCell);
+    const clonedSensemakerCell = await this.appWebsocket.createCloneCell({
+      app_id: 'todo',
+      role_id: "sensemaker",
+      modifiers: {
+        network_seed: '',
+        properties: {
+          community_activator: serializeHash(todoCell.cell_id[1])
+        },
+        origin_time: Date.now(),
+      },
+      name: 'sensemaker-clone',
+    });
+    const sensemakerCellClient = new CellClient(client, clonedSensemakerCell);
+    const sensemakerStore = new SensemakerStore(
+      new SensemakerService(sensemakerCellClient)
+    );
 
     this._todoStore = new TodoStore(
         new HolochainClient(this.appWebsocket),
@@ -74,6 +96,21 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     })
     const allTasks = await this._todoStore.fetchAllTasks()
     console.log('all tasks', allTasks)
+
+    const integerRange = {
+      "name": "10-scale",
+      "kind": {
+        "Integer": { "min": 0, "max": 10 }
+      },
+    };
+
+    const dimension: Dimension = {
+      name: "test",
+      range: integerRange
+    }
+    const dimensionHash = await sensemakerStore.createDimension(dimension)
+    console.log('dimension hash', dimensionHash)
+
     this.loading = false;
   }
 
