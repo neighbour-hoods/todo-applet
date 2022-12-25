@@ -9,14 +9,16 @@
   "scripts": {
     "start": "npm run network 2",
     "network": "hc s clean && npm run build:happ && concurrently-repeat \"npm run start:agent\"",
-    "start:agent": "cross-env HC_PORT=$(port) concurrently -k \"npm run start:happ\" \"sleep 5 && npm run start -w ui\"",
+    "start:agent": "cross-env HC_PORT=$(port) HC_ADMIN_PORT=$(port) concurrently -k \"npm run start:happ\" \"sleep 5 && npm run start -w ui\"",
     "test": "npm run build:happ && npm t -w tests",
-    "start:happ": "concurrently \"RUST_LOG=warn echo \"pass\" | hc s --piped generate ./workdir/todo.happ --run=$HC_PORT -a todo network mdns\" \"npm run playground\"",
+    "start:happ": "concurrently \"RUST_LOG=warn echo \"pass\" | hc s --piped -f=$HC_ADMIN_PORT generate ./workdir/todo.happ --run=$HC_PORT -a todo network mdns\" \"npm run playground\"",
     "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir",
     "build:happ": "npm run build:dnas && hc app pack ./workdir",
     "build:dnas": "npm run build:zomes && hc dna pack ./dna/workdir",
     "build:zomes": "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown",
-    "playground": "run-singleton \"holochain-playground\""
+    "playground": "run-singleton \"holochain-playground\"",
+    "download-sensemaker": "rimraf workdir/sensemaker.dna && curl -L --output workdir/sensemaker.dna https://github.com/neighbour-hoods/sensemaker-lite/releases/download/v0.0.1-alpha/sensemaker.dna",
+    "start:ui": "npm run start -w ui"
   },
   "devDependencies": {
     "@holochain-playground/cli": "^0.0.11",

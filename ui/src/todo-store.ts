@@ -29,7 +29,6 @@ export class TodoStore {
   constructor(
     protected client: HolochainClient,
     protected todoCell: InstalledCell,
-    protected synDnaHash: DnaHash, // This is a template DNA so we don't have a cell on app init
     zomeName: string = 'todo'
   ) {
     this.service = new TodoService(
@@ -44,6 +43,7 @@ export class TodoStore {
     this.#tasksInLists.update(tasks => ({
       ...tasks,
     }));
+    return get(this.#tasksInLists)
   }
 
   async createNewList(list: string) {
