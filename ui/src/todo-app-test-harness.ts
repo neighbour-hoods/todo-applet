@@ -37,7 +37,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
   async firstUpdated() {
     this.adminWebsocket = await AdminWebsocket.connect(
-      `ws://localhost:${process.env.ADMIN_PORT}`
+      `ws://localhost:${process.env.HC_ADMIN_PORT}`
     );
 
     this.appWebsocket = await AppWebsocket.connect(
