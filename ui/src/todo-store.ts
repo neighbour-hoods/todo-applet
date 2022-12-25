@@ -22,6 +22,10 @@ export class TodoStore {
     return derived(this.#tasksInLists, lists => lists[listName]);
   }
 
+  listLists() {
+    return derived(this.#tasksInLists, lists => Object.keys(lists));
+  }
+
   get myAgentPubKey(): AgentPubKeyB64 {
     return serializeHash(this.todoCell.cell_id[1]);
   }
@@ -42,6 +46,7 @@ export class TodoStore {
 
     this.#tasksInLists.update(tasks => ({
       ...tasks,
+      ...fetchedTasks,
     }));
     return get(this.#tasksInLists)
   }

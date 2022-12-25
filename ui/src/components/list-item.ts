@@ -1,14 +1,14 @@
-import { contextProvider, ContextProvider } from "@lit-labs/context";
-import { property, state, query } from "lit/decorators.js";
+import { property } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
-import { LitElement, html, css } from "lit";
+import { LitElement, html } from "lit";
 
 export class ListItem extends ScopedElementsMixin(LitElement) {
     @property()
-    
+    listName!: string
+
     render() {
         return html`
-            <h1>hi</h1>
+            <button type="button">${this.listName}</button>
         `
     }
 }

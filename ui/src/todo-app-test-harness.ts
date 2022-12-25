@@ -16,10 +16,13 @@ import { appWebsocketContext, appInfoContext, adminWebsocketContext, todoStoreCo
 import { TodoStore } from './todo-store';
 import { Dimension, SensemakerService, SensemakerStore } from '@lightningrodlabs/we-applet';
 import { serializeHash } from '@holochain-open-dev/utils';
+import { ListList, TaskList } from './index'
+import { get } from 'svelte/store';
 
 export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   @state() loading = true;
   @state() actionHash: ActionHash | undefined;
+  @state() currentSelectedList: string | undefined;
 
   @contextProvider({ context: appWebsocketContext })
   @property({ type: Object })
@@ -89,6 +92,8 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
         todoCell
       );
 
+    const all = await this._todoStore.fetchAllTasks()
+    console.log('all', all)
     await this._todoStore.createNewList("groceries")
     await this._todoStore.addTaskToList({
       task_description: "apples",
@@ -119,18 +124,30 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       return html`
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       `;
-
+    const allTasks = get(this._todoStore.listTasks("groceries"))
     return html`
       <main>
-        <h1>todo</h1>
-
-    ${this.actionHash ? html`
-    ` : html``}
+        <div class="home-page">
+          <list-list></list-list>
+          <task-list listName=${"groceries"}></task-list>
+        </div>
       </main>
     `;
   }
 
+  static get scopedElements() {
+    return {
+      'list-list': ListList,
+      'task-list': TaskList,
+    };
+  }
+
   static styles = css`
+    .home-page {
+      display: flex;
+      flex-direction: row;
+    }  
+
     :host {
       min-height: 100vh;
       display: flex;

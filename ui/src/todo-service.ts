@@ -26,7 +26,7 @@ export class TodoService {
     return this.callZome('get_tasks_in_list', input);
   }
 
-  async getAllTasks(): Promise<Dictionary<Array<string>>> {
+  async getAllTasks(): Promise<Dictionary<Array<Task>>> {
     return this.callZome('get_all_tasks', null);
   }
   
