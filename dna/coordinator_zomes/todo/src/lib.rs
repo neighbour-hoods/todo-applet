@@ -78,6 +78,19 @@ pub fn complete_task(task_action_hash: ActionHash) -> ExternResult<ActionHash> {
 }
 
 #[hdk_extern]
+pub fn uncomplete_task(task_action_hash: ActionHash) -> ExternResult<ActionHash> {
+    let task = get_latest_task(task_action_hash.clone())?.ok_or(wasm_error!(
+        WasmErrorInner::Guest(String::from("task doesn't exist for action hash"))
+    ))?;
+
+    let updated_task = Task {
+        description: task.description,
+        status: TaskStatus::Incomplete,
+    };
+    update_entry(task_action_hash, updated_task)
+}
+
+#[hdk_extern]
 pub fn get_lists(_: ()) -> ExternResult<Vec<String>> {
     let children_paths: Vec<TypedPath> = Path::from("all_lists")
         .typed(LinkTypes::ListNamePath)?

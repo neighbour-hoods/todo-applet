@@ -7,14 +7,14 @@ import {
 } from '@holochain-open-dev/core-types';
 import { serializeHash, deserializeHash } from '@holochain-open-dev/utils';
 import { derived, get, Writable, writable } from 'svelte/store';
-import { AdminWebsocket, DnaHash, InstalledCell } from '@holochain/client';
+import { ActionHash, AdminWebsocket, DnaHash, InstalledCell } from '@holochain/client';
 import { TodoService } from './todo-service';
 import { Task, TaskToListInput } from './types';
 
 export class TodoStore {
   service: TodoService;
 
-  #tasksInLists: Writable<Dictionary<Array<Task>>> = writable({});
+  #tasksInLists: Writable<Dictionary<Array<[ActionHash, Task]>>> = writable({});
 
   #openedList: Writable<string> = writable("");
 
@@ -61,13 +61,31 @@ export class TodoStore {
   }
 
   async addTaskToList(task: TaskToListInput) {
-    await this.service.addTaskToList(task);
+    let actionHash = await this.service.addTaskToList(task);
 
     this.#tasksInLists.update(lists => {
-      lists[task.list] = [...lists[task.list], {
+      lists[task.list] = [...lists[task.list], [actionHash, {
         description: task.task_description,
         status: { Incomplete: null }
-      }];
+      }]];
+      return lists;
+    });
+  }
+
+  async toggleTaskStatus(listName: string, [actionHash, task]: [ActionHash, Task]) {
+    let updatedTask = task;
+    if(('Complete' in task.status)) {
+      await this.service.uncompleteTask(actionHash);
+      updatedTask.status = { Incomplete: null };
+    }
+    else {
+      await this.service.completeTask(actionHash)
+      updatedTask.status = { Complete: null };
+    }
+    this.#tasksInLists.update(lists => {
+      let updatedTaskInList = lists[listName].filter(([taskActionHash, taskItem]) => serializeHash(taskActionHash) != serializeHash(actionHash));
+      updatedTaskInList.push([actionHash, updatedTask]);
+      lists[listName] = updatedTaskInList;
       return lists;
     });
   }

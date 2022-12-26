@@ -18,15 +18,19 @@ export class TodoService {
     return this.callZome('complete_task', input);
   }
 
+  async uncompleteTask(input: ActionHash): Promise<ActionHash> {
+    return this.callZome('uncomplete_task', input);
+  }
+
   async getLists(): Promise<Array<string>> {
     return this.callZome('get_lists', null);
   }
 
-  async getTasksInList(input: ActionHash): Promise<Array<Task>> {
+  async getTasksInList(input: ActionHash): Promise<Array<[ActionHash, Task]>> {
     return this.callZome('get_tasks_in_list', input);
   }
 
-  async getAllTasks(): Promise<Dictionary<Array<Task>>> {
+  async getAllTasks(): Promise<Dictionary<Array<[ActionHash, Task]>>> {
     return this.callZome('get_all_tasks', null);
   }
   

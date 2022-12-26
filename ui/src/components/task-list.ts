@@ -48,10 +48,13 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         if (this.listName) {
             this.taskList = html`
             ${get(this.todoStore.listTasks(this.listName)).map((task) => html`
-               <task-item .task=${task}></task-item> 
+               <task-item .task=${task} @toggle-task-status=${this.toggleTaskStatus}></task-item> 
             `)}
             `
         }
+    }
+    async toggleTaskStatus(e: CustomEvent) {
+        await this.todoStore.toggleTaskStatus(this.listName!, e.detail.task)
     }
     static get scopedElements() {
         return {
