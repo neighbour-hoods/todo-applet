@@ -40,6 +40,9 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   @property()
   _todoStore!: TodoStore;
 
+  @state()
+  activeList: string | undefined
+
   async firstUpdated() {
     this.adminWebsocket = await AdminWebsocket.connect(
       `ws://localhost:${process.env.HC_ADMIN_PORT}`
@@ -94,11 +97,11 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
     const all = await this._todoStore.fetchAllTasks()
     console.log('all', all)
-    await this._todoStore.createNewList("groceries")
-    await this._todoStore.addTaskToList({
-      task_description: "apples",
-      list: "groceries"
-    })
+    // await this._todoStore.createNewList("groceries")
+    // await this._todoStore.addTaskToList({
+    //   task_description: "apples",
+    //   list: "groceries"
+    // })
     const allTasks = await this._todoStore.fetchAllTasks()
     console.log('all tasks', allTasks)
 
@@ -128,11 +131,15 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     return html`
       <main>
         <div class="home-page">
-          <list-list></list-list>
-          <task-list listName=${"groceries"}></task-list>
+          <list-list @list-selected=${this.updateActiveList}></list-list>
+          <task-list listName=${this.activeList}></task-list>
         </div>
       </main>
     `;
+  }
+
+  updateActiveList(e: CustomEvent) {
+    this.activeList = e.detail.selectedList;
   }
 
   static get scopedElements() {

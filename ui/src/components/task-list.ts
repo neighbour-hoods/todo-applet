@@ -7,6 +7,7 @@ import { TaskItem } from "./task-item";
 import { todoStoreContext } from "../contexts";
 import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
+import { AddItem } from "./add-item";
 
 // add item at the bottom
 export class TaskList extends ScopedElementsMixin(LitElement) {
@@ -15,21 +16,47 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     public  todoStore!: TodoStore
 
     @property()
-    listName!: string
+    listName: string | undefined
+
+    @state()
+    taskList = html``
 
     render() {
-        const taskList = html`
-        ${get(this.todoStore.listTasks(this.listName)).map((task) => html`
-           <task-item .task=${task}></task-item> 
-        `)}
-        `
-        return html`
-            ${taskList}
-        `
+        this.updateTaskList()
+        if (this.listName) {
+            return html`
+                <div class="task-list-container">
+                    ${this.taskList}
+                    <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
+                </div>
+            `
+        }
+        else {
+            return html`
+                <div>select a list!</div>
+            `
+        }
+    }
+    async addNewTask(e: CustomEvent) {
+       await this.todoStore.addTaskToList({
+        task_description: e.detail.newValue,
+        list: this.listName!,
+    })
+        this.updateTaskList()
+    }
+    updateTaskList() {
+        if (this.listName) {
+            this.taskList = html`
+            ${get(this.todoStore.listTasks(this.listName)).map((task) => html`
+               <task-item .task=${task}></task-item> 
+            `)}
+            `
+        }
     }
     static get scopedElements() {
         return {
         'task-item': TaskItem,
+        'add-item': AddItem,
         };
     }
 }

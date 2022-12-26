@@ -8,7 +8,19 @@ export class ListItem extends ScopedElementsMixin(LitElement) {
 
     render() {
         return html`
-            <button type="button">${this.listName}</button>
+            <button type="button" @click=${this.dispatchSelectedList}>${this.listName}</button>
         `
+    }
+
+    dispatchSelectedList() {
+        const selectedList = this.listName;
+        if (selectedList) {
+            const options = {
+                detail: {selectedList},
+                bubbles: true,
+                composed: true
+            };
+            this.dispatchEvent(new CustomEvent('list-selected', options))
+        }
     }
 }

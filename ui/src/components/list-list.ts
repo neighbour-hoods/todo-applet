@@ -12,27 +12,35 @@ export class ListList extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: todoStoreContext, subscribe: true })
     @property({attribute: false})
     public  todoStore!: TodoStore
+
+    @state()
+    listList = html``
+
     render() {
         console.log(get(this.todoStore.listLists()))
-        const listList = html`
-        ${get(this.todoStore.listLists()).map((listName) => html`
-           <list-item listName=${listName}></list-item> 
-        `)}
-        `
+        this.updateListList()
         return html`
             <div class="list-list-container">
-                ${listList}
+                ${this.listList}
                 <add-item itemType="list" @new-item=${this.addNewList}></add-item>
             </div>
         `
     }
     async addNewList(e: CustomEvent) {
-       console.log(e.detail.newValue)
        await this.todoStore.createNewList(e.detail.newValue)
-       console.log(get(this.todoStore.listLists()))
-       const all = await this.todoStore.fetchAllTasks()
-       console.log(all)
+        this.updateListList()
     }
+    updateListList() {
+        this.listList = html`
+        ${get(this.todoStore.listLists()).map((listName) => html`
+           <list-item listName=${listName}></list-item> 
+        `)}
+        `
+    }
+    updateSelectedList(e: CustomEvent) {
+
+    }
+    
     static get scopedElements() {
         return {
         'list-item': ListItem,

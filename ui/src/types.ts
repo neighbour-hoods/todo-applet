@@ -18,6 +18,10 @@ interface TaskToListInput {
     list: string,
 }
 
+interface TasksInList {
+    [actionHash: string]: Task,
+}
+
 export {
     Task,
     TaskStatus,
