@@ -96,18 +96,20 @@ pub fn get_lists(_: ()) -> ExternResult<Vec<String>> {
 }
 
 #[hdk_extern]
-pub fn get_tasks_in_list(list: String) -> ExternResult<Vec<Task>> {
-    Ok(get_links(
+pub fn get_tasks_in_list(list: String) -> ExternResult<Vec<(ActionHash, Task)>> {
+    let mut tasks = Vec::<(ActionHash, Task)>::new();
+    let links = get_links(
         list_typed_path(list)?.path_entry_hash()?,
         LinkTypes::ListToTask,
         None,
-    )?
-    .into_iter()
-    .map(|link| get_latest_task(link.target.into()))
-    .collect::<ExternResult<Vec<Option<Task>>>>()?
-    .into_iter()
-    .filter_map(|maybe_task| maybe_task)
-    .collect::<Vec<Task>>())
+    )?;
+    for list in links {
+        let task = get_latest_task(list.target.clone().into())?.ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Malformed task"
+        ))))?;
+        tasks.push((list.target.into(),task))
+    }
+    Ok(tasks)
 }
 
 fn list_typed_path(list: String) -> ExternResult<TypedPath> {
@@ -125,8 +127,8 @@ pub fn entry_from_record<T: TryFrom<SerializedBytes, Error = SerializedBytesErro
 }
 
 #[hdk_extern]
-pub fn get_all_tasks(_:()) -> ExternResult<BTreeMap<String,Vec<Task>>> {
-    let mut all_tasks: BTreeMap<String,Vec<Task>> = BTreeMap::new();
+pub fn get_all_tasks(_:()) -> ExternResult<BTreeMap<String, Vec<(ActionHash, Task)>>> {
+    let mut all_tasks: BTreeMap<String,Vec<(ActionHash,Task)>> = BTreeMap::new();
     let lists = get_lists(())?;
     for list in lists {
         all_tasks.insert(list.clone(), get_tasks_in_list(list)?);

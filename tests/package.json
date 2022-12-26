@@ -24,7 +24,8 @@
     "@holochain/tryorama": "0.7.0",
     "@types/lodash": "^4.14.158",
     "@types/node": "^14.0.14",
-    "tape-promise": "^4.0.0"
+    "tape-promise": "^4.0.0",
+    "@holochain-open-dev/utils": "^0.4.3"
   },
   "type": "module"
 }
