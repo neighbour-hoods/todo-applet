@@ -1,6 +1,7 @@
 import { property, query, state } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html } from "lit";
+import { TextField, Button } from '@scoped-elements/material-web'
 
 export class AddItem extends ScopedElementsMixin(LitElement) {
     @property()
@@ -15,8 +16,8 @@ export class AddItem extends ScopedElementsMixin(LitElement) {
 
     render() {
         return html`
-            <input id="new-item-input" placeholder=${`new ${this.itemType}`}>
-            <button type="buton" @click=${this.dispatchNewItem}>add+</button>
+            <mwc-textfield id="new-item-input" placeholder=${`new ${this.itemType}`}></mwc-textfield>
+            <mwc-button type="buton" @click=${this.dispatchNewItem}>add+</mwc-button>
         `
     }
 
@@ -35,6 +36,13 @@ export class AddItem extends ScopedElementsMixin(LitElement) {
             };
             this.dispatchEvent(new CustomEvent('new-item', options))
             this.input.value = ''
+        }
+    }
+
+    static get scopedElements() {
+        return {
+            'mwc-textfield': TextField,
+            'mwc-button': Button,
         }
     }
 }
