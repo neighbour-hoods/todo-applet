@@ -6,6 +6,7 @@ import {
   InstalledAppInfo,
   AdminWebsocket,
   InstalledCell,
+  AppEntryType,
 } from '@holochain/client';
 import { contextProvider } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
@@ -14,7 +15,7 @@ import { HolochainClient, CellClient } from '@holochain-open-dev/cell-client';
 
 import { appWebsocketContext, appInfoContext, adminWebsocketContext, todoStoreContext, sensemakerStoreContext } from './contexts';
 import { TodoStore } from './todo-store';
-import { Dimension, SensemakerService, SensemakerStore } from '@lightningrodlabs/we-applet';
+import { Dimension, ResourceType, SensemakerService, SensemakerStore } from '@lightningrodlabs/we-applet';
 import { serializeHash } from '@holochain-open-dev/utils';
 import { ListList, TaskList } from './index'
 import { get } from 'svelte/store';
@@ -126,19 +127,67 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
 
     const integerRange = {
-      "name": "10-scale",
+      "name": "1-scale",
       "kind": {
-        "Integer": { "min": 0, "max": 10 }
+        "Integer": { "min": 0, "max": 1 }
       },
     };
 
     const dimension: Dimension = {
-      name: "test",
+      name: "importance",
       range: integerRange
     }
     const dimensionHash = await this._sensemakerStore.createDimension(dimension)
     console.log('dimension hash', dimensionHash)
+    
+    const integerRange2 = {
+      name: "1-scale-total",
+      kind: {
+        Integer: { min: 0, max: 1000000 },
+      },
+    };
 
+    const objectiveDimension = {
+      name: "total_importance",
+      range: integerRange2,
+    };
+    const objectiveDimensionHash = await this._sensemakerStore.createDimension(objectiveDimension)
+    
+    let app_entry_type: AppEntryType = { id: 0, zome_id: 0, visibility: { Public: null } };
+    const resourceType: ResourceType = {
+      name: "task-item",
+      base_types: [app_entry_type],
+      dimension_ehs: [dimensionHash]
+    }
+
+    const resourceTypeEh = await this._sensemakerStore.createResourceType(resourceType)
+
+    const totalImportanceMethod = {
+      name: "total_importance_method",
+      target_resource_type_eh: resourceTypeEh,
+      input_dimension_ehs: [dimensionHash],
+      output_dimension_eh: objectiveDimensionHash,
+      program: { Sum: null },
+      can_compute_live: false,
+      must_publish_dataset: false,
+    };
+
+    const methodEh = await this._sensemakerStore.createMethod(totalImportanceMethod)
+
+    const threshold = {
+      dimension_eh: objectiveDimensionHash,
+      kind: { GreaterThan: null },
+      value: { Integer: 0 },
+    };
+
+    const culturalContext = {
+      name: "most important tasks",
+      resource_type_eh: resourceTypeEh,
+      thresholds: [threshold],
+      order_by: [[objectiveDimensionHash, { Biggest: null }]], // DimensionEh
+    };
+
+    const contextEh = await this._sensemakerStore.createCulturalContext(culturalContext)
   }
   updateActiveList(e: CustomEvent) {
     this.activeList = e.detail.selectedList;
