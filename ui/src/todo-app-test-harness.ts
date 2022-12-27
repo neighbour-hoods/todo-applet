@@ -127,12 +127,15 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       return html`
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       `;
-    const allTasks = get(this._todoStore.listTasks("groceries"))
+    const taskList = html`
+      <task-list listName=${this.activeList}></task-list>
+    ` 
+
     return html`
       <main>
         <div class="home-page">
           <list-list @list-selected=${this.updateActiveList}></list-list>
-          <task-list listName=${this.activeList}></task-list>
+          ${taskList}
         </div>
       </main>
     `;

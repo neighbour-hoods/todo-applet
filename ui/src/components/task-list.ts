@@ -8,6 +8,7 @@ import { todoStoreContext } from "../contexts";
 import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "./add-item";
+import { ActionHash } from "@holochain/client";
 
 // add item at the bottom
 export class TaskList extends ScopedElementsMixin(LitElement) {
@@ -19,14 +20,14 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     listName: string | undefined
 
     @state()
-    taskList = html``
+    tasks = html``
 
     render() {
         this.updateTaskList()
         if (this.listName) {
             return html`
                 <div class="task-list-container">
-                    ${this.taskList}
+                    ${this.tasks}
                     <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
                 </div>
             `
@@ -46,11 +47,12 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     }
     updateTaskList() {
         if (this.listName) {
-            this.taskList = html`
+            this.tasks = html`
             ${get(this.todoStore.listTasks(this.listName)).map((task) => html`
                <task-item .task=${task} @toggle-task-status=${this.toggleTaskStatus}></task-item> 
             `)}
             `
+            console.log('tasks in list', get(this.todoStore.listTasks(this.listName)))
         }
     }
     async toggleTaskStatus(e: CustomEvent) {
