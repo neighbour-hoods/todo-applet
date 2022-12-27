@@ -4,7 +4,7 @@ import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
 import { Task } from "../types";
 import { ActionHash } from "@holochain/client";
-import { Checkbox } from '@scoped-elements/material-web'
+import { Checkbox, ListItem } from '@scoped-elements/material-web'
 
 export class TaskItem extends ScopedElementsMixin(LitElement) {
     @property()
@@ -28,12 +28,8 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
             `;
         return html`
             <div class="task-item-container">
-                <div>
-                    ${checkBox}
-                </div>
-                <div>
-                    ${this.task[1].description}
-                </div>
+                ${checkBox}
+                <mwc-list-item>${this.task[1].description}</mwc-list-item>
             </div>
         `
     }
@@ -57,6 +53,7 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
     static get scopedElements() {
         return {
             'mwc-checkbox': Checkbox,
+            'mwc-list-item': ListItem,
         }
     }
 }

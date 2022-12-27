@@ -17,7 +17,7 @@ export class AddItem extends ScopedElementsMixin(LitElement) {
     render() {
         return html`
             <mwc-textfield id="new-item-input" placeholder=${`new ${this.itemType}`}></mwc-textfield>
-            <mwc-button type="buton" @click=${this.dispatchNewItem}>add+</mwc-button>
+            <mwc-button outlined=true @click=${this.dispatchNewItem}>add+</mwc-button>
         `
     }
 

@@ -1,6 +1,7 @@
 import { property } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html } from "lit";
+import { ListItem as MWCListItem } from '@scoped-elements/material-web'
 
 export class ListItem extends ScopedElementsMixin(LitElement) {
     @property()
@@ -8,7 +9,7 @@ export class ListItem extends ScopedElementsMixin(LitElement) {
 
     render() {
         return html`
-            <button type="button" @click=${this.dispatchSelectedList}>${this.listName}</button>
+            <mwc-list-item @click=${this.dispatchSelectedList}>${this.listName}</mwc-list-item>
         `
     }
 
@@ -21,6 +22,12 @@ export class ListItem extends ScopedElementsMixin(LitElement) {
                 composed: true
             };
             this.dispatchEvent(new CustomEvent('list-selected', options))
+        }
+    }
+
+    static get scopedElements() {
+        return {
+            'mwc-list-item': MWCListItem,
         }
     }
 }

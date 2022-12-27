@@ -8,7 +8,8 @@ import { todoStoreContext } from "../contexts";
 import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "./add-item";
-import { ActionHash } from "@holochain/client";
+import { List } from '@scoped-elements/material-web'
+
 
 // add item at the bottom
 export class TaskList extends ScopedElementsMixin(LitElement) {
@@ -27,8 +28,10 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         if (this.listName) {
             return html`
                 <div class="task-list-container">
-                    ${this.tasks}
-                    <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
+                    <mwc-list>
+                        ${this.tasks}
+                        <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
+                    </mwc-list>
                 </div>
             `
         }
@@ -62,6 +65,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         return {
         'task-item': TaskItem,
         'add-item': AddItem,
+        'mwc-list': List,
         };
     }
 }
