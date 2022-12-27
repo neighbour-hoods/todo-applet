@@ -4,9 +4,12 @@ import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
 import { Task } from "../types";
 import { ActionHash } from "@holochain/client";
-import { Checkbox, ListItem } from '@scoped-elements/material-web'
+import { Checkbox, ListItem, CheckListItem } from '@scoped-elements/material-web'
 
 export class TaskItem extends ScopedElementsMixin(LitElement) {
+    @property()
+    completed: boolean = false
+
     @property()
     @state()
     task!: [ActionHash, Task]
@@ -18,23 +21,10 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
         `;
 
     render() {
-        console.log(this.isComplete(this.task[1]))
-        const checkBox = this.isComplete(this.task[1]) ? 
-            html`
-                <mwc-checkbox .checked=${true} @click=${this.dispatchToggleStatus}></mwc-checkbox>
-            ` :
-            html`
-                <mwc-checkbox .checked=${false} @click=${this.dispatchToggleStatus}></mwc-checkbox>
-            `;
+        console.log(this.completed)
         return html`
-            <div class="task-item-container">
-                ${checkBox}
-                <mwc-list-item>${this.task[1].description}</mwc-list-item>
-            </div>
+            <mwc-check-list-item left ?selected=${this.completed} @click=${this.dispatchToggleStatus}>${this.task[1].description}</mwc-check-list-item>
         `
-    }
-    isComplete(task: Task) {
-        return ('Complete' in task.status)
     }
     dispatchToggleStatus() {
         const task = this.task;
@@ -54,6 +44,7 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
         return {
             'mwc-checkbox': Checkbox,
             'mwc-list-item': ListItem,
+            'mwc-check-list-item': CheckListItem,
         }
     }
 }
