@@ -12,7 +12,7 @@ import '@material/mwc-circular-progress';
 import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import { HolochainClient, CellClient } from '@holochain-open-dev/cell-client';
 
-import { appWebsocketContext, appInfoContext, adminWebsocketContext, todoStoreContext } from './contexts';
+import { appWebsocketContext, appInfoContext, adminWebsocketContext, todoStoreContext, sensemakerStoreContext } from './contexts';
 import { TodoStore } from './todo-store';
 import { Dimension, SensemakerService, SensemakerStore } from '@lightningrodlabs/we-applet';
 import { serializeHash } from '@holochain-open-dev/utils';
@@ -40,85 +40,29 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   @property()
   _todoStore!: TodoStore;
 
+  @contextProvider({ context: sensemakerStoreContext })
+  @property()
+  _sensemakerStore!: SensemakerStore;
+
   @state()
   activeList: string | undefined
 
   async firstUpdated() {
-    this.adminWebsocket = await AdminWebsocket.connect(
-      `ws://localhost:${process.env.HC_ADMIN_PORT}`
-    );
+    await this.connectHolochain()
 
-    this.appWebsocket = await AppWebsocket.connect(
-      `ws://localhost:${process.env.HC_PORT}`
-    );
-    
+    const installedCells = this.appInfo.cell_data;
+    await this.initializeSensemaker(installedCells)
 
-    this.appInfo = await this.appWebsocket.appInfo({
-      installed_app_id: 'todo',
-    });
-
-    const client = new HolochainClient(this.appWebsocket);
-
-    const appInfo = await this.appWebsocket.appInfo({
-      installed_app_id: 'todo',
-    });
-
-    const installedCells = appInfo.cell_data;
     const todoCell = installedCells.find(
       c => c.role_id === 'todo_lists'
     ) as InstalledCell;
-    const sensemakerCell = installedCells.find(
-      c => c.role_id === 'sensemaker'
-    ) as InstalledCell;
     console.log("todo cell", todoCell)
-    console.log("sensemaker cell", sensemakerCell)
-
-    const clonedSensemakerCell = await this.appWebsocket.createCloneCell({
-      app_id: 'todo',
-      role_id: "sensemaker",
-      modifiers: {
-        network_seed: '',
-        properties: {
-          community_activator: serializeHash(todoCell.cell_id[1])
-        },
-        origin_time: Date.now(),
-      },
-      name: 'sensemaker-clone',
-    });
-    const sensemakerCellClient = new CellClient(client, clonedSensemakerCell);
-    const sensemakerStore = new SensemakerStore(
-      new SensemakerService(sensemakerCellClient)
-    );
 
     this._todoStore = new TodoStore(
         new HolochainClient(this.appWebsocket),
         todoCell
-      );
-
-    const all = await this._todoStore.fetchAllTasks()
-    console.log('all', all)
-    // await this._todoStore.createNewList("groceries")
-    // await this._todoStore.addTaskToList({
-    //   task_description: "apples",
-    //   list: "groceries"
-    // })
-    const allTasks = await this._todoStore.fetchAllTasks()
-    console.log('all tasks', allTasks)
-
-    const integerRange = {
-      "name": "10-scale",
-      "kind": {
-        "Integer": { "min": 0, "max": 10 }
-      },
-    };
-
-    const dimension: Dimension = {
-      name: "test",
-      range: integerRange
-    }
-    const dimensionHash = await sensemakerStore.createDimension(dimension)
-    console.log('dimension hash', dimensionHash)
-
+    );
+    await this._todoStore.fetchAllTasks()
     this.loading = false;
   }
 
@@ -141,6 +85,61 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     `;
   }
 
+  async connectHolochain() {
+    this.adminWebsocket = await AdminWebsocket.connect(
+      `ws://localhost:${process.env.HC_ADMIN_PORT}`
+    );
+
+    this.appWebsocket = await AppWebsocket.connect(
+      `ws://localhost:${process.env.HC_PORT}`
+    );
+    
+
+    this.appInfo = await this.appWebsocket.appInfo({
+      installed_app_id: 'todo',
+    });
+  }
+
+  async initializeSensemaker(installedCells: InstalledCell[]) {
+    const client = new HolochainClient(this.appWebsocket);
+    const sensemakerCell = installedCells.find(
+      c => c.role_id === 'sensemaker'
+    ) as InstalledCell;
+    console.log("sensemaker cell", sensemakerCell)
+
+    const clonedSensemakerCell = await this.appWebsocket.createCloneCell({
+      app_id: 'todo',
+      role_id: "sensemaker",
+      modifiers: {
+        network_seed: '',
+        properties: {
+          community_activator: serializeHash(sensemakerCell.cell_id[1])
+        },
+        origin_time: Date.now(),
+      },
+      name: 'sensemaker-clone',
+    });
+    const sensemakerCellClient = new CellClient(client, clonedSensemakerCell);
+    this._sensemakerStore = new SensemakerStore(
+      new SensemakerService(sensemakerCellClient)
+    );
+
+
+    const integerRange = {
+      "name": "10-scale",
+      "kind": {
+        "Integer": { "min": 0, "max": 10 }
+      },
+    };
+
+    const dimension: Dimension = {
+      name: "test",
+      range: integerRange
+    }
+    const dimensionHash = await this._sensemakerStore.createDimension(dimension)
+    console.log('dimension hash', dimensionHash)
+
+  }
   updateActiveList(e: CustomEvent) {
     this.activeList = e.detail.selectedList;
   }
