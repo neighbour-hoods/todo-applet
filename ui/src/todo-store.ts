@@ -7,7 +7,7 @@ import {
 } from '@holochain-open-dev/core-types';
 import { serializeHash, deserializeHash } from '@holochain-open-dev/utils';
 import { derived, get, Writable, writable } from 'svelte/store';
-import { ActionHash, AdminWebsocket, DnaHash, InstalledCell } from '@holochain/client';
+import { ActionHash, AdminWebsocket, DnaHash, EntryHash, InstalledCell } from '@holochain/client';
 import { TodoService } from './todo-service';
 import { Task, TaskToListInput, WrappedEntry } from './types';
 
@@ -24,6 +24,21 @@ export class TodoStore {
 
   listLists() {
     return derived(this.#tasksInLists, lists => Object.keys(lists));
+  }
+
+  allTaskEntyHashes() {
+    return derived(this.#tasksInLists, lists => {
+      let allTaskEhs: EntryHash[] = []
+      const listNames = Object.keys(lists);
+      for (const list of listNames) {
+        const listEhs = lists[list].map(wrappedTask => wrappedTask.entry_hash)
+        allTaskEhs = [
+          ...allTaskEhs,
+          ...listEhs
+        ]
+      }
+      return allTaskEhs
+    })
   }
 
   get myAgentPubKey(): AgentPubKeyB64 {

@@ -16,7 +16,7 @@ import { HolochainClient, CellClient } from '@holochain-open-dev/cell-client';
 
 import { appWebsocketContext, appInfoContext, adminWebsocketContext, todoStoreContext, sensemakerStoreContext } from './contexts';
 import { TodoStore } from './todo-store';
-import { Assessment, CulturalContext, Dimension, ResourceType, SensemakerService, SensemakerStore, Threshold } from '@lightningrodlabs/we-applet';
+import { Assessment, ComputeContextInput, CulturalContext, Dimension, ResourceType, SensemakerService, SensemakerStore, Threshold } from '@lightningrodlabs/we-applet';
 import { serializeHash } from '@holochain-open-dev/utils';
 import { ListList, TaskList } from './index'
 import { get } from 'svelte/store';
@@ -52,6 +52,12 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   @property()
   sensemakerDimensionHash: EntryHash | undefined
 
+  @property()
+  methodEh: EntryHash | undefined
+
+  @property()
+  contextEh: EntryHash | undefined
+
   async firstUpdated() {
     await this.connectHolochain()
 
@@ -83,7 +89,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     return html`
       <main>
         <div class="home-page">
-          <list-list @list-selected=${this.updateActiveList}></list-list>
+          <list-list @list-selected=${this.updateActiveList} @context-selected=${this.computeContext}></list-list>
           ${taskList}
         </div>
       </main>
@@ -178,7 +184,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     };
 
     const methodEh = await this._sensemakerStore.createMethod(totalImportanceMethod)
-
+    this.methodEh = methodEh
     const threshold: Threshold = {
       dimension_eh: objectiveDimensionHash,
       kind: { GreaterThan: null },
@@ -193,6 +199,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     };
 
     const contextEh = await this._sensemakerStore.createCulturalContext(culturalContext)
+    this.contextEh = contextEh
   }
   updateActiveList(e: CustomEvent) {
     this.activeList = e.detail.selectedList;
@@ -204,12 +211,27 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
               Integer: 1
           },
           dimension_eh: this.sensemakerDimensionHash!,
-          subject_eh: e.detail.task.entry_hash!,
+          subject_eh: e.detail.task.entry_hash,
           maybe_input_dataSet: null,
 
       }
       const assessmentEh = await this._sensemakerStore.createAssessment(assessment)
+      const objectiveAssessmentEh = await this._sensemakerStore.runMethod({
+        resource_eh: e.detail.task.entry_hash,
+        method_eh: this.methodEh!,
+      })
       console.log('created assessment', assessmentEh)
+      console.log('created objective assessment', objectiveAssessmentEh)
+  }
+
+  async computeContext(_e: CustomEvent) {
+    const contextResultInput: ComputeContextInput = {
+      resource_ehs: get(this._todoStore.allTaskEntyHashes()),
+      context_eh: this.contextEh!,
+      can_publish_result: false,
+    }
+    const contextResult = await this._sensemakerStore.computeContext(contextResultInput)
+    console.log('context result', contextResult)
   }
 
   static get scopedElements() {
