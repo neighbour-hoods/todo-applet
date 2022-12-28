@@ -4,11 +4,12 @@ import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
 import { Task } from "../types";
 import { TaskItem } from "./task-item";
-import { todoStoreContext } from "../contexts";
+import { sensemakerStoreContext, todoStoreContext } from "../contexts";
 import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "./add-item";
 import { List } from '@scoped-elements/material-web'
+import { Assessment, SensemakerStore } from "@lightningrodlabs/we-applet";
 
 
 // add item at the bottom
@@ -16,6 +17,10 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: todoStoreContext, subscribe: true })
     @property({attribute: false})
     public  todoStore!: TodoStore
+
+    @contextProvided({ context: sensemakerStoreContext, subscribe: true })
+    @property({attribute: false})
+    public  sensemakerStore!: SensemakerStore
 
     @property()
     listName: string | undefined
@@ -52,7 +57,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         if (this.listName) {
             this.tasks = html`
             ${get(this.todoStore.listTasks(this.listName)).map((task) => html`
-               <task-item .task=${task} .completed=${('Complete' in task[1].status)} @toggle-task-status=${this.toggleTaskStatus}></task-item> 
+               <task-item .task=${task} .completed=${('Complete' in task.entry.status)} @toggle-task-status=${this.toggleTaskStatus}></task-item> 
             `)}
             `
             console.log('tasks in list', get(this.todoStore.listTasks(this.listName)))

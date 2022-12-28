@@ -43,19 +43,20 @@ pub fn add_task_to_list(
         task_description,
         list,
     }: TaskToListInput,
-) -> ExternResult<ActionHash> {
+) -> ExternResult<WrappedEntry<Task>> {
     let task = Task {
         description: task_description,
         status: TaskStatus::Incomplete,
     };
-    let action_hash = create_entry(EntryTypes::Task(task))?;
+    let action_hash = create_entry(EntryTypes::Task(task.clone()))?;
+    let entry_hash = hash_entry(task.clone())?;
     create_link(
         list_typed_path(list)?.path_entry_hash()?,
         action_hash.clone(),
         LinkTypes::ListToTask,
         (),
     )?;
-    Ok(action_hash)
+    Ok(WrappedEntry { action_hash, entry_hash, entry: task })
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, SerializedBytes)]
@@ -109,8 +110,9 @@ pub fn get_lists(_: ()) -> ExternResult<Vec<String>> {
 }
 
 #[hdk_extern]
-pub fn get_tasks_in_list(list: String) -> ExternResult<Vec<(ActionHash, Task)>> {
-    let mut tasks = Vec::<(ActionHash, Task)>::new();
+// pub fn get_tasks_in_list(list: String) -> ExternResult<Vec<(ActionHash, Task)>> {
+pub fn get_tasks_in_list(list: String) -> ExternResult<Vec<WrappedEntry<Task>>> {
+    let mut tasks = Vec::<WrappedEntry<Task>>::new();
     let links = get_links(
         list_typed_path(list)?.path_entry_hash()?,
         LinkTypes::ListToTask,
@@ -120,7 +122,12 @@ pub fn get_tasks_in_list(list: String) -> ExternResult<Vec<(ActionHash, Task)>> 
         let task = get_latest_task(list.target.clone().into())?.ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
             "Malformed task"
         ))))?;
-        tasks.push((list.target.into(),task))
+        // tasks.push((list.target.into(),task))
+        tasks.push(WrappedEntry {
+            action_hash: list.target.into(),
+            entry_hash: hash_entry(task.clone())?,
+            entry: task,
+        })
     }
     Ok(tasks)
 }
@@ -140,11 +147,18 @@ pub fn entry_from_record<T: TryFrom<SerializedBytes, Error = SerializedBytesErro
 }
 
 #[hdk_extern]
-pub fn get_all_tasks(_:()) -> ExternResult<BTreeMap<String, Vec<(ActionHash, Task)>>> {
-    let mut all_tasks: BTreeMap<String,Vec<(ActionHash,Task)>> = BTreeMap::new();
+pub fn get_all_tasks(_:()) -> ExternResult<BTreeMap<String, Vec<WrappedEntry<Task>>>> {
+    let mut all_tasks: BTreeMap<String,Vec<WrappedEntry<Task>>> = BTreeMap::new();
     let lists = get_lists(())?;
     for list in lists {
         all_tasks.insert(list.clone(), get_tasks_in_list(list)?);
     }
     Ok(all_tasks)
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WrappedEntry<T> {
+    pub action_hash: ActionHash,
+    pub entry_hash: EntryHash,
+    pub entry: T,
 }

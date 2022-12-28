@@ -1,3 +1,5 @@
+import { ActionHash, EntryHash } from "@holochain/client"
+
 interface Task {
     description: string,
     status: TaskStatus,
@@ -18,8 +20,10 @@ interface TaskToListInput {
     list: string,
 }
 
-interface TasksInList {
-    [actionHash: string]: Task,
+interface WrappedEntry<T> {
+    action_hash: ActionHash,
+    entry_hash: EntryHash,
+    entry: T,
 }
 
 export {
@@ -27,5 +31,6 @@ export {
     TaskStatus,
     TaskStatusComplete,
     TaskStatusIncomplete,
-    TaskToListInput
+    TaskToListInput,
+    WrappedEntry
 }

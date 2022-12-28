@@ -7,6 +7,7 @@ import {
   AdminWebsocket,
   InstalledCell,
   AppEntryType,
+  EntryHash,
 } from '@holochain/client';
 import { contextProvider } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
@@ -15,7 +16,7 @@ import { HolochainClient, CellClient } from '@holochain-open-dev/cell-client';
 
 import { appWebsocketContext, appInfoContext, adminWebsocketContext, todoStoreContext, sensemakerStoreContext } from './contexts';
 import { TodoStore } from './todo-store';
-import { Dimension, ResourceType, SensemakerService, SensemakerStore } from '@lightningrodlabs/we-applet';
+import { Assessment, CulturalContext, Dimension, ResourceType, SensemakerService, SensemakerStore, Threshold } from '@lightningrodlabs/we-applet';
 import { serializeHash } from '@holochain-open-dev/utils';
 import { ListList, TaskList } from './index'
 import { get } from 'svelte/store';
@@ -48,6 +49,9 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   @state()
   activeList: string | undefined
 
+  @property()
+  sensemakerDimensionHash: EntryHash | undefined
+
   async firstUpdated() {
     await this.connectHolochain()
 
@@ -73,7 +77,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       `;
     const taskList = html`
-      <task-list listName=${this.activeList}></task-list>
+      <task-list listName=${this.activeList} @assess-task-item=${this.assessTaskItem}></task-list>
     ` 
 
     return html`
@@ -139,6 +143,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     }
     const dimensionHash = await this._sensemakerStore.createDimension(dimension)
     console.log('dimension hash', dimensionHash)
+    this.sensemakerDimensionHash = dimensionHash
     
     const integerRange2 = {
       name: "1-scale-total",
@@ -174,13 +179,13 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
     const methodEh = await this._sensemakerStore.createMethod(totalImportanceMethod)
 
-    const threshold = {
+    const threshold: Threshold = {
       dimension_eh: objectiveDimensionHash,
       kind: { GreaterThan: null },
       value: { Integer: 0 },
     };
 
-    const culturalContext = {
+    const culturalContext: CulturalContext = {
       name: "most important tasks",
       resource_type_eh: resourceTypeEh,
       thresholds: [threshold],
@@ -191,6 +196,20 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   }
   updateActiveList(e: CustomEvent) {
     this.activeList = e.detail.selectedList;
+  }
+  async assessTaskItem(e: CustomEvent) {
+      console.log(e.detail.task)
+      const assessment: Assessment = {
+          value: {
+              Integer: 1
+          },
+          dimension_eh: this.sensemakerDimensionHash!,
+          subject_eh: e.detail.task.entry_hash!,
+          maybe_input_dataSet: null,
+
+      }
+      const assessmentEh = await this._sensemakerStore.createAssessment(assessment)
+      console.log('created assessment', assessmentEh)
   }
 
   static get scopedElements() {

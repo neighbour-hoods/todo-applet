@@ -7,7 +7,7 @@ import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { ListItem } from "./list-item";
 import { AddItem } from "./add-item";
-import { List } from '@scoped-elements/material-web'
+import { List, ListItem as MWCListItem } from '@scoped-elements/material-web'
 
 export class ListList extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: todoStoreContext, subscribe: true })
@@ -23,6 +23,7 @@ export class ListList extends ScopedElementsMixin(LitElement) {
         return html`
             <div class="list-list-container">
                 <mwc-list>
+                    <mwc-list-item><b>IMPORTANT TASKS</b></mwc-list-item>
                     ${this.listList}
                     <add-item itemType="list" @new-item=${this.addNewList}></add-item>
                 <mwc-list>
@@ -49,6 +50,7 @@ export class ListList extends ScopedElementsMixin(LitElement) {
         'list-item': ListItem,
         'add-item': AddItem,
         'mwc-list': List,
+        'mwc-list-item': MWCListItem,
         };
     }
     static styles = css`

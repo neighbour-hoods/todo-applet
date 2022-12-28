@@ -9,12 +9,12 @@ import { serializeHash, deserializeHash } from '@holochain-open-dev/utils';
 import { derived, get, Writable, writable } from 'svelte/store';
 import { ActionHash, AdminWebsocket, DnaHash, InstalledCell } from '@holochain/client';
 import { TodoService } from './todo-service';
-import { Task, TaskToListInput } from './types';
+import { Task, TaskToListInput, WrappedEntry } from './types';
 
 export class TodoStore {
   service: TodoService;
 
-  #tasksInLists: Writable<Dictionary<Array<[ActionHash, Task]>>> = writable({});
+  #tasksInLists: Writable<Dictionary<Array<WrappedEntry<Task>>>> = writable({});
 
   #openedList: Writable<string> = writable("");
 
@@ -61,30 +61,27 @@ export class TodoStore {
   }
 
   async addTaskToList(task: TaskToListInput) {
-    let actionHash = await this.service.addTaskToList(task);
+    let newTask = await this.service.addTaskToList(task);
 
     this.#tasksInLists.update(lists => {
-      lists[task.list] = [...lists[task.list], [actionHash, {
-        description: task.task_description,
-        status: { Incomplete: null }
-      }]];
+      lists[task.list] = [...lists[task.list], newTask];
       return lists;
     });
   }
 
-  async toggleTaskStatus(listName: string, [actionHash, task]: [ActionHash, Task]) {
-    let updatedTask = task;
-    if(('Complete' in task.status)) {
-      await this.service.uncompleteTask(actionHash);
-      updatedTask.status = { Incomplete: null };
+  async toggleTaskStatus(listName: string, wrappedTask: WrappedEntry<Task>) {
+    let updatedTask = wrappedTask;
+    if(('Complete' in wrappedTask.entry.status)) {
+      await this.service.uncompleteTask(wrappedTask.action_hash);
+      updatedTask.entry.status = { Incomplete: null };
     }
     else {
-      await this.service.completeTask(actionHash)
-      updatedTask.status = { Complete: null };
+      await this.service.completeTask(wrappedTask.action_hash)
+      updatedTask.entry.status = { Complete: null };
     }
     this.#tasksInLists.update(lists => {
-      let updatedTaskInList = lists[listName].filter(([taskActionHash, taskItem]) => serializeHash(taskActionHash) != serializeHash(actionHash));
-      updatedTaskInList.push([actionHash, updatedTask]);
+      let updatedTaskInList = lists[listName].filter(({ action_hash: taskActionHash, entry: taskItem}) => serializeHash(taskActionHash) != serializeHash(wrappedTask.action_hash));
+      updatedTaskInList.push(updatedTask);
       lists[listName] = updatedTaskInList;
       return lists;
     });
