@@ -34,3 +34,18 @@ export {
     TaskToListInput,
     WrappedEntry
 }
+
+export interface AppletConfig {
+    dimensions: {
+        [dimensionName: string]: EntryHash,
+    },
+    methods: {
+        [methodName: string]: EntryHash,
+    },
+    contexts: {
+        [contextName: string]: EntryHash,
+    },
+    contextResults: {
+        [contextName: string]: Array<WrappedEntry<Task>>,
+    }
+}

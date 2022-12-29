@@ -2,14 +2,14 @@ import { contextProvided } from "@lit-labs/context";
 import { property, state, query } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
-import { Task } from "../types";
+import { AppletConfig, Task, WrappedEntry } from "../types";
 import { TaskItem } from "./task-item";
-import { sensemakerStoreContext, todoStoreContext } from "../contexts";
+import { appletSensemakerConfigContext, sensemakerStoreContext, todoStoreContext } from "../contexts";
 import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "./add-item";
 import { List } from '@scoped-elements/material-web'
-import { Assessment, SensemakerStore } from "@lightningrodlabs/we-applet";
+import { Assessment, ComputeContextInput, SensemakerStore } from "@lightningrodlabs/we-applet";
 
 
 // add item at the bottom
@@ -21,6 +21,13 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: sensemakerStoreContext, subscribe: true })
     @property({attribute: false})
     public  sensemakerStore!: SensemakerStore
+
+    @contextProvided({ context: appletSensemakerConfigContext, subscribe: true })
+    @property({attribute: false})
+    public appletConfig!: AppletConfig
+
+    @property()
+    isContext!: boolean
 
     @property()
     listName: string | undefined
@@ -35,7 +42,6 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
                 <div class="task-list-container">
                     <mwc-list>
                         ${this.tasks}
-                        <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
                     </mwc-list>
                 </div>
             `
@@ -54,14 +60,35 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         this.updateTaskList()
     }
     updateTaskList() {
-        if (this.listName) {
+        if (this.listName && !this.isContext) {
             this.tasks = html`
             ${get(this.todoStore.listTasks(this.listName)).map((task) => html`
-               <task-item .task=${task} .completed=${('Complete' in task.entry.status)} @toggle-task-status=${this.toggleTaskStatus}></task-item> 
+                <task-item .task=${task} .completed=${('Complete' in task.entry.status)} @toggle-task-status=${this.toggleTaskStatus}></task-item> 
             `)}
+            <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
             `
             console.log('tasks in list', get(this.todoStore.listTasks(this.listName)))
         }
+        else if (this.isContext) {
+            const tasksInContext = this.appletConfig.contextResults["most_important_tasks"]
+            this.tasks = html`
+            ${tasksInContext.map((task) => html`
+               <task-item .task=${task} .completed=${('Complete' in task.entry.status)} @toggle-task-status=${this.toggleTaskStatus}></task-item> 
+            `)}
+            `
+        }
+    }
+    async computeContext(): Promise<Array<WrappedEntry<Task>>> {
+        const contextResultInput: ComputeContextInput = {
+        resource_ehs: get(this.todoStore.allTaskEntyHashes()),
+        context_eh: this.appletConfig.contexts["most_important_tasks"],
+        can_publish_result: false,
+        }
+        const contextResult = await this.sensemakerStore.computeContext(contextResultInput)
+        console.log('context result', contextResult)
+        const tasks = get(this.todoStore.tasksFromEntryHashes(contextResult))
+        console.log('tasks from context', tasks)
+        return tasks
     }
     async toggleTaskStatus(e: CustomEvent) {
         await this.todoStore.toggleTaskStatus(this.listName!, e.detail.task)

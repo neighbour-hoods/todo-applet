@@ -2,18 +2,20 @@ import { contextProvided, contextProvider, ContextProvider } from "@lit-labs/con
 import { property, state, query } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
-import { todoStoreContext } from "../contexts";
+import { appletSensemakerConfigContext, todoStoreContext } from "../contexts";
 import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { ListItem } from "./list-item";
 import { AddItem } from "./add-item";
 import { List, ListItem as MWCListItem } from '@scoped-elements/material-web'
+import { AppletConfig } from "../types";
 
 export class ListList extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: todoStoreContext, subscribe: true })
     @property({attribute: false})
     public  todoStore!: TodoStore
 
+    
     @state()
     listList = html``
 
@@ -38,6 +40,7 @@ export class ListList extends ScopedElementsMixin(LitElement) {
         this.updateListList()
     }
     updateListList() {
+        
         this.listList = html`
         ${get(this.todoStore.listLists()).map((listName) => html`
            <list-item listName=${listName}></list-item> 

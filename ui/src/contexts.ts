@@ -1,7 +1,8 @@
 import { createContext } from '@lit-labs/context';
-import { AdminWebsocket, AppWebsocket, InstalledAppInfo } from '@holochain/client';
+import { AdminWebsocket, AppWebsocket, EntryHash, InstalledAppInfo } from '@holochain/client';
 import { TodoStore } from './todo-store';
 import { SensemakerStore } from '@lightningrodlabs/we-applet';
+import { AppletConfig } from './types';
 
 export const appWebsocketContext = createContext<AppWebsocket>('appWebsocket');
 export const adminWebsocketContext = createContext<AdminWebsocket>('adminWebsocket');
@@ -12,3 +13,4 @@ export const todoStoreContext = createContext<TodoStore>(
 export const sensemakerStoreContext = createContext<SensemakerStore>(
     'sensemaker-store-context'
 );
+export const appletSensemakerConfigContext = createContext<AppletConfig>('applet-sensemaker-store-context');

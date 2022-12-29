@@ -2,12 +2,10 @@ import { CellClient, HolochainClient } from '@holochain-open-dev/cell-client';
 import {
   AgentPubKeyB64,
   Dictionary,
-  DnaHashB64,
-  EntryHashB64,
 } from '@holochain-open-dev/core-types';
-import { serializeHash, deserializeHash } from '@holochain-open-dev/utils';
+import { serializeHash } from '@holochain-open-dev/utils';
 import { derived, get, Writable, writable } from 'svelte/store';
-import { ActionHash, AdminWebsocket, DnaHash, EntryHash, InstalledCell } from '@holochain/client';
+import { EntryHash, InstalledCell } from '@holochain/client';
 import { TodoService } from './todo-service';
 import { Task, TaskToListInput, WrappedEntry } from './types';
 
@@ -38,6 +36,14 @@ export class TodoStore {
         ]
       }
       return allTaskEhs
+    })
+  }
+
+  tasksFromEntryHashes(entryHashes: EntryHash[]) {
+    const serializedEntryHashes = entryHashes.map(entryHash => serializeHash(entryHash));
+    return derived(this.#tasksInLists, lists => {
+      const tasks = Object.values(lists).flat();
+      return tasks.filter(task => serializedEntryHashes.includes(serializeHash(task.entry_hash)))
     })
   }
 
