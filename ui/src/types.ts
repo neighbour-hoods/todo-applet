@@ -1,9 +1,11 @@
 import { ActionHash, EntryHash } from "@holochain/client"
+import { Assessment } from "@lightningrodlabs/we-applet"
 
 interface Task {
     description: string,
     status: TaskStatus,
 }
+
 
 type TaskStatus = TaskStatusComplete | TaskStatusIncomplete
 
@@ -25,6 +27,9 @@ interface WrappedEntry<T> {
     entry_hash: EntryHash,
     entry: T,
 }
+type WrappedTaskWithAssessment = WrappedEntry<Task> & {
+    assessments: Assessment | undefined,
+}
 
 export {
     Task,
@@ -32,7 +37,8 @@ export {
     TaskStatusComplete,
     TaskStatusIncomplete,
     TaskToListInput,
-    WrappedEntry
+    WrappedEntry,
+    WrappedTaskWithAssessment,
 }
 
 export interface AppletConfig {
@@ -46,6 +52,6 @@ export interface AppletConfig {
         [contextName: string]: EntryHash,
     },
     contextResults: {
-        [contextName: string]: Array<WrappedEntry<Task>>,
+        [contextName: string]: Array<WrappedTaskWithAssessment>,
     }
 }

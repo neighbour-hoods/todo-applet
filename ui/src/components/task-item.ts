@@ -1,18 +1,23 @@
-import { contextProvider, ContextProvider } from "@lit-labs/context";
+import { contextProvided } from "@lit-labs/context";
 import { property, state, query } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
-import { Task, WrappedEntry } from "../types";
-import { ActionHash } from "@holochain/client";
+import { WrappedTaskWithAssessment } from "../types";
 import { Checkbox, ListItem, CheckListItem } from '@scoped-elements/material-web'
+import { sensemakerStoreContext } from "../contexts";
+import { SensemakerStore } from "@lightningrodlabs/we-applet";
 
 export class TaskItem extends ScopedElementsMixin(LitElement) {
+    @contextProvided({ context: sensemakerStoreContext, subscribe: true })
+    @property({attribute: false})
+    public  sensemakerStore!: SensemakerStore
+
     @property()
     completed: boolean = false
 
     @property()
     @state()
-    task!: WrappedEntry<Task>
+    task!: WrappedTaskWithAssessment
 
     @property()
     @state()
@@ -30,7 +35,7 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
         return html`
             <div class="task-item-container">
             <mwc-check-list-item left ?selected=${this.completed} @click=${this.dispatchToggleStatus}>${this.task.entry.description}</mwc-check-list-item>
-            <mwc-checkbox ?disabled=${this.taskIsAssessed} @click=${this.dispatchAssessTask}></mwc-checkbox>
+            <mwc-checkbox ?disabled=${this.taskIsAssessed} ?checked=${this.taskIsAssessed} @click=${this.dispatchAssessTask}></mwc-checkbox>
             </div>
         `
     }

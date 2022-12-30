@@ -1,15 +1,15 @@
 import { contextProvided } from "@lit-labs/context";
-import { property, state, query } from "lit/decorators.js";
+import { property, state } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
-import { AppletConfig, Task, WrappedEntry } from "../types";
+import { AppletConfig } from "../types";
 import { TaskItem } from "./task-item";
 import { appletSensemakerConfigContext, sensemakerStoreContext, todoStoreContext } from "../contexts";
 import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "./add-item";
 import { List } from '@scoped-elements/material-web'
-import { Assessment, ComputeContextInput, SensemakerStore } from "@lightningrodlabs/we-applet";
+import { CreateAssessmentInput, SensemakerStore } from "@lightningrodlabs/we-applet";
 
 
 // add item at the bottom
@@ -62,37 +62,45 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     updateTaskList() {
         if (this.listName && !this.isContext) {
             this.tasks = html`
-            ${get(this.todoStore.listTasks(this.listName)).map((task) => html`
-                <task-item .task=${task} .completed=${('Complete' in task.entry.status)} @toggle-task-status=${this.toggleTaskStatus}></task-item> 
+            ${this.todoStore.addMyAssessmentsToTasks(get(this.todoStore.listTasks(this.listName))).map((task) => html`
+                <task-item .task=${task} .completed=${('Complete' in task.entry.status)} .taskIsAssessed=${task.assessments != undefined} @toggle-task-status=${this.toggleTaskStatus}  @assess-task-item=${this.assessTaskItem}></task-item> 
             `)}
             <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
             `
-            console.log('tasks in list', get(this.todoStore.listTasks(this.listName)))
+            console.log('tasks in list, with assessment', this.todoStore.addMyAssessmentsToTasks(get(this.todoStore.listTasks(this.listName))))
         }
         else if (this.isContext) {
             const tasksInContext = this.appletConfig.contextResults["most_important_tasks"]
             this.tasks = html`
             ${tasksInContext.map((task) => html`
-               <task-item .task=${task} .completed=${('Complete' in task.entry.status)} @toggle-task-status=${this.toggleTaskStatus}></task-item> 
+               <task-item .task=${task} .completed=${('Complete' in task.entry.status)} .taskIsAssessed=${task.assessments != undefined} @toggle-task-status=${this.toggleTaskStatus}></task-item> 
             `)}
             `
         }
     }
-    async computeContext(): Promise<Array<WrappedEntry<Task>>> {
-        const contextResultInput: ComputeContextInput = {
-        resource_ehs: get(this.todoStore.allTaskEntyHashes()),
-        context_eh: this.appletConfig.contexts["most_important_tasks"],
-        can_publish_result: false,
-        }
-        const contextResult = await this.sensemakerStore.computeContext(contextResultInput)
-        console.log('context result', contextResult)
-        const tasks = get(this.todoStore.tasksFromEntryHashes(contextResult))
-        console.log('tasks from context', tasks)
-        return tasks
-    }
     async toggleTaskStatus(e: CustomEvent) {
         await this.todoStore.toggleTaskStatus(this.listName!, e.detail.task)
         this.updateTaskList()
+    }
+    async assessTaskItem(e: CustomEvent) {
+        console.log(e.detail.task)
+        const assessment: CreateAssessmentInput = {
+            value: {
+                Integer: 1
+            },
+            dimension_eh: this.appletConfig.dimensions["importance"],
+            subject_eh: e.detail.task.entry_hash,
+            maybe_input_dataSet: null,
+
+        }
+        const assessmentEh = await this.sensemakerStore.createAssessment(assessment)
+        const objectiveAssessmentEh = await this.sensemakerStore.runMethod({
+            resource_eh: e.detail.task.entry_hash,
+            method_eh: this.appletConfig.methods["total_importance_method"],
+        })
+        console.log('created assessment', assessmentEh)
+        console.log('created objective assessment', objectiveAssessmentEh)
+        this.todoStore.addAssessment(assessment, e.detail.task.entry_hash)
     }
     static get scopedElements() {
         return {
