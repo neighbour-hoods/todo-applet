@@ -1,5 +1,5 @@
 import { LitElement, css, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import {
   AppWebsocket,
   ActionHash,
@@ -7,69 +7,45 @@ import {
   AdminWebsocket,
   InstalledCell,
   AppEntryType,
-  EntryHash,
 } from '@holochain/client';
-import { contextProvider } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
 import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import { HolochainClient, CellClient } from '@holochain-open-dev/cell-client';
 
-import { appWebsocketContext, appInfoContext, adminWebsocketContext, todoStoreContext, sensemakerStoreContext, appletSensemakerConfigContext } from './contexts';
 import { TodoStore } from './todo-store';
-import { Assessment, ComputeContextInput, CulturalContext, Dimension, ResourceType, SensemakerService, SensemakerStore, Threshold } from '@lightningrodlabs/we-applet';
+import { CulturalContext, Dimension, ResourceType, SensemakerService, SensemakerStore, Threshold } from '@lightningrodlabs/we-applet';
 import { serializeHash } from '@holochain-open-dev/utils';
-import { AppletConfig, ListList, TaskList } from './index'
-import { get } from 'svelte/store';
+import { AppletConfig, TodoApp } from './index'
 
 export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   @state() loading = true;
   @state() actionHash: ActionHash | undefined;
   @state() currentSelectedList: string | undefined;
 
-  @contextProvider({ context: appWebsocketContext })
   @property({ type: Object })
   appWebsocket!: AppWebsocket;
 
-  @contextProvider({ context: adminWebsocketContext })
   @property({ type: Object })
   adminWebsocket!: AdminWebsocket;
 
-  @contextProvider({ context: appInfoContext })
   @property({ type: Object })
   appInfo!: InstalledAppInfo;
 
-  @contextProvider({ context: todoStoreContext })
   @property()
   _todoStore!: TodoStore;
 
-  @contextProvider({ context: sensemakerStoreContext })
   @property()
   _sensemakerStore!: SensemakerStore;
 
-  @contextProvider({ context: appletSensemakerConfigContext })
   @property()
   _appletConfig: AppletConfig = { dimensions: {}, methods: {}, contexts: {}, contextResults: {}};
 
-  @state()
-  activeList: string | undefined
-
-  @state()
-  contextSelected: boolean = false
-
-  @property()
-  sensemakerDimensionHash: EntryHash | undefined
-
-  @property()
-  methodEh: EntryHash | undefined
-
-  @property()
-  contextEh: EntryHash | undefined
 
   async firstUpdated() {
     await this.connectHolochain()
 
     const installedCells = this.appInfo.cell_data;
-    await this.initializeSensemaker(installedCells)
+    const sensemakerService = await this.initializeSensemaker(installedCells)
 
     const todoCell = installedCells.find(
       c => c.role_id === 'todo_lists'
@@ -78,7 +54,9 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
     this._todoStore = new TodoStore(
         new HolochainClient(this.appWebsocket),
-        todoCell
+        todoCell,
+        sensemakerService,
+        this._appletConfig.dimensions["importance"],
     );
     const allTasks = await this._todoStore.fetchAllTasks()
     console.log(allTasks)
@@ -90,15 +68,10 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       return html`
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       `;
-    const taskList = html`
-      <task-list listName=${this.activeList} .isContext=${this.contextSelected} @assess-task-item=${this.assessTaskItem}></task-list>
-    ` 
-
     return html`
       <main>
         <div class="home-page">
-          <list-list @list-selected=${this.updateActiveList} @context-selected=${this.computeContext}></list-list>
-          ${taskList}
+          <todo-app .sensemakerStore=${this._sensemakerStore} .todoStore=${this._todoStore} .appletConfig=${this._appletConfig}></todo-app>
         </div>
       </main>
     `;
@@ -119,7 +92,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     });
   }
 
-  async initializeSensemaker(installedCells: InstalledCell[]) {
+  async initializeSensemaker(installedCells: InstalledCell[]): Promise<SensemakerService> {
     const client = new HolochainClient(this.appWebsocket);
     const sensemakerCell = installedCells.find(
       c => c.role_id === 'sensemaker'
@@ -139,9 +112,8 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       name: 'sensemaker-clone',
     });
     const sensemakerCellClient = new CellClient(client, clonedSensemakerCell);
-    this._sensemakerStore = new SensemakerStore(
-      new SensemakerService(sensemakerCellClient)
-    );
+    const sensemakerService = new SensemakerService(sensemakerCellClient)
+    this._sensemakerStore = new SensemakerStore(sensemakerService);
 
 
     const integerRange = {
@@ -151,14 +123,15 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       },
     };
 
+    const dimensionName = "importance"
     const dimension: Dimension = {
-      name: "importance",
-      range: integerRange
+      name: dimensionName,
+      range: integerRange,
+      computed: false,
     }
     const dimensionHash = await this._sensemakerStore.createDimension(dimension)
     console.log('dimension hash', dimensionHash)
-    this.sensemakerDimensionHash = dimensionHash
-    this._appletConfig.dimensions["importance"] = dimensionHash
+    this._appletConfig.dimensions[dimensionName] = dimensionHash
     
     const integerRange2 = {
       name: "1-scale-total",
@@ -170,6 +143,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     const objectiveDimension = {
       name: "total_importance",
       range: integerRange2,
+      computed: true,
     };
     const objectiveDimensionHash = await this._sensemakerStore.createDimension(objectiveDimension)
     
@@ -182,8 +156,9 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
     const resourceTypeEh = await this._sensemakerStore.createResourceType(resourceType)
 
+    const methodName = "total_importance_method"
     const totalImportanceMethod = {
-      name: "total_importance_method",
+      name: methodName,
       target_resource_type_eh: resourceTypeEh,
       input_dimension_ehs: [dimensionHash],
       output_dimension_eh: objectiveDimensionHash,
@@ -193,8 +168,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     };
 
     const methodEh = await this._sensemakerStore.createMethod(totalImportanceMethod)
-    this.methodEh = methodEh
-    this._appletConfig.methods["total_importance_method"] = methodEh;
+    this._appletConfig.methods[methodName] = methodEh;
     const threshold: Threshold = {
       dimension_eh: objectiveDimensionHash,
       kind: { GreaterThan: null },
@@ -209,51 +183,13 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     };
 
     const contextEh = await this._sensemakerStore.createCulturalContext(culturalContext)
-    this.contextEh = contextEh
     this._appletConfig.contexts["most_important_tasks"] = contextEh;
-  }
-  updateActiveList(e: CustomEvent) {
-    this.activeList = e.detail.selectedList;
-    this.contextSelected = false;
-  }
-  async assessTaskItem(e: CustomEvent) {
-      console.log(e.detail.task)
-      const assessment: Assessment = {
-          value: {
-              Integer: 1
-          },
-          dimension_eh: this.sensemakerDimensionHash!,
-          subject_eh: e.detail.task.entry_hash,
-          maybe_input_dataSet: null,
 
-      }
-      const assessmentEh = await this._sensemakerStore.createAssessment(assessment)
-      const objectiveAssessmentEh = await this._sensemakerStore.runMethod({
-        resource_eh: e.detail.task.entry_hash,
-        method_eh: this.methodEh!,
-      })
-      console.log('created assessment', assessmentEh)
-      console.log('created objective assessment', objectiveAssessmentEh)
+    return sensemakerService
   }
-
-  async computeContext(_e: CustomEvent) {
-    const contextResultInput: ComputeContextInput = {
-      resource_ehs: get(this._todoStore.allTaskEntyHashes()),
-      context_eh: this.contextEh!,
-      can_publish_result: false,
-    }
-    const contextResult = await this._sensemakerStore.computeContext(contextResultInput)
-    console.log('context result', contextResult)
-    const tasks = get(this._todoStore.tasksFromEntryHashes(contextResult))
-    console.log('tasks from context', tasks)
-    this._appletConfig.contextResults["most_important_tasks"] = tasks
-    this.contextSelected = true;
-  }
-
   static get scopedElements() {
     return {
-      'list-list': ListList,
-      'task-list': TaskList,
+      'todo-app': TodoApp,
     };
   }
 
