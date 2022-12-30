@@ -13,4 +13,3 @@ export const todoStoreContext = createContext<TodoStore>(
 export const sensemakerStoreContext = createContext<SensemakerStore>(
     'sensemaker-store-context'
 );
-export const appletSensemakerConfigContext = createContext<AppletConfig>('applet-sensemaker-store-context');

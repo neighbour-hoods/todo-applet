@@ -2,7 +2,7 @@ import { contextProvided, contextProvider, ContextProvider } from "@lit-labs/con
 import { property, state, query } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
-import { appletSensemakerConfigContext, todoStoreContext } from "../contexts";
+import { todoStoreContext } from "../contexts";
 import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { ListItem } from "./list-item";

@@ -4,10 +4,10 @@ import { contextProvider } from '@lit-labs/context';
 import '@material/mwc-circular-progress';
 import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 
-import { todoStoreContext, sensemakerStoreContext, appletSensemakerConfigContext } from './contexts';
+import { todoStoreContext, sensemakerStoreContext } from './contexts';
 import { TodoStore } from './todo-store';
 import { ComputeContextInput, SensemakerStore } from '@lightningrodlabs/we-applet';
-import { AppletConfig, ListList, TaskList } from './index'
+import { addMyAssessmentsToTasks, AppletConfig, ListList, TaskList } from './index'
 import { get } from 'svelte/store';
 
 export class TodoApp extends ScopedElementsMixin(LitElement) {
@@ -18,10 +18,6 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
   @contextProvider({ context: sensemakerStoreContext })
   @property()
   sensemakerStore!: SensemakerStore;
-
-  @contextProvider({ context: appletSensemakerConfigContext })
-  @property()
-  appletConfig!: AppletConfig;
 
   @state()
   activeList: string | undefined
@@ -55,14 +51,11 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
   async computeContext(_e: CustomEvent) {
     const contextResultInput: ComputeContextInput = {
       resource_ehs: get(this.todoStore.allTaskEntyHashes()),
-      context_eh: this.appletConfig.contexts["most_important_tasks"],
+      context_eh: get(this.sensemakerStore.appletConfig()).contexts["most_important_tasks"],
       can_publish_result: false,
     }
-    const contextResult = await this.sensemakerStore.computeContext(contextResultInput)
+    const contextResult = await this.sensemakerStore.computeContext("most_important_tasks", contextResultInput)
     console.log('context result', contextResult)
-    const tasks = this.todoStore.addMyAssessmentsToTasks(get(this.todoStore.tasksFromEntryHashes(contextResult)))
-    console.log('tasks from context', tasks)
-    this.appletConfig.contextResults["most_important_tasks"] = tasks
     this.contextSelected = true;
   }
 

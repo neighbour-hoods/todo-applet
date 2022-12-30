@@ -37,9 +37,6 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   @property()
   _sensemakerStore!: SensemakerStore;
 
-  @property()
-  _appletConfig: AppletConfig = { dimensions: {}, methods: {}, contexts: {}, contextResults: {}};
-
 
   async firstUpdated() {
     await this.connectHolochain()
@@ -55,8 +52,6 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     this._todoStore = new TodoStore(
         new HolochainClient(this.appWebsocket),
         todoCell,
-        sensemakerService,
-        this._appletConfig.dimensions["importance"],
     );
     const allTasks = await this._todoStore.fetchAllTasks()
     console.log(allTasks)
@@ -71,7 +66,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     return html`
       <main>
         <div class="home-page">
-          <todo-app .sensemakerStore=${this._sensemakerStore} .todoStore=${this._todoStore} .appletConfig=${this._appletConfig}></todo-app>
+          <todo-app .sensemakerStore=${this._sensemakerStore} .todoStore=${this._todoStore}></todo-app>
         </div>
       </main>
     `;
@@ -131,7 +126,6 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     }
     const dimensionHash = await this._sensemakerStore.createDimension(dimension)
     console.log('dimension hash', dimensionHash)
-    this._appletConfig.dimensions[dimensionName] = dimensionHash
     
     const integerRange2 = {
       name: "1-scale-total",
@@ -168,7 +162,6 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     };
 
     const methodEh = await this._sensemakerStore.createMethod(totalImportanceMethod)
-    this._appletConfig.methods[methodName] = methodEh;
     const threshold: Threshold = {
       dimension_eh: objectiveDimensionHash,
       kind: { GreaterThan: null },
@@ -183,7 +176,6 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     };
 
     const contextEh = await this._sensemakerStore.createCulturalContext(culturalContext)
-    this._appletConfig.contexts["most_important_tasks"] = contextEh;
 
     return sensemakerService
   }

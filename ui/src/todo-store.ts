@@ -7,18 +7,12 @@ import { serializeHash } from '@holochain-open-dev/utils';
 import { derived, get, Writable, writable } from 'svelte/store';
 import { EntryHash, InstalledCell } from '@holochain/client';
 import { TodoService } from './todo-service';
-import { Task, TaskToListInput, WrappedEntry, WrappedTaskWithAssessment } from './types';
-import { Assessment, CreateAssessmentInput, SensemakerService } from '@lightningrodlabs/we-applet';
+import { Task, TaskToListInput, WrappedEntry } from './types';
 
 export class TodoStore {
   service: TodoService;
-  sensemakerService: SensemakerService;
-  dimensionEh: EntryHash;
 
   #tasksInLists: Writable<Dictionary<Array<WrappedEntry<Task>>>> = writable({});
-  #taskAssessments: Writable<Dictionary<Array<Assessment>>> = writable({});
-
-  #openedList: Writable<string> = writable("");
 
   get myAgentPubKey(): AgentPubKeyB64 {
     return serializeHash(this.todoCell.cell_id[1]);
@@ -27,16 +21,12 @@ export class TodoStore {
   constructor(
     protected client: HolochainClient,
     protected todoCell: InstalledCell,
-    protected smService: SensemakerService,
-    protected dimEh: EntryHash,
     zomeName: string = 'todo'
   ) {
     this.service = new TodoService(
       new CellClient(client, todoCell),
       zomeName
     );
-    this.sensemakerService = smService;
-    this.dimensionEh = dimEh;
   }
 
   listTasks(listName: string) {
@@ -70,49 +60,12 @@ export class TodoStore {
     })
   }
 
-  addMyAssessmentsToTasks(tasks: WrappedEntry<Task>[]): WrappedTaskWithAssessment[] {
-    const myPubKey = this.myAgentPubKey;
-    const tasksWithMyAssessments = tasks.map(task => {
-      const assessmentsForTask = get(this.#taskAssessments)[serializeHash(task.entry_hash)]
-      let myAssessment
-      if (assessmentsForTask) {
-        myAssessment = assessmentsForTask.find(assessment => serializeHash(assessment.author) === myPubKey)
-      }
-      else {
-        myAssessment = undefined
-      }
-      return {
-        ...task,
-        assessments: myAssessment,
-      }
-    })
-    return tasksWithMyAssessments
-  }
-
   async fetchAllTasks() {
     const fetchedTasks = await this.service.getAllTasks();
-
-    let assessmentsForTasks: Dictionary<Array<Assessment>> = {};
-    // for each task, get all assessments, then convert into a dictionary keyed by the task entry hash
-    const tasks = Object.values(fetchedTasks).flat()
-    for (const task of tasks) {
-          console.log('going to try and get assessments')
-          const assessmentsOnTask = await this.sensemakerService.getAssessmentsForResource({
-            resource_eh: task.entry_hash,
-            dimension_eh: this.dimensionEh,
-          })
-          console.log('got it', assessmentsOnTask)
-          assessmentsForTasks[serializeHash(task.entry_hash)] = assessmentsOnTask
-    }
     this.#tasksInLists.update(tasks => ({
       ...tasks,
       ...fetchedTasks,
     }));
-    this.#taskAssessments.update(assessments => ({
-      ...assessments,
-      ...assessmentsForTasks,
-    }))
-
     return get(this.#tasksInLists)
   }
 
@@ -150,13 +103,5 @@ export class TodoStore {
       lists[listName] = updatedTaskInList;
       return lists;
     });
-  }
-
-  addAssessment(assessmentInput: CreateAssessmentInput, entryHash: EntryHash) {
-    this.#taskAssessments.update(assessments => {
-      const currAssessments = assessments[serializeHash(entryHash)] ? assessments[serializeHash(entryHash)] : [];
-      assessments[serializeHash(entryHash)] = [...currAssessments, { ...assessmentInput, author: this.todoCell.cell_id[1] }]
-      return assessments
-    })
   }
 }
