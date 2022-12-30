@@ -20,7 +20,8 @@
     "@lit-labs/context": "^0.1.1",
     "@open-wc/scoped-elements": "^2.1.1",
     "@scoped-elements/material-web": "^0.0.19",
-    "lit": "^2.2.0"
+    "lit": "^2.2.0",
+    "@neighbourhoods/todo-applet": "file:../ui"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.15.0",

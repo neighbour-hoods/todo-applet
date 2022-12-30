@@ -1,49 +1,89 @@
 // import { contextProvider, ContextProvider } from "@lit-labs/context";
-import { property, state, query, customElement } from "lit/decorators.js";
-// import {
-//   ProfilesStore,
-//   profilesStoreContext,
-// } from "@holochain-open-dev/profiles";
-import { InstalledAppInfo, AppWebsocket } from "@holochain/client";
+import { property, state } from "lit/decorators.js";
+import { AppWebsocket, AppEntryType, InstalledCell } from "@holochain/client";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { CircularProgress } from "@scoped-elements/material-web";
 import { LitElement, html, css } from "lit";
-import { InstalledAppletInfo, sensemakerStoreContext, SensemakerStore, Dimension } from "@lightningrodlabs/we-applet";
+import { InstalledAppletInfo, SensemakerStore, Dimension, CulturalContext, Threshold, ResourceType, SensemakerService } from "@lightningrodlabs/we-applet";
+import { AppletConfig, TodoApp, TodoStore } from "@neighbourhoods/todo-applet"
 
 export class TodoApplet extends ScopedElementsMixin(LitElement) {
   @property()
-  appWebsocket!: AppWebsocket;
+  todoStore!: TodoStore;
 
-  // @contextProvider({ context: sensemakerStoreContext })
   @property()
   sensemakerStore!: SensemakerStore;
-
-  @property()
-  appletAppInfo!: InstalledAppletInfo[];
 
   @state()
   loaded = false;
 
   async firstUpdated() {
-    // TODO: Initialize any store that you have and create a ContextProvider for it
-    //
-    // eg:
-    // new ContextProvider(this, todoContext, new TodoStore(cellClient, store));
-    console.log('first updated')
-    this.loaded = true;
     const integerRange = {
-      "name": "10-scale",
+      "name": "1-scale",
       "kind": {
-        "Integer": { "min": 0, "max": 10 }
+        "Integer": { "min": 0, "max": 1 }
       },
     };
 
+    const dimensionName = "importance"
     const dimension: Dimension = {
-      name: "test",
-      range: integerRange
+      name: dimensionName,
+      range: integerRange,
+      computed: false,
     }
     const dimensionHash = await this.sensemakerStore.createDimension(dimension)
     console.log('dimension hash', dimensionHash)
+    
+    const integerRange2 = {
+      name: "1-scale-total",
+      kind: {
+        Integer: { min: 0, max: 1000000 },
+      },
+    };
+
+    const objectiveDimension = {
+      name: "total_importance",
+      range: integerRange2,
+      computed: true,
+    };
+    const objectiveDimensionHash = await this.sensemakerStore.createDimension(objectiveDimension)
+    
+    let app_entry_type: AppEntryType = { id: 0, zome_id: 0, visibility: { Public: null } };
+    const resourceType: ResourceType = {
+      name: "task-item",
+      base_types: [app_entry_type],
+      dimension_ehs: [dimensionHash]
+    }
+
+    const resourceTypeEh = await this.sensemakerStore.createResourceType(resourceType)
+
+    const methodName = "total_importance_method"
+    const totalImportanceMethod = {
+      name: methodName,
+      target_resource_type_eh: resourceTypeEh,
+      input_dimension_ehs: [dimensionHash],
+      output_dimension_eh: objectiveDimensionHash,
+      program: { Sum: null },
+      can_compute_live: false,
+      must_publish_dataset: false,
+    };
+
+    const methodEh = await this.sensemakerStore.createMethod(totalImportanceMethod)
+    const threshold: Threshold = {
+      dimension_eh: objectiveDimensionHash,
+      kind: { GreaterThan: null },
+      value: { Integer: 0 },
+    };
+
+    const culturalContext: CulturalContext = {
+      name: "most_important_tasks",
+      resource_type_eh: resourceTypeEh,
+      thresholds: [threshold],
+      order_by: [[objectiveDimensionHash, { Biggest: null }]], // DimensionEh
+    };
+
+    const contextEh = await this.sensemakerStore.createCulturalContext(culturalContext)
+    this.loaded = true;
   }
   static styles = css`
     .completed {
@@ -52,46 +92,7 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
     }
   `;
 
-  @state()
-  private _listItems = [
-    { text: 'Make to-do list again', completed: true },
-    { text: 'Complete Lit tutorial', completed: false }
-  ];
-
-  @property()
-  hideCompleted = false;
-
-  toggleCompleted(item: ToDoItem) {
-    item.completed = !item.completed;
-    this.requestUpdate();
-  }
-
-  setHideCompleted(e: Event) {
-    this.hideCompleted = (e.target as HTMLInputElement).checked;
-  }
-
-  // @query('#newitem')
-  // input!: HTMLInputElement;
-
-  addToDo() {
-    // this._listItems = [...this._listItems,
-    // { text: this.input.value, completed: false }];
-    // this.input.value = '';
-  }
   render() {
-    const items = this._listItems;
-    const todos = html`
-      <ul>
-        ${items.map((item) =>
-      html`
-            <li
-                class=${item.completed ? 'completed' : ''}
-                @click=${() => this.toggleCompleted(item)}>
-              ${item.text}
-            </li>`
-    )}
-      </ul>
-    `;
     if (!this.loaded)
       return html`<div
         style="display: flex; flex: 1; flex-direction: row; align-items: center; justify-content: center"
@@ -100,23 +101,14 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
       </div>`;
 
     return html`
-      <h2>To Do</h2>
-      ${todos}
-      <input id="newitem" aria-label="New item">
-      <button @click=${this.addToDo}>Add</button>
-      <br>
-      <label>
-        <input type="checkbox"
-          @change=${this.setHideCompleted}
-          ?checked=${this.hideCompleted}>
-        Hide completed
-      </label>
+      <todo-app .sensemakerStore=${this.sensemakerStore} .todoStore=${this.todoStore}></todo-app>
     `;
   }
 
   static get scopedElements() {
     return {
       "mwc-circular-progress": CircularProgress,
+      "todo-app": TodoApp,
       // TODO: add any elements that you have in your applet
     };
   }
