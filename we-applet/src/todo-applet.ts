@@ -4,7 +4,7 @@ import { AppWebsocket, AppEntryType, InstalledCell } from "@holochain/client";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { CircularProgress } from "@scoped-elements/material-web";
 import { LitElement, html, css } from "lit";
-import { InstalledAppletInfo, SensemakerStore, Dimension, CulturalContext, Threshold, ResourceType, SensemakerService } from "@lightningrodlabs/we-applet";
+import { InstalledAppletInfo, SensemakerStore, Dimension, CulturalContext, Threshold, ResourceType, SensemakerService } from "@neighbourhoods/nh-we-applet";
 import { AppletConfig, TodoApp, TodoStore } from "@neighbourhoods/todo-applet"
 
 export class TodoApplet extends ScopedElementsMixin(LitElement) {

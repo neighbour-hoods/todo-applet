@@ -10,7 +10,7 @@ import {
   WeServices,
   InstalledAppletInfo,
   Dimension
-} from "@lightningrodlabs/we-applet";
+} from "@neighbourhoods/nh-we-applet";
 import { TodoStore } from "@neighbourhoods/todo-applet";
 import { TodoApplet } from "./todo-applet";
 import { HolochainClient, CellClient } from '@holochain-open-dev/cell-client';
