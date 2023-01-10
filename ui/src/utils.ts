@@ -2,7 +2,7 @@ import { Task, WrappedEntry, WrappedTaskWithAssessment } from "./types";
 import {
     Dictionary,
   } from '@holochain-open-dev/core-types';
-import { Assessment } from "@lightningrodlabs/we-applet";
+import { Assessment } from "@neighbourhoods/sensemaker-lite-types";
 import { serializeHash } from "@holochain-open-dev/utils";
 
 function addMyAssessmentsToTasks(myPubKey: string, tasks: WrappedEntry<Task>[], assessments: Dictionary<Array<Assessment>>): WrappedTaskWithAssessment[] {

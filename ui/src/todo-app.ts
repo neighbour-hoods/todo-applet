@@ -6,7 +6,8 @@ import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 
 import { todoStoreContext, sensemakerStoreContext } from './contexts';
 import { TodoStore } from './todo-store';
-import { ComputeContextInput, SensemakerStore } from '@lightningrodlabs/we-applet';
+import { SensemakerStore } from '@neighbourhoods/nh-we-applet';
+import { ComputeContextInput } from '@neighbourhoods/sensemaker-lite-types';
 import { addMyAssessmentsToTasks, AppletConfig, ListList, TaskList } from './index'
 import { get } from 'svelte/store';
 
@@ -50,8 +51,8 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
 
   async computeContext(_e: CustomEvent) {
     const contextResultInput: ComputeContextInput = {
-      resource_ehs: get(this.todoStore.allTaskEntyHashes()),
-      context_eh: get(this.sensemakerStore.appletConfig()).contexts["most_important_tasks"],
+      resource_ehs: get(this.todoStore.allTaskEntryHashes()),
+      context_eh: get(this.sensemakerStore.appletConfig()).cultural_contexts["most_important_tasks"],
       can_publish_result: false,
     }
     const contextResult = await this.sensemakerStore.computeContext("most_important_tasks", contextResultInput)

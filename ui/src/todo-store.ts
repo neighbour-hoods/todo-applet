@@ -37,7 +37,7 @@ export class TodoStore {
     return derived(this.#tasksInLists, lists => Object.keys(lists));
   }
 
-  allTaskEntyHashes() {
+  allTaskEntryHashes() {
     return derived(this.#tasksInLists, lists => {
       let allTaskEhs: EntryHash[] = []
       const listNames = Object.keys(lists);

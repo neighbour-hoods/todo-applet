@@ -6,16 +6,16 @@ import {
   InstalledAppInfo,
   AdminWebsocket,
   InstalledCell,
-  AppEntryType,
 } from '@holochain/client';
 import '@material/mwc-circular-progress';
 import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import { HolochainClient, CellClient } from '@holochain-open-dev/cell-client';
-
+import { get } from 'svelte/store';
 import { TodoStore } from './todo-store';
-import { CulturalContext, Dimension, ResourceType, SensemakerService, SensemakerStore, Threshold } from '@lightningrodlabs/we-applet';
+import { SensemakerService, SensemakerStore } from '@neighbourhoods/nh-we-applet';
 import { serializeHash } from '@holochain-open-dev/utils';
-import { AppletConfig, TodoApp } from './index'
+import { TodoApp } from './index';
+import appletConfig from './appletConfig'
 
 export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   @state() loading = true;
@@ -40,21 +40,51 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
   async firstUpdated() {
     await this.connectHolochain()
-
     const installedCells = this.appInfo.cell_data;
-    const sensemakerService = await this.initializeSensemaker(installedCells)
+    const client = new HolochainClient(this.appWebsocket);
+    // check if sensemaker has been cloned yet
+    let clonedSensemakerCell: InstalledCell | undefined
+    clonedSensemakerCell = installedCells.find(
+      c => c.role_id === 'sensemaker.0'
+    );
+    if (!clonedSensemakerCell) {
+      const sensemakerCell = installedCells.find(
+        c => c.role_id === 'sensemaker'
+      ) as InstalledCell;
+  
+      clonedSensemakerCell = await this.appWebsocket.createCloneCell({
+        app_id: 'todo',
+        role_id: "sensemaker",
+        modifiers: {
+          network_seed: '',
+          properties: {
+            community_activator: serializeHash(sensemakerCell.cell_id[1])
+          },
+          origin_time: Date.now(),
+        },
+        name: 'sensemaker-clone',
+      });
+    }
+    const sensemakerCellClient = new CellClient(client, clonedSensemakerCell);
+    const sensemakerService = new SensemakerService(sensemakerCellClient)
+    this._sensemakerStore = new SensemakerStore(sensemakerService);
+
+    let appInfos = await this.appWebsocket.appInfo({
+      installed_app_id: 'todo',
+    });
+
+    await this._sensemakerStore.registerApplet(appletConfig)
 
     const todoCell = installedCells.find(
       c => c.role_id === 'todo_lists'
     ) as InstalledCell;
-    console.log("todo cell", todoCell)
 
     this._todoStore = new TodoStore(
         new HolochainClient(this.appWebsocket),
         todoCell,
     );
     const allTasks = await this._todoStore.fetchAllTasks()
-    console.log(allTasks)
+    await this.updateSensemakerState()
     this.loading = false;
   }
 
@@ -87,98 +117,17 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     });
   }
 
-  async initializeSensemaker(installedCells: InstalledCell[]): Promise<SensemakerService> {
-    const client = new HolochainClient(this.appWebsocket);
-    const sensemakerCell = installedCells.find(
-      c => c.role_id === 'sensemaker'
-    ) as InstalledCell;
-    console.log("sensemaker cell", sensemakerCell)
-
-    const clonedSensemakerCell = await this.appWebsocket.createCloneCell({
-      app_id: 'todo',
-      role_id: "sensemaker",
-      modifiers: {
-        network_seed: '',
-        properties: {
-          community_activator: serializeHash(sensemakerCell.cell_id[1])
-        },
-        origin_time: Date.now(),
-      },
-      name: 'sensemaker-clone',
-    });
-    const sensemakerCellClient = new CellClient(client, clonedSensemakerCell);
-    const sensemakerService = new SensemakerService(sensemakerCellClient)
-    this._sensemakerStore = new SensemakerStore(sensemakerService);
-
-
-    const integerRange = {
-      "name": "1-scale",
-      "kind": {
-        "Integer": { "min": 0, "max": 1 }
-      },
-    };
-
-    const dimensionName = "importance"
-    const dimension: Dimension = {
-      name: dimensionName,
-      range: integerRange,
-      computed: false,
+  async updateSensemakerState() {
+    const allTaskEntryHashes = get(this._todoStore.allTaskEntryHashes())
+    const dimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["importance"]
+    for (const taskEh of allTaskEntryHashes) {
+      await this._sensemakerStore.getAssessmentForResource({
+        dimension_eh: dimensionEh,
+        resource_eh: taskEh
+      })
     }
-    const dimensionHash = await this._sensemakerStore.createDimension(dimension)
-    console.log('dimension hash', dimensionHash)
-    
-    const integerRange2 = {
-      name: "1-scale-total",
-      kind: {
-        Integer: { min: 0, max: 1000000 },
-      },
-    };
-
-    const objectiveDimension = {
-      name: "total_importance",
-      range: integerRange2,
-      computed: true,
-    };
-    const objectiveDimensionHash = await this._sensemakerStore.createDimension(objectiveDimension)
-    
-    let app_entry_type: AppEntryType = { id: 0, zome_id: 0, visibility: { Public: null } };
-    const resourceType: ResourceType = {
-      name: "task-item",
-      base_types: [app_entry_type],
-      dimension_ehs: [dimensionHash]
-    }
-
-    const resourceTypeEh = await this._sensemakerStore.createResourceType(resourceType)
-
-    const methodName = "total_importance_method"
-    const totalImportanceMethod = {
-      name: methodName,
-      target_resource_type_eh: resourceTypeEh,
-      input_dimension_ehs: [dimensionHash],
-      output_dimension_eh: objectiveDimensionHash,
-      program: { Sum: null },
-      can_compute_live: false,
-      must_publish_dataset: false,
-    };
-
-    const methodEh = await this._sensemakerStore.createMethod(totalImportanceMethod)
-    const threshold: Threshold = {
-      dimension_eh: objectiveDimensionHash,
-      kind: { GreaterThan: null },
-      value: { Integer: 0 },
-    };
-
-    const culturalContext: CulturalContext = {
-      name: "most_important_tasks",
-      resource_type_eh: resourceTypeEh,
-      thresholds: [threshold],
-      order_by: [[objectiveDimensionHash, { Biggest: null }]], // DimensionEh
-    };
-
-    const contextEh = await this._sensemakerStore.createCulturalContext(culturalContext)
-
-    return sensemakerService
   }
+  
   static get scopedElements() {
     return {
       'todo-app': TodoApp,

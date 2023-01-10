@@ -8,7 +8,8 @@ import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "./add-item";
 import { List } from '@scoped-elements/material-web'
-import { CreateAssessmentInput, SensemakerStore } from "@lightningrodlabs/we-applet";
+import { SensemakerStore } from "@neighbourhoods/nh-we-applet";
+import { CreateAssessmentInput } from "@neighbourhoods/sensemaker-lite-types";
 import { addMyAssessmentsToTasks } from "../utils";
 
 
@@ -33,7 +34,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
 
     render() {
         this.updateTaskList()
-        if (this.listName) {
+        if (this.listName || this.isContext) {
             return html`
                 <div class="task-list-container">
                     <mwc-list>
@@ -67,8 +68,8 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             console.log('tasks in list, with assessment', tasksWithAssessments)
         }
         else if (this.isContext) {
-            console.log('context result', get(this.sensemakerStore.appletConfig()).contextResults)
-            const tasksInContext = addMyAssessmentsToTasks(this.todoStore.myAgentPubKey, get(this.todoStore.tasksFromEntryHashes(get(this.sensemakerStore.appletConfig()).contextResults["most_important_tasks"])), get(this.sensemakerStore.resourceAssessments()));
+            console.log('context result', get(this.sensemakerStore.contextResults()))
+            const tasksInContext = addMyAssessmentsToTasks(this.todoStore.myAgentPubKey, get(this.todoStore.tasksFromEntryHashes(get(this.sensemakerStore.contextResults())["most_important_tasks"])), get(this.sensemakerStore.resourceAssessments()));
             this.tasks = html`
             ${tasksInContext.map((task) => html`
                <task-item .task=${task} .completed=${('Complete' in task.entry.status)} .taskIsAssessed=${task.assessments != undefined} @toggle-task-status=${this.toggleTaskStatus}></task-item> 
