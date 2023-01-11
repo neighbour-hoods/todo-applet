@@ -9,7 +9,6 @@ import {
   AppletRenderers,
   WeServices,
   InstalledAppletInfo,
-  Dimension
 } from "@neighbourhoods/nh-we-applet";
 import { TodoStore } from "@neighbourhoods/todo-applet";
 import { TodoApplet } from "./todo-applet";
@@ -28,13 +27,11 @@ const todoApplet: WeApplet = {
         element.innerHTML = `<todo-applet></todo-applet>`;
         const appletElement = element.querySelector("todo-applet") as any;
 
-
         const todoCell = appletAppInfo[0].installedAppInfo.cell_data.find(c => c.role_id === 'todo_lists') as InstalledCell;
         const todoStore = new TodoStore(
           new HolochainClient(appWebsocket),
           todoCell,
         )
-
         appletElement.todoStore = todoStore;
         appletElement.appletAppInfo = appletAppInfo;
         appletElement.sensemakerStore = weStore.sensemakerStore;
