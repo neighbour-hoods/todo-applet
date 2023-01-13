@@ -30,6 +30,7 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
   }
 
   render() {
+    // the task list component is also used to display a cultural context, so we need to pass a flag to it
     const taskList = html`
       <task-list listName=${this.activeList} .isContext=${this.contextSelected}></task-list>
     ` 
@@ -44,11 +45,13 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
     `;
   }
 
+  // handle the @list-selected event from the list-list component
   updateActiveList(e: CustomEvent) {
     this.activeList = e.detail.selectedList;
     this.contextSelected = false;
   }
 
+  // whenever the IMPORTANT TASKS view is selected, we recompute the context by passing it all the task entry hashes
   async computeContext(_e: CustomEvent) {
     const contextResultInput: ComputeContextInput = {
       resource_ehs: get(this.todoStore.allTaskEntryHashes()),

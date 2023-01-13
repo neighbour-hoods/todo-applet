@@ -12,6 +12,8 @@ import { Task, TaskToListInput, WrappedEntry } from './types';
 export class TodoStore {
   service: TodoService;
 
+  // a front end store of all tasks in the dna
+  // it is an object keyed by the list name
   #tasksInLists: Writable<Dictionary<Array<WrappedEntry<Task>>>> = writable({});
 
   get myAgentPubKey(): AgentPubKeyB64 {
@@ -29,14 +31,18 @@ export class TodoStore {
     );
   }
 
+  // return all tasks in a list
   listTasks(listName: string) {
     return derived(this.#tasksInLists, lists => lists[listName]);
   }
 
+  // return all lists
   listLists() {
     return derived(this.#tasksInLists, lists => Object.keys(lists));
   }
 
+  // get all the task entry hashes so that we can get the assessments for them
+  // or for computing contexts
   allTaskEntryHashes() {
     return derived(this.#tasksInLists, lists => {
       let allTaskEhs: EntryHash[] = []

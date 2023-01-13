@@ -27,6 +27,7 @@ interface WrappedEntry<T> {
     entry_hash: EntryHash,
     entry: T,
 }
+// defining a new type for including an assessment with the task
 type WrappedTaskWithAssessment = WrappedEntry<Task> & {
     assessments: Assessment | undefined,
 }

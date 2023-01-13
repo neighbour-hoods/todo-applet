@@ -57,6 +57,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         this.updateTaskList()
     }
     updateTaskList() {
+        // check if displaying a context or not
         if (this.listName && !this.isContext) {
             const tasksWithAssessments = addMyAssessmentsToTasks(this.todoStore.myAgentPubKey, get(this.todoStore.listTasks(this.listName)), get(this.sensemakerStore.resourceAssessments()));
             this.tasks = html`
@@ -87,6 +88,8 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             value: {
                 Integer: 1
             },
+            // this is one of the main reasons we store the applet config in the sensemaker store, so that we can access
+            // the entry hashes we need
             dimension_eh: get(this.sensemakerStore.appletConfig()).dimensions["importance"],
             subject_eh: e.detail.task.entry_hash,
             maybe_input_dataSet: null,

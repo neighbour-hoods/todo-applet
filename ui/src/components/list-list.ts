@@ -32,6 +32,7 @@ export class ListList extends ScopedElementsMixin(LitElement) {
             </div>
         `
     }
+    // dispatch an event when a context is selected
     dispatchContextSelected() {
         this.dispatchEvent(new CustomEvent('context-selected'))
     }
@@ -40,7 +41,7 @@ export class ListList extends ScopedElementsMixin(LitElement) {
         this.updateListList()
     }
     updateListList() {
-        
+        // TODO: rather than updating the list manually like this, use subscriptions on the svelte store
         this.listList = html`
         ${get(this.todoStore.listLists()).map((listName) => html`
            <list-item listName=${listName}></list-item> 

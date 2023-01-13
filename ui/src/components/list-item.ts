@@ -13,6 +13,7 @@ export class ListItem extends ScopedElementsMixin(LitElement) {
         `
     }
 
+    // dispatch an event to update the currently selected list
     dispatchSelectedList() {
         const selectedList = this.listName;
         if (selectedList) {

@@ -39,6 +39,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
 
   async firstUpdated() {
+    // connect to holochain conductor and set up websocket connections
     await this.connectHolochain()
     const installedCells = this.appInfo.cell_data;
     const client = new HolochainClient(this.appWebsocket);
@@ -117,6 +118,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     });
   }
 
+  // attempt to fetch assessments for each task to have an up-to-date sensemaker state (currently just of assessments)
   async updateSensemakerState() {
     const allTaskEntryHashes = get(this._todoStore.allTaskEntryHashes())
     const dimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["importance"]
