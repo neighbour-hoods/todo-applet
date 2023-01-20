@@ -1,12 +1,9 @@
-
-import { DnaSource, Record, ActionHash, EntryHash, AppBundleSource } from "@holochain/client";
+import { ActionHash, EntryHash, AppBundleSource, encodeHashToBase64 } from "@holochain/client";
 import { pause, Player, runScenario } from "@holochain/tryorama";
-import { decode } from '@msgpack/msgpack';
 import pkg from 'tape-promise/tape';
 const { test } = pkg;
 
 import { todoListsHapp } from "../../utils";
-import { encodeHashToBase64 } from "@holochain-open-dev/utils";
 
 
 export default () => test("todo tasks CRUD tests", async (t) => {
