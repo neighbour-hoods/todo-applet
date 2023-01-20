@@ -6,7 +6,7 @@ import pkg from 'tape-promise/tape';
 const { test } = pkg;
 
 import { todoListsHapp } from "../../utils";
-import { serializeHash } from "@holochain-open-dev/utils";
+import { encodeHashToBase64 } from "@holochain-open-dev/utils";
 
 
 export default () => test("todo tasks CRUD tests", async (t) => {
@@ -90,8 +90,8 @@ export default () => test("todo tasks CRUD tests", async (t) => {
       t.deepEqual(groceryTasks.length, 2)
 
       console.log('list', groceryTasks)
-      t.ok(groceryTasks.find(({ action_hash, entry }) => serializeHash(action_hash) === serializeHash(createAction) && JSON.stringify(entry) === JSON.stringify({ description: 'apples', status: { Incomplete: null } })))
-      t.ok(groceryTasks.find(({ action_hash, entry }) => serializeHash(action_hash) === serializeHash(createAction2) && JSON.stringify(entry) === JSON.stringify({ description: 'bananas', status: { Incomplete: null } })))
+      t.ok(groceryTasks.find(({ action_hash, entry }) => encodeHashToBase64(action_hash) === encodeHashToBase64(createAction) && JSON.stringify(entry) === JSON.stringify({ description: 'apples', status: { Incomplete: null } })))
+      t.ok(groceryTasks.find(({ action_hash, entry }) => encodeHashToBase64(action_hash) === encodeHashToBase64(createAction2) && JSON.stringify(entry) === JSON.stringify({ description: 'bananas', status: { Incomplete: null } })))
 
       const updateAction = await alice.cells[0].callZome({
         zome_name: "todo",
@@ -107,8 +107,8 @@ export default () => test("todo tasks CRUD tests", async (t) => {
         payload: "groceries",
       });
       t.deepEqual(groceryTasks.length, 2)
-      t.ok(updatedGroceryTasks.find(({ action_hash, entry }) => serializeHash(action_hash) === serializeHash(createAction) && JSON.stringify(entry) === JSON.stringify({ description: 'apples', status: { Complete: null } })))
-      t.ok(updatedGroceryTasks.find(({ action_hash, entry }) => serializeHash(action_hash) === serializeHash(createAction2) && JSON.stringify(entry) === JSON.stringify({ description: 'bananas', status: { Incomplete: null } })))
+      t.ok(updatedGroceryTasks.find(({ action_hash, entry }) => encodeHashToBase64(action_hash) === encodeHashToBase64(createAction) && JSON.stringify(entry) === JSON.stringify({ description: 'apples', status: { Complete: null } })))
+      t.ok(updatedGroceryTasks.find(({ action_hash, entry }) => encodeHashToBase64(action_hash) === encodeHashToBase64(createAction2) && JSON.stringify(entry) === JSON.stringify({ description: 'bananas', status: { Incomplete: null } })))
 
       const allTasks: { [list: string]: any[] } = await bob.cells[0].callZome({
         zome_name: "todo",
