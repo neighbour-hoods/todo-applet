@@ -1,10 +1,8 @@
-import { CellClient } from '@holochain-open-dev/cell-client';
-import { Dictionary, EntryHashB64 } from '@holochain-open-dev/core-types';
-import { ActionHash } from '@holochain/client';
+import { ActionHash, AppAgentCallZomeRequest, AppAgentClient, RoleName } from '@holochain/client';
 import { Task, TaskToListInput, WrappedEntry } from './types';
 
 export class TodoService {
-  constructor(public cellClient: CellClient, public zomeName = 'todo') {}
+  constructor(public client: AppAgentClient, public roleName: RoleName, public zomeName = 'todo') {}
 
   async createNewList(input: string): Promise<null> {
     return this.callZome('create_new_list', input);
@@ -30,11 +28,17 @@ export class TodoService {
     return this.callZome('get_tasks_in_list', input);
   }
 
-  async getAllTasks(): Promise<Dictionary<Array<WrappedEntry<Task>>>> {
+  async getAllTasks(): Promise<{ [listName: string]: Array<WrappedEntry<Task>>}> {
     return this.callZome('get_all_tasks', null);
   }
   
-  private callZome(fnName: string, payload: any) {
-    return this.cellClient.callZome(this.zomeName, fnName, payload);
+  private callZome(fn_name: string, payload: any) {
+    const req: AppAgentCallZomeRequest = {
+      role_name: this.roleName,
+      zome_name: this.zomeName,
+      fn_name,
+      payload
+    }
+    return this.client.callZome(req);
   }
 }

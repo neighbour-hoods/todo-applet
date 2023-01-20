@@ -1,7 +1,7 @@
 import {
   AdminWebsocket,
   AppWebsocket,
-  InstalledAppInfo,
+  AppInfo,
   InstalledCell,
 } from "@holochain/client";
 import {
@@ -27,7 +27,7 @@ const todoApplet: WeApplet = {
         element.innerHTML = `<todo-applet></todo-applet>`;
         const appletElement = element.querySelector("todo-applet") as any;
 
-        const todoCell = appletAppInfo[0].installedAppInfo.cell_data.find(c => c.role_id === 'todo_lists') as InstalledCell;
+        const todoCell = appletAppInfo[0].appInfo.cell_data.find(c => c.role_id === 'todo_lists') as InstalledCell;
         const todoStore = new TodoStore(
           new HolochainClient(appWebsocket),
           todoCell,

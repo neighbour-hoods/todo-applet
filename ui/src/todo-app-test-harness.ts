@@ -3,17 +3,21 @@ import { property, state } from 'lit/decorators.js';
 import {
   AppWebsocket,
   ActionHash,
-  InstalledAppInfo,
+  AppInfo,
   AdminWebsocket,
   InstalledCell,
+  encodeHashToBase64,
+  CellInfo,
+  Cell,
+  AppAgentWebsocket,
+  AppSignal,
+  AppAgentClient,
 } from '@holochain/client';
 import '@material/mwc-circular-progress';
 import { ScopedElementsMixin } from '@open-wc/scoped-elements';
-import { HolochainClient, CellClient } from '@holochain-open-dev/cell-client';
 import { get } from 'svelte/store';
 import { TodoStore } from './todo-store';
 import { SensemakerService, SensemakerStore } from '@neighbourhoods/nh-we-applet';
-import { serializeHash } from '@holochain-open-dev/utils';
 import { TodoApp } from './index';
 import appletConfig from './appletConfig'
 
@@ -29,7 +33,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   adminWebsocket!: AdminWebsocket;
 
   @property({ type: Object })
-  appInfo!: InstalledAppInfo;
+  appInfo!: AppInfo;
 
   @property()
   _todoStore!: TodoStore;
@@ -41,48 +45,46 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   async firstUpdated() {
     // connect to holochain conductor and set up websocket connections
     await this.connectHolochain()
-    const installedCells = this.appInfo.cell_data;
-    const client = new HolochainClient(this.appWebsocket);
+    const installedCells = this.appInfo.cell_info;
+    // const client = new HolochainClient(this.appWebsocket);
     // check if sensemaker has been cloned yet
     let clonedSensemakerCell: InstalledCell | undefined
-    clonedSensemakerCell = installedCells.find(
-      c => c.role_id === 'sensemaker.0'
-    );
-    if (!clonedSensemakerCell) {
-      const sensemakerCell = installedCells.find(
-        c => c.role_id === 'sensemaker'
-      ) as InstalledCell;
+    let clonedSensemakerRoleName: string
+    const sensemakerCellInfo: CellInfo[] = installedCells["sensemaker"];
+    
+    // check if the cell has been cloned yet
+    if (sensemakerCellInfo.length == 1) {
+      const sensemakerCell  = (sensemakerCellInfo[0] as { "Provisioned": Cell }).Provisioned;
   
       clonedSensemakerCell = await this.appWebsocket.createCloneCell({
         app_id: 'todo',
-        role_id: "sensemaker",
+        role_name: "sensemaker",
         modifiers: {
           network_seed: '',
           properties: {
-            community_activator: serializeHash(sensemakerCell.cell_id[1])
+            community_activator: encodeHashToBase64(sensemakerCell.cell_id[1])
           },
           origin_time: Date.now(),
         },
         name: 'sensemaker-clone',
       });
+      clonedSensemakerRoleName = clonedSensemakerCell.role_name;
     }
-    const sensemakerCellClient = new CellClient(client, clonedSensemakerCell);
-    const sensemakerService = new SensemakerService(sensemakerCellClient)
+    else {
+      // const thing: CellInfo
+      const clonedCellInfo = sensemakerCellInfo.filter((cellInfo) => "Cloned" in cellInfo)[0]
+      const cell = (clonedCellInfo as { "Cloned": Cell }).Cloned!;
+      clonedSensemakerRoleName = cell.clone_id!;
+    }
+    const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(this.appWebsocket, "todo-sensemaker");
+    const sensemakerService = new SensemakerService(appAgentWebsocket, clonedSensemakerRoleName)
     this._sensemakerStore = new SensemakerStore(sensemakerService);
-
-    let appInfos = await this.appWebsocket.appInfo({
-      installed_app_id: 'todo',
-    });
 
     await this._sensemakerStore.registerApplet(appletConfig)
 
-    const todoCell = installedCells.find(
-      c => c.role_id === 'todo_lists'
-    ) as InstalledCell;
-
     this._todoStore = new TodoStore(
-        new HolochainClient(this.appWebsocket),
-        todoCell,
+        appAgentWebsocket,
+        "todo_lists"
     );
     const allTasks = await this._todoStore.fetchAllTasks()
     await this.updateSensemakerState()
@@ -104,13 +106,9 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   }
 
   async connectHolochain() {
-    this.adminWebsocket = await AdminWebsocket.connect(
-      `ws://localhost:${process.env.HC_ADMIN_PORT}`
-    );
+    this.adminWebsocket = await AdminWebsocket.connect(``);
 
-    this.appWebsocket = await AppWebsocket.connect(
-      `ws://localhost:${process.env.HC_PORT}`
-    );
+    this.appWebsocket = await AppWebsocket.connect(``);
     
 
     this.appInfo = await this.appWebsocket.appInfo({
