@@ -8,7 +8,7 @@ import { todoStoreContext, sensemakerStoreContext } from './contexts';
 import { TodoStore } from './todo-store';
 import { SensemakerStore } from '@neighbourhoods/nh-we-applet';
 import { ComputeContextInput } from '@neighbourhoods/sensemaker-lite-types';
-import { addMyAssessmentsToTasks, AppletConfig, ListList, TaskList } from './index'
+import { ListList, TaskList } from './index'
 import { get } from 'svelte/store';
 
 export class TodoApp extends ScopedElementsMixin(LitElement) {

@@ -1,5 +1,5 @@
 import { derived, get, Writable, writable } from 'svelte/store';
-import { AgentPubKey, AgentPubKeyB64, AppAgentClient, encodeHashToBase64, EntryHash, InstalledCell, RoleName } from '@holochain/client';
+import { AgentPubKeyB64, AppAgentClient, encodeHashToBase64, EntryHash, RoleName } from '@holochain/client';
 import { TodoService } from './todo-service';
 import { Task, TaskToListInput, WrappedEntry } from './types';
 

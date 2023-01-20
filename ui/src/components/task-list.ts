@@ -1,7 +1,7 @@
 import { contextProvided } from "@lit-labs/context";
 import { property, state } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
-import { LitElement, html, css } from "lit";
+import { LitElement, html } from "lit";
 import { TaskItem } from "./task-item";
 import { sensemakerStoreContext, todoStoreContext } from "../contexts";
 import { TodoStore } from "../todo-store";

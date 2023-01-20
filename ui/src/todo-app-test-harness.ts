@@ -10,8 +10,6 @@ import {
   CellInfo,
   Cell,
   AppAgentWebsocket,
-  AppSignal,
-  AppAgentClient,
 } from '@holochain/client';
 import '@material/mwc-circular-progress';
 import { ScopedElementsMixin } from '@open-wc/scoped-elements';
@@ -44,51 +42,54 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
   async firstUpdated() {
     // connect to holochain conductor and set up websocket connections
-    await this.connectHolochain()
-    const installedCells = this.appInfo.cell_info;
-    // const client = new HolochainClient(this.appWebsocket);
-    // check if sensemaker has been cloned yet
-    let clonedSensemakerCell: InstalledCell | undefined
-    let clonedSensemakerRoleName: string
-    const sensemakerCellInfo: CellInfo[] = installedCells["sensemaker"];
-    
-    // check if the cell has been cloned yet
-    if (sensemakerCellInfo.length == 1) {
-      const sensemakerCell  = (sensemakerCellInfo[0] as { "Provisioned": Cell }).Provisioned;
-  
-      clonedSensemakerCell = await this.appWebsocket.createCloneCell({
-        app_id: 'todo',
-        role_name: "sensemaker",
-        modifiers: {
-          network_seed: '',
-          properties: {
-            community_activator: encodeHashToBase64(sensemakerCell.cell_id[1])
+    try {
+      await this.connectHolochain()
+      const installedCells = this.appInfo.cell_info;
+      // check if sensemaker has been cloned yet
+      let clonedSensemakerCell: InstalledCell | undefined
+      let clonedSensemakerRoleName: string
+      const sensemakerCellInfo: CellInfo[] = installedCells["sensemaker"];
+
+      // check if the cell has been cloned yet
+      if (sensemakerCellInfo.length == 1) {
+        const sensemakerCell = (sensemakerCellInfo[0] as { "Provisioned": Cell }).Provisioned;
+
+        clonedSensemakerCell = await this.appWebsocket.createCloneCell({
+          app_id: 'todo-sensemaker',
+          role_name: "sensemaker",
+          modifiers: {
+            network_seed: '',
+            properties: {
+              community_activator: encodeHashToBase64(sensemakerCell.cell_id[1])
+            },
+            origin_time: Date.now(),
           },
-          origin_time: Date.now(),
-        },
-        name: 'sensemaker-clone',
-      });
-      clonedSensemakerRoleName = clonedSensemakerCell.role_name;
-    }
-    else {
-      // const thing: CellInfo
-      const clonedCellInfo = sensemakerCellInfo.filter((cellInfo) => "Cloned" in cellInfo)[0]
-      const cell = (clonedCellInfo as { "Cloned": Cell }).Cloned!;
-      clonedSensemakerRoleName = cell.clone_id!;
-    }
-    const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(this.appWebsocket, "todo-sensemaker");
-    const sensemakerService = new SensemakerService(appAgentWebsocket, clonedSensemakerRoleName)
-    this._sensemakerStore = new SensemakerStore(sensemakerService);
+          name: 'sensemaker-clone',
+        });
+        clonedSensemakerRoleName = clonedSensemakerCell.role_name;
+      }
+      else {
+        const clonedCellInfo = sensemakerCellInfo.filter((cellInfo) => "Cloned" in cellInfo)[0]
+        const cell = (clonedCellInfo as { "Cloned": Cell }).Cloned!;
+        clonedSensemakerRoleName = cell.clone_id!;
+      }
+      const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(this.appWebsocket, "todo-sensemaker");
+      const sensemakerService = new SensemakerService(appAgentWebsocket, clonedSensemakerRoleName)
+      this._sensemakerStore = new SensemakerStore(sensemakerService);
 
-    await this._sensemakerStore.registerApplet(appletConfig)
+      await this._sensemakerStore.registerApplet(appletConfig)
 
-    this._todoStore = new TodoStore(
+      this._todoStore = new TodoStore(
         appAgentWebsocket,
         "todo_lists"
-    );
-    const allTasks = await this._todoStore.fetchAllTasks()
-    await this.updateSensemakerState()
-    this.loading = false;
+      );
+      const allTasks = await this._todoStore.fetchAllTasks()
+      await this.updateSensemakerState()
+      this.loading = false;
+    }
+    catch (e) {
+      console.log("error registering applet", e)
+    }
   }
 
   render() {
@@ -107,9 +108,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
   async connectHolochain() {
     this.adminWebsocket = await AdminWebsocket.connect(``);
-
     this.appWebsocket = await AppWebsocket.connect(``);
-    
 
     this.appInfo = await this.appWebsocket.appInfo({
       installed_app_id: 'todo',
@@ -127,7 +126,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       })
     }
   }
-  
+
   static get scopedElements() {
     return {
       'todo-app': TodoApp,
