@@ -1,8 +1,8 @@
-import { ActionHash, AppAgentCallZomeRequest, AppAgentClient, RoleName } from '@holochain/client';
+import { ActionHash, AgentPubKey, AppAgentCallZomeRequest, AppAgentClient, AppWebsocket, CallZomeRequest, CellId, RoleName } from '@holochain/client';
 import { Task, TaskToListInput, WrappedEntry } from './types';
 
 export class TodoService {
-  constructor(public client: AppAgentClient, public roleName: RoleName, public zomeName = 'todo') {}
+  constructor(public client: AppWebsocket, public cellId: CellId, public roleName: RoleName, public zomeName = 'todo') {}
 
   async createNewList(input: string): Promise<null> {
     return this.callZome('create_new_list', input);
@@ -33,11 +33,12 @@ export class TodoService {
   }
   
   private callZome(fn_name: string, payload: any) {
-    const req: AppAgentCallZomeRequest = {
-      role_name: this.roleName,
+    const req: CallZomeRequest = {
+      cell_id: this.cellId,
       zome_name: this.zomeName,
-      fn_name,
-      payload
+      fn_name: fn_name,
+      payload: payload,
+      provenance: this.cellId[1],
     }
     return this.client.callZome(req);
   }

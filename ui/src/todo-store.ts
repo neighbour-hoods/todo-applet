@@ -1,5 +1,5 @@
 import { derived, get, Writable, writable } from 'svelte/store';
-import { AgentPubKeyB64, AppAgentClient, encodeHashToBase64, EntryHash, RoleName } from '@holochain/client';
+import { AgentPubKey, AgentPubKeyB64, AppAgentClient, AppWebsocket, CellId, encodeHashToBase64, EntryHash, RoleName } from '@holochain/client';
 import { TodoService } from './todo-service';
 import { Task, TaskToListInput, WrappedEntry } from './types';
 
@@ -16,14 +16,16 @@ export class TodoStore {
   // }
 
   constructor(
-    protected client: AppAgentClient,
+    protected client: AppWebsocket,
+    protected cellId: CellId,
     roleName: RoleName,
   ) {
     this.service = new TodoService(
       client,
+      cellId,
       roleName
     );
-    this.myAgentPubKey = encodeHashToBase64(client.myPubKey);
+    this.myAgentPubKey = encodeHashToBase64(cellId[1]);
   }
 
   // return all tasks in a list

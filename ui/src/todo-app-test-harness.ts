@@ -45,10 +45,13 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     try {
       await this.connectHolochain()
       const installedCells = this.appInfo.cell_info;
+      
       // check if sensemaker has been cloned yet
       let clonedSensemakerCell: InstalledCell | undefined
       let clonedSensemakerRoleName: string
       const sensemakerCellInfo: CellInfo[] = installedCells["sensemaker"];
+      const todoCellInfo: CellInfo[] = installedCells["todo_lists"];
+      const todoCellId = (todoCellInfo[0] as { "Provisioned": Cell }).Provisioned.cell_id;
 
       // check if the cell has been cloned yet
       if (sensemakerCellInfo.length == 1) {
@@ -80,7 +83,8 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       await this._sensemakerStore.registerApplet(appletConfig)
 
       this._todoStore = new TodoStore(
-        appAgentWebsocket,
+        this.appWebsocket,
+        todoCellId,
         "todo_lists"
       );
       const allTasks = await this._todoStore.fetchAllTasks()
