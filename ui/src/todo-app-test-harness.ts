@@ -1,5 +1,5 @@
 import { LitElement, css, html } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import {
   AppWebsocket,
   ActionHash,
@@ -19,6 +19,7 @@ import { SensemakerService, SensemakerStore } from '@neighbourhoods/nh-we-applet
 import { TodoApp } from './index';
 import appletConfig from './appletConfig'
 
+@customElement('todo-app-test-harness')
 export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   @state() loading = true;
   @state() actionHash: ActionHash | undefined;

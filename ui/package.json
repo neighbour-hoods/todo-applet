@@ -14,13 +14,11 @@
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
     "build": "rimraf dist && tsc && rollup -c rollup.config.js",
     "ts-build": "tsc",
-    "build:watch": "rimraf dist && rimraf tsconfig.tsbuildinfo && tsc && rollup -c rollup.config.js -w",
+    "build:watch": "rimraf dist && rimraf tsconfig.tsbuildinfo && rollup -c rollup.config.js -w",
     "start": "tsc && concurrently -r \"npm run build:watch\" \"wds\"",
     "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
-    "@holochain-open-dev/utils": "^0.8.0",
-    "@holochain-open-dev/core-types": "^0.6.3",
     "@holochain/client": "0.11.9",
     "@lit-labs/context": "^0.1.2",
     "@material/mwc-button": "^0.25.3",
@@ -39,6 +37,7 @@
     "@rollup/plugin-commonjs": "18.0.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@rollup/plugin-replace": "^3.0.0",
+    "@rollup/plugin-typescript": "^10.0.1",
     "@typescript-eslint/eslint-plugin": "^4.29.2",
     "@typescript-eslint/parser": "^4.29.2",
     "@web/dev-server": "0.1.21",
