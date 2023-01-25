@@ -1,11 +1,5 @@
-import { CellClient, HolochainClient } from '@holochain-open-dev/cell-client';
-import {
-  AgentPubKeyB64,
-  Dictionary,
-} from '@holochain-open-dev/core-types';
-import { serializeHash } from '@holochain-open-dev/utils';
 import { derived, get, Writable, writable } from 'svelte/store';
-import { EntryHash, InstalledCell } from '@holochain/client';
+import { AgentPubKey, AgentPubKeyB64, AppAgentClient, AppWebsocket, CellId, encodeHashToBase64, EntryHash, RoleName } from '@holochain/client';
 import { TodoService } from './todo-service';
 import { Task, TaskToListInput, WrappedEntry } from './types';
 
@@ -14,21 +8,24 @@ export class TodoStore {
 
   // a front end store of all tasks in the dna
   // it is an object keyed by the list name
-  #tasksInLists: Writable<Dictionary<Array<WrappedEntry<Task>>>> = writable({});
+  #tasksInLists: Writable<{ [listName: string]: Array<WrappedEntry<Task>>}> = writable({});
 
-  get myAgentPubKey(): AgentPubKeyB64 {
-    return serializeHash(this.todoCell.cell_id[1]);
-  }
+  public myAgentPubKey: AgentPubKeyB64;
+  // get myAgentPubKey(): AgentPubKeyB64 {
+  //   return encodeHashToBase64(this.todoCell.cell_id[1]);
+  // }
 
   constructor(
-    protected client: HolochainClient,
-    protected todoCell: InstalledCell,
-    zomeName: string = 'todo'
+    protected client: AppWebsocket,
+    protected cellId: CellId,
+    roleName: RoleName,
   ) {
     this.service = new TodoService(
-      new CellClient(client, todoCell),
-      zomeName
+      client,
+      cellId,
+      roleName
     );
+    this.myAgentPubKey = encodeHashToBase64(cellId[1]);
   }
 
   // return all tasks in a list
@@ -59,10 +56,13 @@ export class TodoStore {
   }
 
   tasksFromEntryHashes(entryHashes: EntryHash[]) {
-    const serializedEntryHashes = entryHashes.map(entryHash => serializeHash(entryHash));
+    const serializedEntryHashes = entryHashes.map(entryHash => encodeHashToBase64(entryHash));
     return derived(this.#tasksInLists, lists => {
-      const tasks = Object.values(lists).flat();
-      return tasks.filter(task => serializedEntryHashes.includes(serializeHash(task.entry_hash)))
+      let tasks: WrappedEntry<Task>[] = [];
+      Object.values(lists).map(list => {
+        tasks = [...tasks, ...list] 
+      })
+      return tasks.filter(task => serializedEntryHashes.includes(encodeHashToBase64(task.entry_hash)))
     })
   }
 
@@ -104,7 +104,7 @@ export class TodoStore {
       updatedTask.entry.status = { Complete: null };
     }
     this.#tasksInLists.update(lists => {
-      let updatedTaskInList = lists[listName].filter(({ action_hash: taskActionHash, entry: taskItem}) => serializeHash(taskActionHash) != serializeHash(wrappedTask.action_hash));
+      let updatedTaskInList = lists[listName].filter(({ action_hash: taskActionHash, entry: taskItem}) => encodeHashToBase64(taskActionHash) != encodeHashToBase64(wrappedTask.action_hash));
       updatedTaskInList.push(updatedTask);
       lists[listName] = updatedTaskInList;
       return lists;

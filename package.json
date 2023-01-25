@@ -7,19 +7,20 @@
     "we-applet"
   ],
   "scripts": {
-    "start": "npm run network 2",
-    "network": "hc s clean && npm run build:test-happ && concurrently-repeat \"npm run start:agent\"",
+    "start": "AGENTS=2 npm run network",
+    "network": "hc s clean && npm run build:test-happ && concurrently \"npm run build:watch -w ui\" \"npm run launch:happ\"",
     "start:agent": "cross-env HC_PORT=$(port) HC_ADMIN_PORT=$(port) concurrently -k \"npm run start:happ\" \"sleep 5 && npm run start -w ui\"",
     "test": "npm run build:happ && npm t -w tests",
     "start:happ": "concurrently \"RUST_LOG=warn echo \"pass\" | hc s --piped -f=$HC_ADMIN_PORT generate ./workdir/sensemaker-enabled/todo-sensemaker.happ --run=$HC_PORT -a todo network mdns\" \"npm run playground\"",
+    "launch:happ": "RUST_LOG=warn echo \"pass\" | hc launch --piped -n $AGENTS ./workdir/sensemaker-enabled/todo-sensemaker.happ -w --ui-path ui/dist network mdns",
     "package": "npm run build:happ && npm run package:ui -w we-applet && hc web-app pack workdir",
     "build:happ": "npm run build:dnas && hc app pack ./workdir",
-    "build:test-happ": "npm run build:dnas && hc app pack ./workdir/sensemaker-enabled",
+    "build:test-happ": "npm run download-sensemaker && npm run build:dnas && hc app pack ./workdir/sensemaker-enabled",
     "build:dnas": "npm run build:zomes && hc dna pack ./dna/workdir",
     "build:zomes": "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown",
     "playground": "run-singleton \"holochain-playground\"",
-    "download-sensemaker": "rimraf workdir/sensemaker.dna && curl -L --output workdir/sensemaker.dna https://github.com/neighbour-hoods/sensemaker-lite/releases/download/v0.0.2-alpha/sensemaker.dna",
-    "start:ui": "npm run start -w ui"
+    "download-sensemaker": "rimraf workdir/sensemaker.dna && curl -L --output workdir/sensemaker.dna https://github.com/neighbour-hoods/sensemaker-lite/releases/download/v0.0.3-alpha/sensemaker.dna",
+    "start:ui": "npm run build:test-happ && npm run start -w ui"
   },
   "devDependencies": {
     "@holochain-playground/cli": "^0.0.11",

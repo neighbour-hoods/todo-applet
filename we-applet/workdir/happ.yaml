@@ -3,7 +3,7 @@ manifest_version: "1"
 name: todo_applet-applet
 description: ~
 roles:
-  - id: todo_applet
+  - name: todo_applet
     provisioning:
       strategy: create
       deferred: false

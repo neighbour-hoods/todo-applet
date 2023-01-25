@@ -1,38 +1,41 @@
 import {
   AdminWebsocket,
   AppWebsocket,
-  InstalledAppInfo,
-  InstalledCell,
 } from "@holochain/client";
 import {
   WeApplet,
   AppletRenderers,
   WeServices,
-  InstalledAppletInfo,
+  AppletInfo,
 } from "@neighbourhoods/nh-we-applet";
-import { TodoStore } from "@neighbourhoods/todo-applet";
 import { TodoApplet } from "./todo-applet";
-import { HolochainClient, CellClient } from '@holochain-open-dev/cell-client';
 
 const todoApplet: WeApplet = {
   async appletRenderers(
     appWebsocket: AppWebsocket,
     adminWebsocket: AdminWebsocket,
     weStore: WeServices,
-    appletAppInfo: InstalledAppletInfo[]
+    appletAppInfo: AppletInfo[]
   ): Promise<AppletRenderers> {
     return {
       full(element: HTMLElement, registry: CustomElementRegistry) {
-        registry.define("todo-applet", TodoApplet);
-        element.innerHTML = `<todo-applet></todo-applet>`;
-        const appletElement = element.querySelector("todo-applet") as any;
+        console.log("in the applet in we")
+        console.log("registry", registry);
+        console.log("applet app info", appletAppInfo)
+        try {
 
-        const todoCell = appletAppInfo[0].installedAppInfo.cell_data.find(c => c.role_id === 'todo_lists') as InstalledCell;
-        const todoStore = new TodoStore(
-          new HolochainClient(appWebsocket),
-          todoCell,
-        )
-        appletElement.todoStore = todoStore;
+          registry.define("todo-applet", TodoApplet);
+          // element.innerHTML = `<script src="/node_modules/@webcomponents/scoped-custom-element-registry/scoped-custom-element-registry.min.js"></script>`
+          element.innerHTML = `<todo-applet></todo-applet>`;
+        }
+        catch (e) {
+          console.log('error in registry', e)
+          throw e
+        }
+        // registry.upgrade("todo-applet", TodoApplet);
+        const appletElement = element.querySelector("todo-applet") as any;
+        appletElement.appWebsocket = appWebsocket;
+        appletElement.appWebsocket = adminWebsocket;
         appletElement.appletAppInfo = appletAppInfo;
         appletElement.sensemakerStore = weStore.sensemakerStore;
         console.log('sensemaker store in index', weStore.sensemakerStore)

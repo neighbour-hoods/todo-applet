@@ -1,5 +1,5 @@
 import { contextProvided } from "@lit-labs/context";
-import { property, state, query } from "lit/decorators.js";
+import { property, state } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
 import { WrappedTaskWithAssessment } from "../types";
