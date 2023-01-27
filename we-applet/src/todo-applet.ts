@@ -5,7 +5,7 @@ import { LitElement, html, css } from "lit";
 import { AppletInfo, SensemakerStore } from "@neighbourhoods/nh-we-applet";
 import { TodoApp, TodoStore } from "@neighbourhoods/todo-applet";
 import appletConfig from './appletConfig';
-import { AdminWebsocket, AppAgentWebsocket, AppWebsocket, Cell } from "@holochain/client";
+import { AppWebsocket, Cell } from "@holochain/client";
 
 export class TodoApplet extends ScopedElementsMixin(LitElement) {
   @property()
@@ -13,9 +13,6 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
 
   @property()
   appWebsocket!: AppWebsocket;
-
-  @property()
-  adminWebsocket!: AdminWebsocket;
 
   @property()
   sensemakerStore!: SensemakerStore;
@@ -28,25 +25,24 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
 
   async firstUpdated() {
     try {
-    
-    const appletRoleName = "todo_lists";
-    const todoAppletInfo = this.appletAppInfo[0];
-    const cellInfo = todoAppletInfo.appInfo.cell_info[appletRoleName][0]
-    const todoCellInfo = (cellInfo as { "Provisioned": Cell }).Provisioned;
+      const appletRoleName = "todo_lists";
+      const todoAppletInfo = this.appletAppInfo[0];
+      const cellInfo = todoAppletInfo.appInfo.cell_info[appletRoleName][0]
+      const todoCellInfo = (cellInfo as { "Provisioned": Cell }).Provisioned;
 
-    const maybeAppletConfig = await this.sensemakerStore.checkIfAppletConfigExists(appletConfig.name)
-    if (!maybeAppletConfig) {
-      await this.sensemakerStore.registerApplet(appletConfig)
-    }
-    
-    const appWs = await AppWebsocket.connect(this.appWebsocket.client.socket.url)
-    this.todoStore = new TodoStore(
-      appWs,
-      todoCellInfo.cell_id,
-      appletRoleName
-    );
-    const allTasks = await this.todoStore.fetchAllTasks()
-    this.loaded = true;
+      const maybeAppletConfig = await this.sensemakerStore.checkIfAppletConfigExists(appletConfig.name)
+      if (!maybeAppletConfig) {
+        await this.sensemakerStore.registerApplet(appletConfig)
+      }
+
+      const appWs = await AppWebsocket.connect(this.appWebsocket.client.socket.url)
+      this.todoStore = new TodoStore(
+        appWs,
+        todoCellInfo.cell_id,
+        appletRoleName
+      );
+      const allTasks = await this.todoStore.fetchAllTasks()
+      this.loaded = true;
     }
     catch (e) {
       console.log("error in first update", e)
