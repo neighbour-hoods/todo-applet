@@ -9,6 +9,7 @@ import {
   CellInfo,
   Cell,
   AppAgentWebsocket,
+  InstalledCell,
 } from '@holochain/client';
 import '@material/mwc-circular-progress';
 import { ScopedElementsMixin } from '@open-wc/scoped-elements';
@@ -67,11 +68,13 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       const allTasks = await this._todoStore.fetchAllTasks()
       // check if the cell has been cloned yet
       if (sensemakerCellInfo.length > 1) {
+        console.log('already cloned')
         this.isSensemakerCloned = true;
         const clonedCellInfo = sensemakerCellInfo.filter((cellInfo) => "Cloned" in cellInfo)[0]
         const cell = (clonedCellInfo as { "Cloned": Cell }).Cloned!;
         const clonedSensemakerRoleName = cell.clone_id!;
         await this.initializeSensemakerStore(clonedSensemakerRoleName);
+        await this.updateSensemakerState()
         this.loading = false;
       }
     }
@@ -86,7 +89,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       this._sensemakerStore = new SensemakerStore(sensemakerService);
   }
   async cloneSensemakerCell(ca_pubkey: string) {
-      const clonedSensemakerCell = await this.appWebsocket.createCloneCell({
+      const clonedSensemakerCell: InstalledCell = await this.appWebsocket.createCloneCell({
         app_id: 'todo-sensemaker',
         role_name: "sensemaker",
         modifiers: {
@@ -94,7 +97,6 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
           properties: {
             community_activator: ca_pubkey
           },
-          origin_time: Date.now(),
         },
         name: 'sensemaker-clone',
       });
@@ -104,16 +106,20 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
   async createNeighbourhood(_e: CustomEvent) {
     await this.cloneSensemakerCell(this.agentPubkey)
-    await this._sensemakerStore.registerApplet(appletConfig);
+    const _todoConfig = await this._sensemakerStore.registerApplet(appletConfig);
     await this.updateSensemakerState()
     this.loading = false;
   }
 
   async joinNeighbourhood(e: CustomEvent) {
       await this.cloneSensemakerCell(e.detail.newValue)
-      await this._sensemakerStore.checkIfAppletConfigExists("todo_applet")
-      await this.updateSensemakerState()
-      this.loading = false;
+      console.log('successfully cloned sensemaker cell')
+      // wait some time for the dht to sync, otherwise checkIfAppletConfigExists returns null
+      setTimeout(async () => {
+        const _todoConfig = await this._sensemakerStore.checkIfAppletConfigExists("todo_applet")
+        await this.updateSensemakerState()
+        this.loading = false;
+      }, 2000)
   }
   
   render() {
@@ -146,6 +152,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
   // attempt to fetch assessments for each task to have an up-to-date sensemaker state (currently just of assessments)
   async updateSensemakerState() {
+    await this._sensemakerStore.checkIfAppletConfigExists("todo_applet")
     const allTaskEntryHashes = get(this._todoStore.allTaskEntryHashes())
     const dimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["importance"]
     for (const taskEh of allTaskEntryHashes) {
