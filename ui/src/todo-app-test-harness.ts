@@ -61,9 +61,8 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       const sensemakerCellInfo: CellInfo[] = installedCells["sensemaker"];
       const todoCellInfo: CellInfo[] = installedCells["todo_lists"];
       let todoCellId: CellId;
-
-      if (CellType.Provisioned in todoCellInfo) {
-        todoCellId = (todoCellInfo[CellType.Provisioned] as ProvisionedCell).cell_id;
+      if (CellType.Provisioned in todoCellInfo[0]) {
+        todoCellId = (todoCellInfo[0][CellType.Provisioned] as ProvisionedCell).cell_id;
       } else {
         throw new Error("todo_lists cell not provisioned yet")
 
@@ -80,7 +79,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       if (sensemakerCellInfo.length > 1) {
         console.log('already cloned')
         this.isSensemakerCloned = true;
-        const clonedCellInfo = sensemakerCellInfo.filter((cellInfo) => "Cloned" in cellInfo)[0];
+        const clonedCellInfo = sensemakerCellInfo.filter((cellInfo) => CellType.Cloned in cellInfo)[0];
         let clonedCell: ClonedCell;
         if (CellType.Cloned in clonedCellInfo) {
           clonedCell = clonedCellInfo[CellType.Cloned];
@@ -110,11 +109,14 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       modifiers: {
         network_seed: '',
         properties: {
-          community_activator: ca_pubkey
+          sensemaker_config: {
+            neighbourhood: "todo test",
+            wizard_version: "v0.1",
+            community_activator: ca_pubkey
+          },
+          applet_configs: [],
         },
-      },
-      name: 'sensemaker-clone',
-    });
+    }});
     this.isSensemakerCloned = true;
     await this.initializeSensemakerStore(clonedSensemakerCell.clone_id)
   }
@@ -128,7 +130,6 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
   async joinNeighbourhood(e: CustomEvent) {
     await this.cloneSensemakerCell(e.detail.newValue)
-    console.log('successfully cloned sensemaker cell')
     // wait some time for the dht to sync, otherwise checkIfAppletConfigExists returns null
     setTimeout(async () => {
       const _todoConfig = await this._sensemakerStore.checkIfAppletConfigExists("todo_applet")
