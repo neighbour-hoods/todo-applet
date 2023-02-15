@@ -5,7 +5,7 @@ import { LitElement, html, css } from "lit";
 import { AppletInfo, SensemakerStore } from "@neighbourhoods/nh-we-applet";
 import { TodoApp, TodoStore } from "@neighbourhoods/todo-applet";
 import appletConfig from './appletConfig';
-import { AppWebsocket, Cell } from "@holochain/client";
+import { AppWebsocket, CellType, ProvisionedCell } from "@holochain/client";
 
 export class TodoApplet extends ScopedElementsMixin(LitElement) {
   @property()
@@ -28,7 +28,7 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
       const appletRoleName = "todo_lists";
       const todoAppletInfo = this.appletAppInfo[0];
       const cellInfo = todoAppletInfo.appInfo.cell_info[appletRoleName][0]
-      const todoCellInfo = (cellInfo as { "Provisioned": Cell }).Provisioned;
+      const todoCellInfo = (cellInfo as { [CellType.Provisioned]: ProvisionedCell }).provisioned;
 
       const maybeAppletConfig = await this.sensemakerStore.checkIfAppletConfigExists(appletConfig.name)
       if (!maybeAppletConfig) {
