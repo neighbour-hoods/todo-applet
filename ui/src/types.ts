@@ -1,5 +1,5 @@
 import { ActionHash, EntryHash } from "@holochain/client"
-import { Assessment } from "@neighbourhoods/sensemaker-lite-types"
+import { Assessment } from "@neighbourhoods/client"
 
 interface Task {
     description: string,

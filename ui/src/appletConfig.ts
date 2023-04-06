@@ -1,4 +1,4 @@
-import { AppletConfigInput, ConfigCulturalContext, ConfigMethod, ConfigResourceType, ConfigThreshold, Dimension, Range } from '@neighbourhoods/sensemaker-lite-types'
+import { AppletConfigInput, ConfigCulturalContext, ConfigDimension, ConfigMethod, ConfigResourceDef, ConfigThreshold, CreateAppletConfigInput, Dimension, Range } from '@neighbourhoods/client'
 
 const importanceRange: Range = {
     "name": "1-scale",
@@ -6,7 +6,7 @@ const importanceRange: Range = {
         "Integer": { "min": 0, "max": 1 }
     }
 }
-const importanceDimension: Dimension = {
+const importanceDimension: ConfigDimension = {
     "name": "importance",
     "range": importanceRange,
     "computed": false
@@ -24,20 +24,20 @@ const totalImportanceDimension = {
     "computed": true
 }
 
-const taskItemResourceType: ConfigResourceType = {
+const taskItemResourceDef: ConfigResourceDef = {
     "name": "task_item",
     "base_types": [{ "entry_index": 0, "zome_index": 0, "visibility": { "Public": null } }],
-    "dimensions": [importanceDimension]
+    "dimensions": [importanceDimension, totalImportanceDimension]
 }
 
 const totalImportanceMethod: ConfigMethod = {
     "name": "total_importance_method",
-    "target_resource_type": taskItemResourceType,
+    "target_resource_def": taskItemResourceDef,
     "input_dimensions": [importanceDimension],
     "output_dimension": totalImportanceDimension,
     "program": { "Sum": null },
     "can_compute_live": false,
-    "must_publish_dataset": false
+    "requires_validation": false
 }
 
 const importanceThreshold: ConfigThreshold = {
@@ -47,16 +47,22 @@ const importanceThreshold: ConfigThreshold = {
 }
 const mostImportantTasksContext: ConfigCulturalContext = {
     "name": "most_important_tasks",
-    "resource_type": taskItemResourceType,
+    "resource_def": taskItemResourceDef,
     "thresholds": [importanceThreshold],
     "order_by": [[totalImportanceDimension, { "Biggest": null }]]
 }
 const appletConfig: AppletConfigInput = {
     "name": "todo_applet",
+    "ranges": [importanceRange, totalImportanceRange],
     "dimensions": [importanceDimension, totalImportanceDimension],
-    "resource_types": [taskItemResourceType],
+    "resource_defs": [taskItemResourceDef],
     "methods": [totalImportanceMethod],
     "cultural_contexts": [mostImportantTasksContext]
 }
 
-export default appletConfig
+const createAppletConfigInput: CreateAppletConfigInput = {
+    "applet_config_input": appletConfig,
+    "role_name": "todo_lists"
+} 
+
+export default createAppletConfigInput

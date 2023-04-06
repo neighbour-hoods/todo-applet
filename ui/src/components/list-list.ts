@@ -9,19 +9,22 @@ import { ListItem } from "./list-item";
 import { AddItem } from "./add-item";
 import { List, ListItem as MWCListItem } from '@scoped-elements/material-web'
 import { AppletConfig } from "../types";
+import { StoreSubscriber } from "lit-svelte-stores";
 
 export class ListList extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: todoStoreContext, subscribe: true })
     @property({attribute: false})
     public  todoStore!: TodoStore
 
+    list = new StoreSubscriber(this, this.todoStore.listLists)
     
     @state()
     listList = html``
-
+    
+    
     render() {
         console.log(get(this.todoStore.listLists()))
-        this.updateListList()
+        // this.updateListList()
         return html`
             <div class="list-list-container">
                 <mwc-list>
@@ -38,7 +41,7 @@ export class ListList extends ScopedElementsMixin(LitElement) {
     }
     async addNewList(e: CustomEvent) {
        await this.todoStore.createNewList(e.detail.newValue)
-        this.updateListList()
+        // this.updateListList()
     }
     updateListList() {
         // TODO: rather than updating the list manually like this, use subscriptions on the svelte store

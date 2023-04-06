@@ -5,8 +5,8 @@ import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 
 import { todoStoreContext, sensemakerStoreContext } from './contexts';
 import { TodoStore } from './todo-store';
-import { SensemakerStore } from '@neighbourhoods/nh-we-applet';
-import { ComputeContextInput } from '@neighbourhoods/sensemaker-lite-types';
+// import { SensemakerStore } from '@neighbourhoods/nh-we-applet';
+import { ComputeContextInput, SensemakerStore } from '@neighbourhoods/client';
 import { ListList, TaskList } from './index'
 import { get } from 'svelte/store';
 

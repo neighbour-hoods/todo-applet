@@ -19,7 +19,7 @@ import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import { get } from 'svelte/store';
 import { TodoStore } from './todo-store';
 import { CreateOrJoinNh } from './create-or-join-nh';
-import { SensemakerService, SensemakerStore } from '@neighbourhoods/nh-we-applet';
+import { SensemakerService, SensemakerStore } from '@neighbourhoods/client';
 import { TodoApp } from './index';
 import appletConfig from './appletConfig'
 
@@ -171,12 +171,16 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     await this._sensemakerStore.checkIfAppletConfigExists("todo_applet")
     const allTaskEntryHashes = get(this._todoStore.allTaskEntryHashes())
     const dimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["importance"]
-    for (const taskEh of allTaskEntryHashes) {
-      await this._sensemakerStore.getAssessmentForResource({
-        dimension_eh: dimensionEh,
-        resource_eh: taskEh
-      })
-    }
+    await this._sensemakerStore.getAssessmentsForResources({
+      dimension_ehs: [dimensionEh],
+      resource_ehs: allTaskEntryHashes
+    })
+    // for (const taskEh of allTaskEntryHashes) {
+    //   await this._sensemakerStore.getAssessmentsForResources({
+    //     dimension_ehs: [dimensionEh],
+    //     resource_ehs: [taskEh]
+    //   })
+    // }
   }
 
   static get scopedElements() {

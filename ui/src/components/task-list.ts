@@ -8,8 +8,8 @@ import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "./add-item";
 import { List } from '@scoped-elements/material-web'
-import { SensemakerStore } from "@neighbourhoods/nh-we-applet";
-import { CreateAssessmentInput } from "@neighbourhoods/sensemaker-lite-types";
+// import { SensemakerStore } from "@neighbourhoods/nh-we-applet";
+import { CreateAssessmentInput, SensemakerStore } from "@neighbourhoods/client";
 import { addMyAssessmentsToTasks } from "../utils";
 
 
@@ -91,8 +91,9 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             // this is one of the main reasons we store the applet config in the sensemaker store, so that we can access
             // the entry hashes we need
             dimension_eh: get(this.sensemakerStore.appletConfig()).dimensions["importance"],
-            subject_eh: e.detail.task.entry_hash,
-            maybe_input_dataSet: null,
+            resource_eh: e.detail.task.entry_hash,
+            resource_def_eh: get(this.sensemakerStore.appletConfig()).resource_defs["task"],
+            maybe_input_dataset: null,
 
         }
         const assessmentEh = await this.sensemakerStore.createAssessment(assessment)

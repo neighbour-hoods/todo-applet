@@ -5,7 +5,7 @@ import { LitElement, html, css } from "lit";
 import { WrappedTaskWithAssessment } from "../types";
 import { Checkbox, ListItem, CheckListItem } from '@scoped-elements/material-web'
 import { sensemakerStoreContext } from "../contexts";
-import { SensemakerStore } from "@neighbourhoods/nh-we-applet";
+import { SensemakerStore } from "@neighbourhoods/client";
 
 export class TaskItem extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: sensemakerStoreContext, subscribe: true })
