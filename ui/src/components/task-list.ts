@@ -8,10 +8,11 @@ import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "./add-item";
 import { List } from '@scoped-elements/material-web'
-import { CreateAssessmentInput, SensemakerStore } from "@neighbourhoods/client";
+import { Assessment, CreateAssessmentInput, RangeValueInteger, SensemakerStore, getLargestAssessment } from "@neighbourhoods/client";
 import { addMyAssessmentsToTasks } from "../utils";
 import { StoreSubscriber } from "lit-svelte-stores";
 import {repeat} from 'lit/directives/repeat.js';
+import { encodeHashToBase64 } from "@holochain/client";
 
 
 // add item at the bottom
@@ -21,7 +22,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     public  todoStore!: TodoStore
 
     @contextProvided({ context: sensemakerStoreContext, subscribe: true })
-    @property({attribute: false})
+    @state()
     public  sensemakerStore!: SensemakerStore
 
     @property()
@@ -33,7 +34,18 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     @state()
     tasks = html``
 
+    /**
+     * component subscribers
+     */
     listTasks = new StoreSubscriber(this, () => this.todoStore.listTasks(this.listName!));
+    // not sure if I can use a reactive value in the subscriber callback
+    // listTasksAssessments = new StoreSubscriber(this, () => this.sensemakerStore.resourceAssessments(this.listTasks?.value?.map((task) => encodeHashToBase64(task.entry_hash))));
+    listTasksAssessments: StoreSubscriber<Record<string, Assessment[]>> | undefined
+
+    firstUpdated() {
+    this.listTasksAssessments = new StoreSubscriber(this, () => this.sensemakerStore.resourceAssessments(this.listTasks?.value?.map((task) => encodeHashToBase64(task.entry_hash))));
+
+    }
 
     render() {
         this.updateTaskList()
@@ -59,14 +71,28 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         list: this.listName!,
     })
     }
+    // TODO: update this function name to be more descriptive/accurate
     updateTaskList() {
         // check if displaying a context or not
         if (this.listName && !this.isContext) {
-            const tasksWithAssessments = addMyAssessmentsToTasks(this.todoStore.myAgentPubKey, this.listTasks.value, get(this.sensemakerStore.resourceAssessments()));
+            const tasksWithAssessments = addMyAssessmentsToTasks(this.todoStore.myAgentPubKey, this.listTasks.value, this.listTasksAssessments ? this.listTasksAssessments.value : {});
             this.tasks = html`
-            ${repeat(tasksWithAssessments, (task) => task.entry_hash, (task, index) => html`
-                <task-item .task=${task} .completed=${('Complete' in task.entry.status)} .taskIsAssessed=${task.assessments != undefined} @toggle-task-status=${this.toggleTaskStatus}  @assess-task-item=${this.assessTaskItem}></task-item> 
-            `)}
+            ${tasksWithAssessments.length > 0 ? repeat(tasksWithAssessments, (task) => task.entry_hash, (task, index) => {
+                const taskTotalImportance = this.listTasksAssessments?.value[encodeHashToBase64(task.entry_hash)]
+                // go through taskTotalImportance, filter to find the assessment with the dimension_eh that matches the importance dimension and return the highest value of matching assessments
+                // add this as a helper to the sensemaker store
+                const taskImportance = taskTotalImportance ? (getLargestAssessment(taskTotalImportance, encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["total_importance"])).value as RangeValueInteger).Integer : 0
+
+                return html`
+                <task-item 
+                    .task=${task} 
+                    .completed=${('Complete' in task.entry.status)} 
+                    .taskIsAssessed=${task.assessments != undefined} 
+                    .totalImportance=${taskImportance}
+                    @toggle-task-status=${this.toggleTaskStatus}  
+                    @assess-task-item=${this.assessTaskItem}
+                ></task-item> 
+            `}) : html``}
             <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
             `
 
@@ -96,10 +122,11 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             // the entry hashes we need
             dimension_eh: get(this.sensemakerStore.appletConfig()).dimensions["importance"],
             resource_eh: e.detail.task.entry_hash,
-            resource_def_eh: get(this.sensemakerStore.appletConfig()).resource_defs["task"],
+            resource_def_eh: get(this.sensemakerStore.appletConfig()).resource_defs["task_item"],
             maybe_input_dataset: null,
 
         }
+        console.log('assessment create input!', assessment)
         const assessmentEh = await this.sensemakerStore.createAssessment(assessment)
         const objectiveAssessmentEh = await this.sensemakerStore.runMethod({
             resource_eh: e.detail.task.entry_hash,

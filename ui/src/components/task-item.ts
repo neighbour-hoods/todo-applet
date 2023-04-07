@@ -23,6 +23,10 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
     @state()
     taskIsAssessed = false
 
+    @property()
+    @state()
+    totalImportance!: number
+
     static styles = css`
           .task-item-container {
             display: flex;
@@ -34,7 +38,7 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
         console.log(this.completed)
         return html`
             <div class="task-item-container">
-            <mwc-check-list-item left ?selected=${this.completed} @click=${this.dispatchToggleStatus}>${this.task.entry.description}</mwc-check-list-item>
+            <mwc-check-list-item left ?selected=${this.completed} @click=${this.dispatchToggleStatus}>${this.task.entry.description} ${this.totalImportance}</mwc-check-list-item>
             <mwc-checkbox ?disabled=${this.taskIsAssessed} ?checked=${this.taskIsAssessed} @click=${this.dispatchAssessTask}></mwc-checkbox>
             </div>
         `
@@ -56,6 +60,7 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
         console.log('clicked!', this.taskIsAssessed)
         if(!this.taskIsAssessed) {
             const task = this.task;
+            console.log('assessed task', task);
             if (task) {
                 const options = {
                     detail: {
