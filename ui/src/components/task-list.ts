@@ -8,15 +8,15 @@ import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "./add-item";
 import { List } from '@scoped-elements/material-web'
-// import { SensemakerStore } from "@neighbourhoods/nh-we-applet";
 import { CreateAssessmentInput, SensemakerStore } from "@neighbourhoods/client";
 import { addMyAssessmentsToTasks } from "../utils";
+import { StoreSubscriber } from "lit-svelte-stores";
 
 
 // add item at the bottom
 export class TaskList extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: todoStoreContext, subscribe: true })
-    @property({attribute: false})
+    @state()
     public  todoStore!: TodoStore
 
     @contextProvided({ context: sensemakerStoreContext, subscribe: true })
@@ -32,8 +32,11 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     @state()
     tasks = html``
 
+    listTasks = new StoreSubscriber(this, () => this.todoStore.listTasks(this.listName!));
+
     render() {
         this.updateTaskList()
+
         if (this.listName || this.isContext) {
             return html`
                 <div class="task-list-container">
@@ -54,12 +57,11 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         task_description: e.detail.newValue,
         list: this.listName!,
     })
-        this.updateTaskList()
     }
     updateTaskList() {
         // check if displaying a context or not
         if (this.listName && !this.isContext) {
-            const tasksWithAssessments = addMyAssessmentsToTasks(this.todoStore.myAgentPubKey, get(this.todoStore.listTasks(this.listName)), get(this.sensemakerStore.resourceAssessments()));
+            const tasksWithAssessments = addMyAssessmentsToTasks(this.todoStore.myAgentPubKey, this.listTasks.value, get(this.sensemakerStore.resourceAssessments()));
             this.tasks = html`
             ${tasksWithAssessments.map((task) => html`
                 <task-item .task=${task} .completed=${('Complete' in task.entry.status)} .taskIsAssessed=${task.assessments != undefined} @toggle-task-status=${this.toggleTaskStatus}  @assess-task-item=${this.assessTaskItem}></task-item> 
@@ -80,7 +82,6 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     }
     async toggleTaskStatus(e: CustomEvent) {
         await this.todoStore.toggleTaskStatus(this.listName!, e.detail.task)
-        this.updateTaskList()
     }
     async assessTaskItem(e: CustomEvent) {
         console.log(e.detail.task)
