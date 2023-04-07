@@ -160,7 +160,6 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   async connectHolochain() {
     this.adminWebsocket = await AdminWebsocket.connect(``);
     this.appWebsocket = await AppWebsocket.connect(``);
-    // comment
     this.appInfo = await this.appWebsocket.appInfo({
       installed_app_id: 'todo',
     });
@@ -170,17 +169,12 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   async updateSensemakerState() {
     await this._sensemakerStore.checkIfAppletConfigExists("todo_applet")
     const allTaskEntryHashes = get(this._todoStore.allTaskEntryHashes())
-    const dimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["importance"]
+    const importanceDimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["importance"]
+    const totalImportanceDimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["total_importance"]
     await this._sensemakerStore.getAssessmentsForResources({
-      dimension_ehs: [dimensionEh],
+      dimension_ehs: [importanceDimensionEh, totalImportanceDimensionEh],
       resource_ehs: allTaskEntryHashes
     })
-    // for (const taskEh of allTaskEntryHashes) {
-    //   await this._sensemakerStore.getAssessmentsForResources({
-    //     dimension_ehs: [dimensionEh],
-    //     resource_ehs: [taskEh]
-    //   })
-    // }
   }
 
   static get scopedElements() {
