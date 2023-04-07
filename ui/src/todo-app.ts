@@ -33,7 +33,6 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
     const taskList = html`
       <task-list listName=${this.activeList} .isContext=${this.contextSelected}></task-list>
     ` 
-
     return html`
       <main>
         <div class="home-page">
