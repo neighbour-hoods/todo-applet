@@ -39,13 +39,11 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
      */
     listTasks = new StoreSubscriber(this, () => this.todoStore.listTasks(this.listName!));
     // not sure if I can use a reactive value in the subscriber callback
-    // listTasksAssessments = new StoreSubscriber(this, () => this.sensemakerStore.resourceAssessments(this.listTasks?.value?.map((task) => encodeHashToBase64(task.entry_hash))));
-    listTasksAssessments: StoreSubscriber<Record<string, Assessment[]>> | undefined
+    // listTasksAssessments = new StoreSubscriber(this, () => this.sensemakerStore.resourceAssessments(this.listTasks.value.map((task) => encodeHashToBase64(task.entry_hash))));
+    
+    // TODO: figure out how to get a more relevent derived store, based on a the list of items, maybe I can use get instead of this.listTasks.value
+    listTasksAssessments = new StoreSubscriber(this, () => this.sensemakerStore.resourceAssessments());
 
-    firstUpdated() {
-    this.listTasksAssessments = new StoreSubscriber(this, () => this.sensemakerStore.resourceAssessments(this.listTasks?.value?.map((task) => encodeHashToBase64(task.entry_hash))));
-
-    }
 
     render() {
         this.updateTaskList()
@@ -79,9 +77,10 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             this.tasks = html`
             ${tasksWithAssessments.length > 0 ? repeat(tasksWithAssessments, (task) => task.entry_hash, (task, index) => {
                 const taskTotalImportance = this.listTasksAssessments?.value[encodeHashToBase64(task.entry_hash)]
-                // go through taskTotalImportance, filter to find the assessment with the dimension_eh that matches the importance dimension and return the highest value of matching assessments
-                // add this as a helper to the sensemaker store
-                const taskImportance = taskTotalImportance ? (getLargestAssessment(taskTotalImportance, encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["total_importance"])).value as RangeValueInteger).Integer : 0
+                const diminsion_eh = encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["total_importance"]);
+                const largestAssessment = taskTotalImportance ? getLargestAssessment(taskTotalImportance, diminsion_eh) : null;
+
+                const taskImportance = largestAssessment ? (largestAssessment.value as RangeValueInteger).Integer : 0;
 
                 return html`
                 <task-item 
@@ -126,7 +125,6 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             maybe_input_dataset: null,
 
         }
-        console.log('assessment create input!', assessment)
         const assessmentEh = await this.sensemakerStore.createAssessment(assessment)
         const objectiveAssessmentEh = await this.sensemakerStore.runMethod({
             resource_eh: e.detail.task.entry_hash,
