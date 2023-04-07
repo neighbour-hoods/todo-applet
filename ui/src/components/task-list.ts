@@ -11,6 +11,7 @@ import { List } from '@scoped-elements/material-web'
 import { CreateAssessmentInput, SensemakerStore } from "@neighbourhoods/client";
 import { addMyAssessmentsToTasks } from "../utils";
 import { StoreSubscriber } from "lit-svelte-stores";
+import {repeat} from 'lit/directives/repeat.js';
 
 
 // add item at the bottom
@@ -63,11 +64,13 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         if (this.listName && !this.isContext) {
             const tasksWithAssessments = addMyAssessmentsToTasks(this.todoStore.myAgentPubKey, this.listTasks.value, get(this.sensemakerStore.resourceAssessments()));
             this.tasks = html`
-            ${tasksWithAssessments.map((task) => html`
+            ${repeat(tasksWithAssessments, (task) => task.entry_hash, (task, index) => html`
                 <task-item .task=${task} .completed=${('Complete' in task.entry.status)} .taskIsAssessed=${task.assessments != undefined} @toggle-task-status=${this.toggleTaskStatus}  @assess-task-item=${this.assessTaskItem}></task-item> 
             `)}
             <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
             `
+
+
             console.log('tasks in list, with assessment', tasksWithAssessments)
         }
         else if (this.isContext) {
