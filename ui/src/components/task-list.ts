@@ -26,9 +26,6 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     public  sensemakerStore!: SensemakerStore
 
     @property()
-    isContext!: boolean
-
-    @property()
     listName: string | undefined
 
     @state()
@@ -48,7 +45,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     render() {
         this.updateTaskList()
 
-        if (this.listName || this.isContext) {
+        if (this.listName) {
             return html`
                 <div class="task-list-container">
                     <mwc-list>
@@ -72,7 +69,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     // TODO: update this function name to be more descriptive/accurate
     updateTaskList() {
         // check if displaying a context or not
-        if (this.listName && !this.isContext) {
+        if (this.listName) {
             const tasksWithAssessments = addMyAssessmentsToTasks(this.todoStore.myAgentPubKey, this.listTasks.value, this.listTasksAssessments ? this.listTasksAssessments.value : {});
             this.tasks = html`
             ${tasksWithAssessments.length > 0 ? repeat(tasksWithAssessments, (task) => task.entry_hash, (task, index) => {
@@ -95,17 +92,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
             `
 
-
             console.log('tasks in list, with assessment', tasksWithAssessments)
-        }
-        else if (this.isContext) {
-            console.log('context result', get(this.sensemakerStore.contextResults()))
-            const tasksInContext = addMyAssessmentsToTasks(this.todoStore.myAgentPubKey, get(this.todoStore.tasksFromEntryHashes(get(this.sensemakerStore.contextResults())["most_important_tasks"])), get(this.sensemakerStore.resourceAssessments()));
-            this.tasks = html`
-            ${tasksInContext.map((task) => html`
-               <task-item .task=${task} .completed=${('Complete' in task.entry.status)} .taskIsAssessed=${task.assessments != undefined} @toggle-task-status=${this.toggleTaskStatus}></task-item> 
-            `)}
-            `
         }
     }
     async toggleTaskStatus(e: CustomEvent) {
