@@ -13,6 +13,7 @@ import { addMyAssessmentsToTasks } from "../utils";
 import { StoreSubscriber } from "lit-svelte-stores";
 import {repeat} from 'lit/directives/repeat.js';
 import { encodeHashToBase64 } from "@holochain/client";
+import { ResourceWrapper } from "./sensemaker/resource-wrapper";
 
 
 // add item at the bottom
@@ -80,14 +81,16 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
                 const taskImportance = largestAssessment ? (largestAssessment.value as RangeValueInteger).Integer : 0;
 
                 return html`
-                <task-item 
-                    .task=${task} 
-                    .completed=${('Complete' in task.entry.status)} 
-                    .taskIsAssessed=${task.assessments != undefined} 
-                    .totalImportance=${taskImportance}
-                    @toggle-task-status=${this.toggleTaskStatus}  
-                    @assess-task-item=${this.assessTaskItem}
-                ></task-item> 
+                <resource-wrapper .resourceEh=${task.entry_hash}>
+                    <task-item 
+                        .task=${task} 
+                        .completed=${('Complete' in task.entry.status)} 
+                        .taskIsAssessed=${task.assessments != undefined} 
+                        .totalImportance=${taskImportance}
+                        @toggle-task-status=${this.toggleTaskStatus}  
+                        @assess-task-item=${this.assessTaskItem}
+                    ></task-item>
+                </resource-wrapper> 
             `}) : html``}
             <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
             `
@@ -125,6 +128,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         'task-item': TaskItem,
         'add-item': AddItem,
         'mwc-list': List,
+        'resource-wrapper': ResourceWrapper,
         };
     }
 }

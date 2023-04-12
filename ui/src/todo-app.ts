@@ -8,8 +8,8 @@ import { TodoStore } from './todo-store';
 import { ComputeContextInput, SensemakerStore } from '@neighbourhoods/client';
 import { ListList, TaskList } from './index'
 import { get } from 'svelte/store';
-import { ContextSelector } from './components/context-selector';
-import { ContextView } from './components/context-view';
+import { ContextSelector } from './components/sensemaker/context-selector';
+import { ContextView } from './components/sensemaker/context-view';
 
 export class TodoApp extends ScopedElementsMixin(LitElement) {
   @contextProvider({ context: todoStoreContext })

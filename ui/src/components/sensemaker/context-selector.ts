@@ -3,11 +3,11 @@ import { contextProvided } from "@lit-labs/context";
 import { property, state, query } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
-import { sensemakerStoreContext, todoStoreContext } from "../contexts";
-import { TodoStore } from "../todo-store";
+import { sensemakerStoreContext, todoStoreContext } from "../../contexts";
+import { TodoStore } from "../../todo-store";
 import { get, writable } from "svelte/store";
-import { ListItem } from "./list-item";
-import { AddItem } from "./add-item";
+import { ListItem } from "../list-item";
+import { AddItem } from "../add-item";
 import { List, ListItem as MWCListItem } from '@scoped-elements/material-web'
 import { StoreSubscriber } from "lit-svelte-stores";
 import { SensemakerStore, AppletConfig } from "@neighbourhoods/client";
