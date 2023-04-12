@@ -4,14 +4,19 @@ import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
 import { Task, WrappedEntry, WrappedTaskWithAssessment } from "../types";
 import { Checkbox, ListItem, CheckListItem } from '@scoped-elements/material-web'
-import { sensemakerStoreContext } from "../contexts";
+import { sensemakerStoreContext, todoStoreContext } from "../contexts";
 import { SensemakerStore } from "@neighbourhoods/client";
+import { TodoStore } from "../todo-store";
 
 export class TaskItem extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: sensemakerStoreContext, subscribe: true })
-    @property({attribute: false})
-    public  sensemakerStore!: SensemakerStore
+    @property({ attribute: false })
+    public sensemakerStore!: SensemakerStore
 
+    @contextProvided({ context: todoStoreContext, subscribe: true })
+    @state()
+    public todoStore!: TodoStore
+    
     @property()
     completed: boolean = false
 
@@ -30,22 +35,18 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
         console.log(this.completed)
         return html`
             <div class="task-item-container">
-            <mwc-check-list-item left ?selected=${this.completed} @click=${this.dispatchToggleStatus}>${this.task.entry.description}</mwc-check-list-item>
+                <mwc-check-list-item 
+                    left 
+                    ?selected=${this.completed} 
+                    @click=${this.toggleTaskStatus}
+                >
+                    ${this.task.entry.description}
+                </mwc-check-list-item>
             </div>
         `
     }
-    dispatchToggleStatus() {
-        const task = this.task;
-        if (task) {
-            const options = {
-                detail: {
-                    task,
-                },
-                bubbles: true,
-                composed: true
-            };
-            this.dispatchEvent(new CustomEvent('toggle-task-status', options))
-        }
+    async toggleTaskStatus() {
+        await this.todoStore.toggleTaskStatus(this.task)
     }
 
     static get scopedElements() {

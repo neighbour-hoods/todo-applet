@@ -78,16 +78,12 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
                     <task-item 
                         .task=${task} 
                         .completed=${('Complete' in task.entry.status)} 
-                        @toggle-task-status=${this.toggleTaskStatus}  
                     ></task-item>
                 </resource-wrapper> 
             `}) : html``}
             <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
             `
         }
-    }
-    async toggleTaskStatus(e: CustomEvent) {
-        await this.todoStore.toggleTaskStatus(this.listName!, e.detail.task)
     }
     static get scopedElements() {
         return {
