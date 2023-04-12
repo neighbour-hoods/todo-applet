@@ -24,13 +24,19 @@ export class ResourceWrapper extends ScopedElementsMixin(LitElement) {
         const total_importance_dimension_eh = get(this.sensemakerStore.appletConfig()).dimensions["total_importance"];
         const importance_dimension_eh = get(this.sensemakerStore.appletConfig()).dimensions["importance"];
         return html`
-            <div>
+            <div class="resource-wrapper">
                 <slot></slot>
+                <display-assessment .resourceEh=${this.resourceEh} .dimensionEh=${total_importance_dimension_eh}></display-assessment>
+                <assess-resource .resourceEh=${this.resourceEh} .dimensionEh=${importance_dimension_eh}></assess-resource>
             </div>
-            <display-assessment .resourceEh=${this.resourceEh} .dimensionEh=${total_importance_dimension_eh}></display-assessment>
-            <assess-resource .resourceEh=${this.resourceEh} .dimensionEh=${importance_dimension_eh}></assess-resource>
         `
     }
+    static styles = css`
+          .resource-wrapper {
+            display: flex;
+            flex-direction: row;
+          }
+        `;
     static get scopedElements() {
         return {
             'display-assessment': DisplayAssessment,
