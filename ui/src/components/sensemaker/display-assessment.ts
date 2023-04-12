@@ -27,7 +27,7 @@ export class DisplayAssessment extends ScopedElementsMixin(LitElement) {
         const taskImportance = largestAssessment ? (largestAssessment.value as RangeValueInteger).Integer : 0;
         return html`
             <div>
-                ${taskImportance}
+                (${taskImportance})
             </div>
         `
     }
