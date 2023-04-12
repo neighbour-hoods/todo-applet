@@ -13,6 +13,7 @@ import { addMyAssessmentsToTasks } from "../../utils";
 import { StoreSubscriber } from "lit-svelte-stores";
 import { repeat } from 'lit/directives/repeat.js';
 import { encodeHashToBase64 } from "@holochain/client";
+import { ResourceWrapper } from "./resource-wrapper";
 
 
 // add item at the bottom
@@ -28,12 +29,17 @@ export class ContextView extends ScopedElementsMixin(LitElement) {
     @property()
     contextName!: string;
 
+    tasksInContext = new StoreSubscriber(this, () => this.todoStore.tasksFromEntryHashes(get(this.sensemakerStore.contextResults())[this.contextName]));
     render() {
-        console.log('context result', get(this.sensemakerStore.contextResults()))
-        const tasksInContext = addMyAssessmentsToTasks(this.todoStore.myAgentPubKey, get(this.todoStore.tasksFromEntryHashes(get(this.sensemakerStore.contextResults())["most_important_tasks"])), get(this.sensemakerStore.resourceAssessments()));
+        // consider using `repeat()` instead of `map()`
         return html`
-            ${tasksInContext.map((task) => html`
-                <task-item .task=${task} .completed=${('Complete' in task.entry.status)} .taskIsAssessed=${task.assessments != undefined}></task-item> 
+            ${this.tasksInContext.value.map((task) => html`
+                <resource-wrapper .resourceEh=${task.entry_hash}>
+                    <task-item 
+                        .task=${task} 
+                        .completed=${('Complete' in task.entry.status)} 
+                    ></task-item>
+                </resource-wrapper>
             `)}
         `
     }
@@ -42,6 +48,7 @@ export class ContextView extends ScopedElementsMixin(LitElement) {
             'task-item': TaskItem,
             'add-item': AddItem,
             'mwc-list': List,
+            'resource-wrapper': ResourceWrapper,
         };
     }
 }
