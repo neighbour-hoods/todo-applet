@@ -6,7 +6,9 @@ import { WrappedTaskWithAssessment } from "../../types";
 import { Checkbox, ListItem, CheckListItem } from '@scoped-elements/material-web'
 import { sensemakerStoreContext, todoStoreContext } from "../../contexts";
 import { SensemakerStore } from "@neighbourhoods/client";
-import { EntryHash } from "@holochain/client";
+import { EntryHash, encodeHashToBase64 } from "@holochain/client";
+import { DisplayAssessment } from "./display-assessment";
+import { get } from "svelte/store";
 
 export class ResourceWrapper extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: sensemakerStoreContext, subscribe: true })
@@ -17,14 +19,18 @@ export class ResourceWrapper extends ScopedElementsMixin(LitElement) {
     resourceEh!: EntryHash
 
     render() {
+
+        const diminsion_eh = get(this.sensemakerStore.appletConfig()).dimensions["total_importance"];
         return html`
             <div>
                 <slot></slot>
             </div>
+            <display-assessment .resourceEh=${this.resourceEh} .dimensionEh=${diminsion_eh}></display-assessment>
         `
     }
     static get scopedElements() {
         return {
+            'display-assessment': DisplayAssessment,
         }
     }
 }
