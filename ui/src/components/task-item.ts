@@ -2,7 +2,7 @@ import { contextProvided } from "@lit-labs/context";
 import { property, state } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
-import { WrappedTaskWithAssessment } from "../types";
+import { Task, WrappedEntry, WrappedTaskWithAssessment } from "../types";
 import { Checkbox, ListItem, CheckListItem } from '@scoped-elements/material-web'
 import { sensemakerStoreContext } from "../contexts";
 import { SensemakerStore } from "@neighbourhoods/client";
@@ -17,15 +17,7 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
 
     @property()
     @state()
-    task!: WrappedTaskWithAssessment
-
-    @property()
-    @state()
-    taskIsAssessed = false
-
-    @property()
-    @state()
-    totalImportance!: number
+    task!: WrappedEntry<Task>
 
     static styles = css`
           .task-item-container {
@@ -38,8 +30,7 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
         console.log(this.completed)
         return html`
             <div class="task-item-container">
-            <mwc-check-list-item left ?selected=${this.completed} @click=${this.dispatchToggleStatus}>${this.task.entry.description} ${this.totalImportance}</mwc-check-list-item>
-            <mwc-checkbox ?disabled=${this.taskIsAssessed} ?checked=${this.taskIsAssessed} @click=${this.dispatchAssessTask}></mwc-checkbox>
+            <mwc-check-list-item left ?selected=${this.completed} @click=${this.dispatchToggleStatus}>${this.task.entry.description}</mwc-check-list-item>
             </div>
         `
     }
@@ -54,24 +45,6 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
                 composed: true
             };
             this.dispatchEvent(new CustomEvent('toggle-task-status', options))
-        }
-    }
-    dispatchAssessTask() {
-        console.log('clicked!', this.taskIsAssessed)
-        if(!this.taskIsAssessed) {
-            const task = this.task;
-            console.log('assessed task', task);
-            if (task) {
-                const options = {
-                    detail: {
-                        task,
-                    },
-                    bubbles: true,
-                    composed: true
-                };
-                this.dispatchEvent(new CustomEvent('assess-task-item', options))
-            }
-            this.taskIsAssessed = !this.taskIsAssessed
         }
     }
 
