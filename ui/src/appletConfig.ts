@@ -79,7 +79,7 @@ const importanceThreshold: ConfigThreshold = {
 const heatThreshold: ConfigThreshold = {
     "dimension": totalHeatDimension,
     "kind": { "GreaterThan": null },
-    "value": { "Integer": 3 }
+    "value": { "Integer": 2 }
 }
 
 // ==========CULTURAL CONTEXTS==========
