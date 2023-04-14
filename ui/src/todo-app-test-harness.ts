@@ -171,8 +171,10 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     const allTaskEntryHashes = get(this._todoStore.allTaskEntryHashes())
     const importanceDimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["importance"]
     const totalImportanceDimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["total_importance"]
+    const perceivedHeatDimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["perceived_heat"]
+    const averageHeatDimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["average_heat"]
     await this._sensemakerStore.getAssessmentsForResources({
-      dimension_ehs: [importanceDimensionEh, totalImportanceDimensionEh],
+      dimension_ehs: [importanceDimensionEh, totalImportanceDimensionEh, perceivedHeatDimensionEh, averageHeatDimensionEh],
       resource_ehs: allTaskEntryHashes
     })
     
