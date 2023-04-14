@@ -74,7 +74,10 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             this.tasks = html`
             ${tasks.length > 0 ? repeat(tasks, (task) => task.entry_hash, (task, index) => {
                 return html`
-                <resource-wrapper .resourceEh=${task.entry_hash}>
+                <resource-wrapper 
+                    .resourceEh=${task.entry_hash} 
+                    .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
+                >
                     <task-item 
                         .task=${task} 
                         .completed=${('Complete' in task.entry.status)} 

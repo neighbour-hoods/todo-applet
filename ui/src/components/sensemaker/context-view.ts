@@ -34,7 +34,10 @@ export class ContextView extends ScopedElementsMixin(LitElement) {
         // consider using `repeat()` instead of `map()`
         return html`
             ${this.tasksInContext.value.map((task) => html`
-                <resource-wrapper .resourceEh=${task.entry_hash}>
+                <resource-wrapper 
+                    .resourceEh=${task.entry_hash} 
+                    .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
+                >
                     <task-item 
                         .task=${task} 
                         .completed=${('Complete' in task.entry.status)} 

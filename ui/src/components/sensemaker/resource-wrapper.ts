@@ -10,6 +10,7 @@ import { EntryHash, encodeHashToBase64 } from "@holochain/client";
 import { DisplayAssessment } from "./display-assessment";
 import { get } from "svelte/store";
 import { AssessResource } from "./assess-resource";
+import { StoreSubscriber } from "lit-svelte-stores";
 
 export class ResourceWrapper extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: sensemakerStoreContext, subscribe: true })
@@ -19,15 +20,17 @@ export class ResourceWrapper extends ScopedElementsMixin(LitElement) {
     @property()
     resourceEh!: EntryHash
 
-    render() {
+    @property()
+    resourceDefEh!: EntryHash
 
-        const total_importance_dimension_eh = get(this.sensemakerStore.appletConfig()).dimensions["total_importance"];
-        const importance_dimension_eh = get(this.sensemakerStore.appletConfig()).dimensions["importance"];
+    appletUIConfig = new StoreSubscriber(this, () => this.sensemakerStore.appletUIConfig())
+
+    render() {
         return html`
             <div class="resource-wrapper">
                 <slot></slot>
-                <display-assessment .resourceEh=${this.resourceEh} .dimensionEh=${total_importance_dimension_eh}></display-assessment>
-                <assess-resource .resourceEh=${this.resourceEh} .dimensionEh=${importance_dimension_eh}></assess-resource>
+                <display-assessment .resourceEh=${this.resourceEh} .dimensionEh=${this.appletUIConfig.value[encodeHashToBase64(this.resourceDefEh)].display_objective_dimension}></display-assessment>
+                <assess-resource .resourceEh=${this.resourceEh} .dimensionEh=${this.appletUIConfig.value[encodeHashToBase64(this.resourceDefEh)].create_assessment_dimension}></assess-resource>
             </div>
         `
     }

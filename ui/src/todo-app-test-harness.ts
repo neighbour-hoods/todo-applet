@@ -124,6 +124,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   async createNeighbourhood(_e: CustomEvent) {
     await this.cloneSensemakerCell(this.agentPubkey)
     const _todoConfig = await this._sensemakerStore.registerApplet(appletConfig);
+    await this._sensemakerStore.updateAppletUIConfig(encodeHashToBase64(_todoConfig.resource_defs["task_item"]), _todoConfig.dimensions["total_importance"], _todoConfig.dimensions["importance"])
     await this.updateSensemakerState()
     this.loading = false;
   }
@@ -133,6 +134,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     // wait some time for the dht to sync, otherwise checkIfAppletConfigExists returns null
     setTimeout(async () => {
       const _todoConfig = await this._sensemakerStore.checkIfAppletConfigExists("todo_applet")
+      await this._sensemakerStore.updateAppletUIConfig(encodeHashToBase64(_todoConfig!.resource_defs["task_item"]), _todoConfig!.dimensions["total_importance"], _todoConfig!.dimensions["importance"])
       await this.updateSensemakerState()
       this.loading = false;
     }, 2000)
