@@ -10,7 +10,7 @@ const importanceRange: Range = {
 const perceivedHeatRange: Range = {
     "name": "perceived_heat_range",
     "kind": {
-        "Integer": { "min": 0, "max": 10 }
+        "Integer": { "min": 0, "max": 4 }
     }
 }
 const totalImportanceRange: Range = {
@@ -79,7 +79,7 @@ const importanceThreshold: ConfigThreshold = {
 const heatThreshold: ConfigThreshold = {
     "dimension": totalHeatDimension,
     "kind": { "GreaterThan": null },
-    "value": { "Integer": 5 }
+    "value": { "Integer": 3 }
 }
 
 // ==========CULTURAL CONTEXTS==========

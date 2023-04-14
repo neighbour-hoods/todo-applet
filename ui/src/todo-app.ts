@@ -82,11 +82,13 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
   }
 
   toggleDefaultUISettings() {
+    console.log('method eh when toggle', get(this.sensemakerStore.appletConfig()).methods["average_heat_method"])
     if (this.defaultUISettings) {
       this.sensemakerStore.updateAppletUIConfig(
         encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]),
         get(this.sensemakerStore.appletConfig()).dimensions["average_heat"],
         get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"],
+        get(this.sensemakerStore.appletConfig()).methods["average_heat_method"],
       )
     }
     else {
@@ -94,6 +96,7 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
         encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]),
         get(this.sensemakerStore.appletConfig()).dimensions["total_importance"],
         get(this.sensemakerStore.appletConfig()).dimensions["importance"],
+        get(this.sensemakerStore.appletConfig()).methods["total_importance_method"],
       )
     }
     this.defaultUISettings = !this.defaultUISettings;

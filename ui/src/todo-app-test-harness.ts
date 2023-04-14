@@ -175,10 +175,13 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       dimension_ehs: [importanceDimensionEh, totalImportanceDimensionEh],
       resource_ehs: allTaskEntryHashes
     })
+    
+    // initialize the default UI settings
     await this._sensemakerStore.updateAppletUIConfig(
       encodeHashToBase64(get(this._sensemakerStore.appletConfig()).resource_defs["task_item"]), 
       get(this._sensemakerStore.appletConfig()).dimensions["total_importance"], 
-      get(this._sensemakerStore.appletConfig()).dimensions["importance"]
+      get(this._sensemakerStore.appletConfig()).dimensions["importance"],
+      get(this._sensemakerStore.appletConfig()).methods["total_importance_method"],
     )
   }
 

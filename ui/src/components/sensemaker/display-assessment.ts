@@ -38,16 +38,16 @@ export class DisplayAssessment extends ScopedElementsMixin(LitElement) {
             }
             case get(this.sensemakerStore.appletConfig()).dimensions["average_heat"]: {
                 let emoji = "🧊";
-                if (latestAssessmentValue > 7) {
+                if (latestAssessmentValue > 3) {
                     emoji = "🔥";
                 }
-                else if (latestAssessmentValue > 5) {
+                else if (latestAssessmentValue > 2) {
                     emoji = "🌶️";
                 }
-                else if (latestAssessmentValue > 3) {
+                else if (latestAssessmentValue > 1) {
                     emoji = "💧";
                 }
-                else if (latestAssessmentValue > 1) {
+                else if (latestAssessmentValue > 0) {
                     emoji = "❄️";
                 }
                 else {

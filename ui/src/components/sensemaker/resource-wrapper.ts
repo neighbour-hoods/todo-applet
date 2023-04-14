@@ -30,7 +30,11 @@ export class ResourceWrapper extends ScopedElementsMixin(LitElement) {
             <div class="resource-wrapper">
                 <slot></slot>
                 <display-assessment .resourceEh=${this.resourceEh} .dimensionEh=${this.appletUIConfig.value[encodeHashToBase64(this.resourceDefEh)].display_objective_dimension}></display-assessment>
-                <assess-resource .resourceEh=${this.resourceEh} .dimensionEh=${this.appletUIConfig.value[encodeHashToBase64(this.resourceDefEh)].create_assessment_dimension}></assess-resource>
+                <assess-resource 
+                    .resourceEh=${this.resourceEh} 
+                    .resourceDefEh=${this.resourceDefEh}
+                    .dimensionEh=${this.appletUIConfig.value[encodeHashToBase64(this.resourceDefEh)].create_assessment_dimension}
+                ></assess-resource>
             </div>
         `
     }
