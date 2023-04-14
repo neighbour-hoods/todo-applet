@@ -31,13 +31,30 @@ export class AssessResource extends ScopedElementsMixin(LitElement) {
         
         console.log('resourceAssessments', resourceAssessments);
         const myResourceAssessmentsAlongDimension = resourceAssessments ? resourceAssessments.filter(assessment => {
-            return encodeHashToBase64(assessment.author) === encodeHashToBase64(this.sensemakerStore.myAgentPubKey) 
+            return (encodeHashToBase64(assessment.author) === encodeHashToBase64(this.sensemakerStore.myAgentPubKey) && encodeHashToBase64(assessment.dimension_eh) === encodeHashToBase64(this.dimensionEh))
         }) : [];
         console.log('myResourceAssessmentsAlongDimension', myResourceAssessmentsAlongDimension)
         this.isAssessedByMe = myResourceAssessmentsAlongDimension.length > 0 ? true : false;
-        return html`
-            <mwc-checkbox ?disabled=${this.isAssessedByMe} ?checked=${this.isAssessedByMe} @click=${this.createAssessmet}></mwc-checkbox>
-        `
+        switch (this.dimensionEh) {
+            case get(this.sensemakerStore.appletConfig()).dimensions["importance"]: {
+                return html`
+                    <mwc-checkbox 
+                        ?disabled=${this.isAssessedByMe} 
+                        ?checked=${this.isAssessedByMe} 
+                        @click=${this.createAssessmet}
+                    ></mwc-checkbox>
+                `
+            }
+            case get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]: {
+                return html`
+                    <div @click=${() => {}}>🧊</div>
+                    <div @click=${() => {}}>❄️</div>
+                    <div @click=${() => {}}>💧</div>
+                    <div @click=${() => {}}>🌶️</div>
+                    <div @click=${() => {}}>🔥</div>
+                `
+            }
+        }
     }
 
     static get scopedElements() {

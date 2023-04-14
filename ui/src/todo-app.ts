@@ -10,6 +10,8 @@ import { ListList, TaskList } from './index'
 import { get } from 'svelte/store';
 import { ContextSelector } from './components/sensemaker/context-selector';
 import { ContextView } from './components/sensemaker/context-view';
+import { Checkbox } from '@scoped-elements/material-web'
+import { encodeHashToBase64 } from '@holochain/client';
 
 export class TodoApp extends ScopedElementsMixin(LitElement) {
   @contextProvider({ context: todoStoreContext })
@@ -25,6 +27,9 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
 
   @state()
   activeContext: string | undefined
+
+  @state()
+  defaultUISettings = true
 
   async firstUpdated() {
   }
@@ -43,6 +48,7 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
     return html`
       <main>
         <div class="home-page">
+          <mwc-checkbox @click=${this.toggleDefaultUISettings}></mwc-checkbox>
           <div class="view-selectors">
             <context-selector @list-selected=${this.computeContext}></context-selector>
             <list-list @list-selected=${this.updateActiveList}></list-list>
@@ -75,12 +81,31 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
     this.activeContext = selectedContextName;
   }
 
+  toggleDefaultUISettings() {
+    if (this.defaultUISettings) {
+      this.sensemakerStore.updateAppletUIConfig(
+        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]),
+        get(this.sensemakerStore.appletConfig()).dimensions["average_heat"],
+        get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"],
+      )
+    }
+    else {
+      this.sensemakerStore.updateAppletUIConfig(
+        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]),
+        get(this.sensemakerStore.appletConfig()).dimensions["total_importance"],
+        get(this.sensemakerStore.appletConfig()).dimensions["importance"],
+      )
+    }
+    this.defaultUISettings = !this.defaultUISettings;
+  }
+
   static get scopedElements() {
     return {
       'list-list': ListList,
       'task-list': TaskList,
       'context-selector': ContextSelector,
       'context-view': ContextView,
+      'mwc-checkbox': Checkbox,
     };
   }
 

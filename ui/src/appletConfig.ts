@@ -38,7 +38,7 @@ const totalImportanceDimension = {
     "computed": true
 }
 const totalHeatDimension = {
-    "name": "total_heat",
+    "name": "average_heat",
     "range": perceivedHeatRange,
     "computed": true
 }
@@ -61,7 +61,7 @@ const totalImportanceMethod: ConfigMethod = {
     "requires_validation": false
 }
 const totalHeatMethod: ConfigMethod = {
-    "name": "total_heat_method",
+    "name": "average_heat_method",
     "target_resource_def": taskItemResourceDef,
     "input_dimensions": [perceivedHeatDimension],
     "output_dimension": totalHeatDimension,
