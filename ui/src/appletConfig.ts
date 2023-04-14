@@ -37,7 +37,7 @@ const totalImportanceDimension = {
     "range": totalImportanceRange,
     "computed": true
 }
-const totalHeatDimension = {
+const averageHeatDimension = {
     "name": "average_heat",
     "range": perceivedHeatRange,
     "computed": true
@@ -47,7 +47,7 @@ const totalHeatDimension = {
 const taskItemResourceDef: ConfigResourceDef = {
     "name": "task_item",
     "base_types": [{ "entry_index": 0, "zome_index": 0, "visibility": { "Public": null } }],
-    "dimensions": [importanceDimension, totalImportanceDimension, perceivedHeatDimension, totalHeatDimension]
+    "dimensions": [importanceDimension, totalImportanceDimension, perceivedHeatDimension, averageHeatDimension]
 }
 
 // ==========METHODS==========
@@ -64,7 +64,7 @@ const totalHeatMethod: ConfigMethod = {
     "name": "average_heat_method",
     "target_resource_def": taskItemResourceDef,
     "input_dimensions": [perceivedHeatDimension],
-    "output_dimension": totalHeatDimension,
+    "output_dimension": averageHeatDimension,
     "program": { "Average": null },
     "can_compute_live": false,
     "requires_validation": false
@@ -77,7 +77,7 @@ const importanceThreshold: ConfigThreshold = {
     "value": { "Integer": 0 }
 }
 const heatThreshold: ConfigThreshold = {
-    "dimension": totalHeatDimension,
+    "dimension": averageHeatDimension,
     "kind": { "GreaterThan": null },
     "value": { "Integer": 2 }
 }
@@ -93,14 +93,14 @@ const hottestTasksContext: ConfigCulturalContext = {
     "name": "hottest_tasks 🔥 🌶️",
     "resource_def": taskItemResourceDef,
     "thresholds": [heatThreshold],
-    "order_by": [[totalHeatDimension, { "Biggest": null }]]
+    "order_by": [[averageHeatDimension, { "Biggest": null }]]
 }
 
 // ==========APPLET CONFIG==========
 const appletConfig: AppletConfigInput = {
     "name": "todo_applet",
     "ranges": [importanceRange, totalImportanceRange, perceivedHeatRange],
-    "dimensions": [importanceDimension, totalImportanceDimension, perceivedHeatDimension, totalHeatDimension],
+    "dimensions": [importanceDimension, totalImportanceDimension, perceivedHeatDimension, averageHeatDimension],
     "resource_defs": [taskItemResourceDef],
     "methods": [totalImportanceMethod, totalHeatMethod],
     "cultural_contexts": [mostImportantTasksContext, hottestTasksContext]
