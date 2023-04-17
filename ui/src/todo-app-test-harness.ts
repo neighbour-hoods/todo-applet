@@ -21,7 +21,7 @@ import { TodoStore } from './todo-store';
 import { CreateOrJoinNh } from './create-or-join-nh';
 import { SensemakerService, SensemakerStore } from '@neighbourhoods/client';
 import { TodoApp } from './index';
-import appletConfig from './appletConfig'
+import { appletConfig } from './appletConfig'
 
 @customElement('todo-app-test-harness')
 export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {

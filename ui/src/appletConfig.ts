@@ -97,7 +97,7 @@ const hottestTasksContext: ConfigCulturalContext = {
 }
 
 // ==========APPLET CONFIG==========
-const appletConfig: AppletConfigInput = {
+const appletConfigInput: AppletConfigInput = {
     "name": "todo_applet",
     "ranges": [importanceRange, totalImportanceRange, perceivedHeatRange],
     "dimensions": [importanceDimension, totalImportanceDimension, perceivedHeatDimension, averageHeatDimension],
@@ -106,9 +106,9 @@ const appletConfig: AppletConfigInput = {
     "cultural_contexts": [mostImportantTasksContext, hottestTasksContext]
 }
 
-const createAppletConfigInput: CreateAppletConfigInput = {
-    "applet_config_input": appletConfig,
+const appletConfig: CreateAppletConfigInput = {
+    "applet_config_input": appletConfigInput,
     "role_name": "todo_lists"
 } 
 
-export default createAppletConfigInput
+export  { appletConfig }
