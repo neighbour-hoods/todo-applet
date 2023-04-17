@@ -2,10 +2,10 @@ import { property, state } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { CircularProgress } from "@scoped-elements/material-web";
 import { LitElement, html, css } from "lit";
-import { AppletInfo, SensemakerStore } from "@neighbourhoods/nh-we-applet";
-import { TodoApp, TodoStore } from "@neighbourhoods/todo-applet";
-import appletConfig from './appletConfig';
+import { AppletInfo } from "@neighbourhoods/nh-launcher-applet";
+import { TodoApp, TodoStore, appletConfig } from "@neighbourhoods/todo-applet";
 import { AppWebsocket, CellType, ProvisionedCell } from "@holochain/client";
+import { SensemakerStore } from "@neighbourhoods/client";
 
 export class TodoApplet extends ScopedElementsMixin(LitElement) {
   @property()
@@ -30,7 +30,7 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
       const cellInfo = todoAppletInfo.appInfo.cell_info[appletRoleName][0]
       const todoCellInfo = (cellInfo as { [CellType.Provisioned]: ProvisionedCell }).provisioned;
 
-      const maybeAppletConfig = await this.sensemakerStore.checkIfAppletConfigExists(appletConfig.name)
+      const maybeAppletConfig = await this.sensemakerStore.checkIfAppletConfigExists(appletConfig.applet_config_input.name)
       if (!maybeAppletConfig) {
         await this.sensemakerStore.registerApplet(appletConfig)
       }

@@ -3,14 +3,14 @@ import {
   AppWebsocket,
 } from "@holochain/client";
 import {
-  WeApplet,
+  NhLauncherApplet,
   AppletRenderers,
   WeServices,
   AppletInfo,
-} from "@neighbourhoods/nh-we-applet";
+} from "@neighbourhoods/nh-launcher-applet";
 import { TodoApplet } from "./todo-applet";
 
-const todoApplet: WeApplet = {
+const todoApplet: NhLauncherApplet = {
   async appletRenderers(
     appWebsocket: AppWebsocket,
     adminWebsocket: AdminWebsocket,
