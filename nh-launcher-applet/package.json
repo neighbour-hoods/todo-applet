@@ -1,5 +1,5 @@
 {
-  "name": "we-applet",
+  "name": "nh-launcher-applet",
   "version": "0.0.1",
   "scripts": {
     "start": "npm run build:happ && cross-env HC_PORT=$(port) ADMIN_PORT=$(port) concurrently \"npm run start:happ\" \"npm run start:ui\"",
