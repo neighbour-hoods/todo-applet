@@ -4,8 +4,9 @@ import { CircularProgress } from "@scoped-elements/material-web";
 import { LitElement, html, css } from "lit";
 import { AppletInfo } from "@neighbourhoods/nh-launcher-applet";
 import { TodoApp, TodoStore, appletConfig } from "@neighbourhoods/todo-applet";
-import { AppWebsocket, CellType, ProvisionedCell } from "@holochain/client";
+import { AppWebsocket, CellType, ProvisionedCell, encodeHashToBase64 } from "@holochain/client";
 import { SensemakerStore } from "@neighbourhoods/client";
+import { get } from 'svelte/store';
 
 export class TodoApplet extends ScopedElementsMixin(LitElement) {
   @property()
@@ -35,6 +36,12 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
         await this.sensemakerStore.registerApplet(appletConfig)
       }
 
+      await this.sensemakerStore.updateAppletUIConfig(
+        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]), 
+        get(this.sensemakerStore.appletConfig()).dimensions["total_importance"], 
+        get(this.sensemakerStore.appletConfig()).dimensions["importance"],
+        get(this.sensemakerStore.appletConfig()).methods["total_importance_method"],
+      )
       const appWs = await AppWebsocket.connect(this.appWebsocket.client.socket.url)
       this.todoStore = new TodoStore(
         appWs,
@@ -42,6 +49,15 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
         appletRoleName
       );
       const allTasks = await this.todoStore.fetchAllTasks()
+      const allTaskEntryHashes = get(this.todoStore.allTaskEntryHashes())
+      const importanceDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["importance"]
+      const totalImportanceDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["total_importance"]
+      const perceivedHeatDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]
+      const averageHeatDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["average_heat"]
+      await this.sensemakerStore.getAssessmentsForResources({
+      dimension_ehs: [importanceDimensionEh, totalImportanceDimensionEh, perceivedHeatDimensionEh, averageHeatDimensionEh],
+      resource_ehs: allTaskEntryHashes
+    })
       this.loaded = true;
     }
     catch (e) {
