@@ -1,7 +1,7 @@
 import { createContext } from '@lit-labs/context';
 import { AdminWebsocket, AppWebsocket, EntryHash, AppInfo } from '@holochain/client';
 import { TodoStore } from './todo-store';
-import { SensemakerStore } from '@neighbourhoods/nh-we-applet';
+import { SensemakerStore } from '@neighbourhoods/client';
 
 export const appWebsocketContext = createContext<AppWebsocket>('appWebsocket');
 export const adminWebsocketContext = createContext<AdminWebsocket>('adminWebsocket');

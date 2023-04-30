@@ -1,38 +1,38 @@
+
 import { contextProvided } from "@lit-labs/context";
 import { property, state, query } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css } from "lit";
-import { todoStoreContext } from "../contexts";
-import { TodoStore } from "../todo-store";
+import { sensemakerStoreContext, todoStoreContext } from "../../contexts";
+import { TodoStore } from "../../todo-store";
 import { get, writable } from "svelte/store";
-import { ListItem } from "./list-item";
-import { AddItem } from "./add-item";
+import { ListItem } from "../list-item";
+import { AddItem } from "../add-item";
 import { List, ListItem as MWCListItem } from '@scoped-elements/material-web'
-import { AppletConfig } from "../types";
 import { StoreSubscriber } from "lit-svelte-stores";
+import { SensemakerStore, AppletConfig } from "@neighbourhoods/client";
 
-export class ListList extends ScopedElementsMixin(LitElement) {
-    @contextProvided({ context: todoStoreContext, subscribe: true })
+export class ContextSelector extends ScopedElementsMixin(LitElement) {
+    @contextProvided({ context: sensemakerStoreContext, subscribe: true })
     @state()
-    public  todoStore!: TodoStore
+    public  sensemakerStore!: SensemakerStore
 
-    lists: StoreSubscriber<string[]> = new StoreSubscriber(this, () => this.todoStore.listLists());
+    contexts: StoreSubscriber<AppletConfig> = new StoreSubscriber(this, () => this.sensemakerStore.appletConfig());
 
     render() {
         return html`
             <div class="list-list-container">
                 <mwc-list>
-                    ${this.lists?.value?.map((listName) => html`
-                        <list-item listName=${listName}></list-item> 
+                    ${Object.keys(this.contexts?.value?.cultural_contexts).map((contextName) => html`
+                        <list-item listName=${contextName}></list-item> 
                     `)}
-                    <add-item itemType="list" @new-item=${this.addNewList}></add-item>
                 <mwc-list>
             </div>
         `
     }
 
-    async addNewList(e: CustomEvent) {
-       await this.todoStore.createNewList(e.detail.newValue)
+    dispatchContextSelected() {
+        this.dispatchEvent(new CustomEvent('context-selected'))
     }
     
     static get scopedElements() {

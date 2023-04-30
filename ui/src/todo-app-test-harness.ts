@@ -19,9 +19,9 @@ import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import { get } from 'svelte/store';
 import { TodoStore } from './todo-store';
 import { CreateOrJoinNh } from './create-or-join-nh';
-import { SensemakerService, SensemakerStore } from '@neighbourhoods/nh-we-applet';
+import { SensemakerService, SensemakerStore } from '@neighbourhoods/client';
 import { TodoApp } from './index';
-import appletConfig from './appletConfig'
+import { appletConfig } from './appletConfig'
 
 @customElement('todo-app-test-harness')
 export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
@@ -160,7 +160,6 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   async connectHolochain() {
     this.adminWebsocket = await AdminWebsocket.connect(``);
     this.appWebsocket = await AppWebsocket.connect(``);
-    // comment
     this.appInfo = await this.appWebsocket.appInfo({
       installed_app_id: 'todo',
     });
@@ -170,13 +169,22 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
   async updateSensemakerState() {
     await this._sensemakerStore.checkIfAppletConfigExists("todo_applet")
     const allTaskEntryHashes = get(this._todoStore.allTaskEntryHashes())
-    const dimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["importance"]
-    for (const taskEh of allTaskEntryHashes) {
-      await this._sensemakerStore.getAssessmentForResource({
-        dimension_eh: dimensionEh,
-        resource_eh: taskEh
-      })
-    }
+    const importanceDimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["importance"]
+    const totalImportanceDimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["total_importance"]
+    const perceivedHeatDimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["perceived_heat"]
+    const averageHeatDimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["average_heat"]
+    await this._sensemakerStore.getAssessmentsForResources({
+      dimension_ehs: [importanceDimensionEh, totalImportanceDimensionEh, perceivedHeatDimensionEh, averageHeatDimensionEh],
+      resource_ehs: allTaskEntryHashes
+    })
+    
+    // initialize the default UI settings
+    await this._sensemakerStore.updateAppletUIConfig(
+      encodeHashToBase64(get(this._sensemakerStore.appletConfig()).resource_defs["task_item"]), 
+      get(this._sensemakerStore.appletConfig()).dimensions["total_importance"], 
+      get(this._sensemakerStore.appletConfig()).dimensions["importance"],
+      get(this._sensemakerStore.appletConfig()).methods["total_importance_method"],
+    )
   }
 
   static get scopedElements() {

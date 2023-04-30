@@ -93,7 +93,7 @@ export class TodoStore {
     });
   }
 
-  async toggleTaskStatus(listName: string, wrappedTask: WrappedEntry<Task>) {
+  async toggleTaskStatus(wrappedTask: WrappedEntry<Task>) {
     let updatedTask = wrappedTask;
     if(('Complete' in wrappedTask.entry.status)) {
       await this.service.uncompleteTask(wrappedTask.action_hash);
@@ -104,9 +104,15 @@ export class TodoStore {
       updatedTask.entry.status = { Complete: null };
     }
     this.#tasksInLists.update(lists => {
-      let updatedTaskInList = lists[listName].filter(({ action_hash: taskActionHash, entry: taskItem}) => encodeHashToBase64(taskActionHash) != encodeHashToBase64(wrappedTask.action_hash));
-      updatedTaskInList.push(updatedTask);
-      lists[listName] = updatedTaskInList;
+      // find which list the task is in and update it
+      Object.keys(lists).map(list => {
+        lists[list].map(task => {
+          if(encodeHashToBase64(task.action_hash) == encodeHashToBase64(wrappedTask.action_hash)) {
+            let updatedTaskInList = lists[list].filter(({ action_hash: taskActionHash, entry: taskItem}) => encodeHashToBase64(taskActionHash) != encodeHashToBase64(wrappedTask.action_hash));
+            updatedTaskInList.push(updatedTask);
+            lists[list] = updatedTaskInList;
+          }
+      })}); 
       return lists;
     });
   }

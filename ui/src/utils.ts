@@ -1,5 +1,5 @@
 import { Task, WrappedEntry, WrappedTaskWithAssessment } from "./types";
-import { Assessment } from "@neighbourhoods/sensemaker-lite-types";
+import { Assessment } from "@neighbourhoods/client";
 import { encodeHashToBase64 } from "@holochain/client";
 
 // this function is used to add assessments by the current agent to the tasks so that the 
