@@ -63,7 +63,13 @@ pub fn get_latest_task(action_hash: ActionHash) -> ExternResult<Option<Task>> {
 
 #[hdk_extern]
 pub fn create_new_list(list_name: String) -> ExternResult<()> {
-    list_typed_path(list_name)?.ensure()
+    list_typed_path(list_name.clone())?.ensure()?;
+
+    // send signal to other peers with the list
+    let signal = Signal::NewList { list: list_name };
+    let encoded_signal = ExternIO::encode(signal).map_err(|err| wasm_error!(WasmErrorInner::Guest(err.into())))?;
+    remote_signal(encoded_signal, get_all_agents(())?)?;
+    Ok(())
 }
 
 #[hdk_extern]
