@@ -4,6 +4,7 @@ import { Assessment } from "@neighbourhoods/client"
 interface Task {
     description: string,
     status: TaskStatus,
+    list: string,
 }
 
 
@@ -30,6 +31,15 @@ interface WrappedEntry<T> {
 // defining a new type for including an assessment with the task
 type WrappedTaskWithAssessment = WrappedEntry<Task> & {
     assessments: Assessment | undefined,
+}
+
+export type SignalPayload = 
+| {
+    type: "NewTask",
+    task: WrappedEntry<Task>,
+} | {
+    type: "NewList",
+    list: string,
 }
 
 export {
