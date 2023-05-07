@@ -23,6 +23,7 @@ pub enum TaskStatus {
 pub enum LinkTypes {
     ListToTask,
     ListNamePath,
+    AllAgentsPath,
 }
 
 #[hdk_extern]

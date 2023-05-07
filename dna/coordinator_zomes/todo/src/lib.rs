@@ -1,7 +1,36 @@
+mod signal;
+pub use signal::*;
+
 use std::collections::BTreeMap;
 
 use hdk::prelude::*;
+use signal::all_agents_typed_path;
 use todo_integrity::{EntryTypes, LinkTypes, Task, TaskStatus};
+
+
+#[hdk_extern]
+pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
+    // register agent in NH
+    // create a link from all agents path to my pub key
+    create_link(
+        all_agents_typed_path()?.path_entry_hash()?,
+        agent_info()?.agent_latest_pubkey,
+        LinkTypes::AllAgentsPath,
+        (),
+    )?;
+
+    // set up capability grants to allow for remote signals    
+    let mut functions = BTreeSet::new();
+    functions.insert((zome_info()?.name, FunctionName("recv_remote_signal".into())));
+    let cap_grant_entry: CapGrantEntry = CapGrantEntry::new(
+        String::from("new primitives signals"), // A string by which to later query for saved grants.
+        ().into(), // Unrestricted access means any external agent can call the extern
+        GrantedFunctions::Listed(functions),
+    );
+
+    create_cap_grant(cap_grant_entry)?;
+    return Ok(InitCallbackResult::Pass);
+}
 
 #[hdk_extern]
 pub fn get_latest_task(action_hash: ActionHash) -> ExternResult<Option<Task>> {
