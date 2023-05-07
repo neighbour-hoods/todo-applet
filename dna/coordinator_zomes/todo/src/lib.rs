@@ -76,6 +76,7 @@ pub fn add_task_to_list(
     let task = Task {
         description: task_description,
         status: TaskStatus::Incomplete,
+        list: list.clone(),
     };
     let action_hash = create_entry(EntryTypes::Task(task.clone()))?;
     let entry_hash = hash_entry(task.clone())?;
@@ -85,7 +86,18 @@ pub fn add_task_to_list(
         LinkTypes::ListToTask,
         (),
     )?;
-    Ok(WrappedEntry { action_hash, entry_hash, entry: task })
+    let wrapped_task = WrappedEntry {
+        action_hash,
+        entry_hash,
+        entry: task,
+    };
+
+    // send signal to other peers with the task
+    let signal = Signal::NewTask { task: wrapped_task.clone() };
+    let encoded_signal = ExternIO::encode(signal).map_err(|err| wasm_error!(WasmErrorInner::Guest(err.into())))?;
+    remote_signal(encoded_signal, get_all_agents(())?)?;
+
+    Ok(wrapped_task)
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, SerializedBytes)]
@@ -101,8 +113,8 @@ pub fn complete_task(task_action_hash: ActionHash) -> ExternResult<ActionHash> {
     ))?;
 
     let updated_task = Task {
-        description: task.description,
         status: TaskStatus::Complete,
+        ..task
     };
     update_entry(task_action_hash, updated_task)
 }
@@ -114,8 +126,8 @@ pub fn uncomplete_task(task_action_hash: ActionHash) -> ExternResult<ActionHash>
     ))?;
 
     let updated_task = Task {
-        description: task.description,
         status: TaskStatus::Incomplete,
+        ..task
     };
     update_entry(task_action_hash, updated_task)
 }
