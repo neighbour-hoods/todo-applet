@@ -99,8 +99,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
   async initializeSensemakerStore(clonedSensemakerRoleName: string) {
     const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(``, "todo-sensemaker");
-    const sensemakerService = new SensemakerService(appAgentWebsocket, clonedSensemakerRoleName)
-    this._sensemakerStore = new SensemakerStore(sensemakerService);
+    this._sensemakerStore = new SensemakerStore(appAgentWebsocket, clonedSensemakerRoleName);
   }
   async cloneSensemakerCell(ca_pubkey: string) {
     const clonedSensemakerCell: ClonedCell = await this.appWebsocket.createCloneCell({

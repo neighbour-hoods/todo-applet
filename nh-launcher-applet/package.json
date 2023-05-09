@@ -22,7 +22,7 @@
     "@scoped-elements/material-web": "^0.0.19",
     "lit": "^2.2.0",
     "@neighbourhoods/todo-applet": "file:../ui",
-    "@neighbourhoods/client": "^0.0.1"
+    "@neighbourhoods/client": "0.0.2"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.15.0",
