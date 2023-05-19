@@ -1,7 +1,7 @@
 import { derived, get, Writable, writable } from 'svelte/store';
-import { AgentPubKey, AgentPubKeyB64, AppAgentClient, AppWebsocket, CellId, encodeHashToBase64, EntryHash, RoleName } from '@holochain/client';
+import { AgentPubKey, AgentPubKeyB64, AppAgentClient, AppSignal, AppWebsocket, CellId, encodeHashToBase64, EntryHash, RoleName } from '@holochain/client';
 import { TodoService } from './todo-service';
-import { Task, TaskToListInput, WrappedEntry } from './types';
+import { SignalPayload, Task, TaskToListInput, WrappedEntry } from './types';
 
 export class TodoStore {
   service: TodoService;
@@ -20,6 +20,27 @@ export class TodoStore {
     protected cellId: CellId,
     roleName: RoleName,
   ) {
+    client.on("signal", (signal: AppSignal) => {
+      console.log("received signal: ", signal)
+      const payload = (signal.payload as SignalPayload);
+
+      switch (payload.type) {
+        case "NewTask":
+          const task = payload.task;
+          this.#tasksInLists.update(lists => {
+            lists[task.entry.list] = [...lists[task.entry.list], task];
+            return lists;
+          });
+          break;
+        case "NewList":
+          const list = payload.list;
+          this.#tasksInLists.update(lists => {
+            lists[list] = [];
+            return lists;
+          });
+          break;
+      }
+    });
     this.service = new TodoService(
       client,
       cellId,

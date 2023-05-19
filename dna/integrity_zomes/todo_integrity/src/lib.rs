@@ -11,6 +11,7 @@ pub enum EntryTypes {
 pub struct Task {
     pub description: String,
     pub status: TaskStatus,
+    pub list: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, SerializedBytes)]
@@ -23,6 +24,7 @@ pub enum TaskStatus {
 pub enum LinkTypes {
     ListToTask,
     ListNamePath,
+    AllAgentsPath,
 }
 
 #[hdk_extern]

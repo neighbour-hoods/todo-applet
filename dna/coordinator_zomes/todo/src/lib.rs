@@ -1,7 +1,36 @@
+mod signal;
+pub use signal::*;
+
 use std::collections::BTreeMap;
 
 use hdk::prelude::*;
+use signal::all_agents_typed_path;
 use todo_integrity::{EntryTypes, LinkTypes, Task, TaskStatus};
+
+
+#[hdk_extern]
+pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
+    // register agent in NH
+    // create a link from all agents path to my pub key
+    create_link(
+        all_agents_typed_path()?.path_entry_hash()?,
+        agent_info()?.agent_latest_pubkey,
+        LinkTypes::AllAgentsPath,
+        (),
+    )?;
+
+    // set up capability grants to allow for remote signals    
+    let mut functions = BTreeSet::new();
+    functions.insert((zome_info()?.name, FunctionName("recv_remote_signal".into())));
+    let cap_grant_entry: CapGrantEntry = CapGrantEntry::new(
+        String::from("new primitives signals"), // A string by which to later query for saved grants.
+        ().into(), // Unrestricted access means any external agent can call the extern
+        GrantedFunctions::Listed(functions),
+    );
+
+    create_cap_grant(cap_grant_entry)?;
+    return Ok(InitCallbackResult::Pass);
+}
 
 #[hdk_extern]
 pub fn get_latest_task(action_hash: ActionHash) -> ExternResult<Option<Task>> {
@@ -34,7 +63,13 @@ pub fn get_latest_task(action_hash: ActionHash) -> ExternResult<Option<Task>> {
 
 #[hdk_extern]
 pub fn create_new_list(list_name: String) -> ExternResult<()> {
-    list_typed_path(list_name)?.ensure()
+    list_typed_path(list_name.clone())?.ensure()?;
+
+    // send signal to other peers with the list
+    let signal = Signal::NewList { list: list_name };
+    let encoded_signal = ExternIO::encode(signal).map_err(|err| wasm_error!(WasmErrorInner::Guest(err.into())))?;
+    remote_signal(encoded_signal, get_all_agents(())?)?;
+    Ok(())
 }
 
 #[hdk_extern]
@@ -47,6 +82,7 @@ pub fn add_task_to_list(
     let task = Task {
         description: task_description,
         status: TaskStatus::Incomplete,
+        list: list.clone(),
     };
     let action_hash = create_entry(EntryTypes::Task(task.clone()))?;
     let entry_hash = hash_entry(task.clone())?;
@@ -56,7 +92,18 @@ pub fn add_task_to_list(
         LinkTypes::ListToTask,
         (),
     )?;
-    Ok(WrappedEntry { action_hash, entry_hash, entry: task })
+    let wrapped_task = WrappedEntry {
+        action_hash,
+        entry_hash,
+        entry: task,
+    };
+
+    // send signal to other peers with the task
+    let signal = Signal::NewTask { task: wrapped_task.clone() };
+    let encoded_signal = ExternIO::encode(signal).map_err(|err| wasm_error!(WasmErrorInner::Guest(err.into())))?;
+    remote_signal(encoded_signal, get_all_agents(())?)?;
+
+    Ok(wrapped_task)
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, SerializedBytes)]
@@ -72,8 +119,8 @@ pub fn complete_task(task_action_hash: ActionHash) -> ExternResult<ActionHash> {
     ))?;
 
     let updated_task = Task {
-        description: task.description,
         status: TaskStatus::Complete,
+        ..task
     };
     update_entry(task_action_hash, updated_task)
 }
@@ -85,8 +132,8 @@ pub fn uncomplete_task(task_action_hash: ActionHash) -> ExternResult<ActionHash>
     ))?;
 
     let updated_task = Task {
-        description: task.description,
         status: TaskStatus::Incomplete,
+        ..task
     };
     update_entry(task_action_hash, updated_task)
 }
