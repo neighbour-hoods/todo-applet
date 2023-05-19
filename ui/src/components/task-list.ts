@@ -104,17 +104,16 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
                                 ></importance-dimension-assessment>
                             `
                         }
-                        // case get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]: {
-                        //     return html`
-                        //         <div class="heat-scale">
-                        //             <div @click=${() => this.createAssessmet({ Integer: 0 })}>🧊</div>
-                        //             <div @click=${() => this.createAssessmet({ Integer: 1 })}>❄️</div>
-                        //             <div @click=${() => this.createAssessmet({ Integer: 2 })}>💧</div>
-                        //             <div @click=${() => this.createAssessmet({ Integer: 3 })}>🌶️</div>
-                        //             <div @click=${() => this.createAssessmet({ Integer: 4 })}>🔥</div>
-                        //         </div>
-                        //     `
-                        // }
+                        case get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]: {
+                            return html`
+                                <heat-dimension-assessment 
+                                    .resourceEh=${task.entry_hash}
+                                    .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
+                                    .dimensionEh=${get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]}
+                                    .isAssessedByMe=${false}
+                                ></heat-dimension-assessment>
+                            `
+                        }
                     }
     }
     static get scopedElements() {
