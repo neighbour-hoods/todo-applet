@@ -1,6 +1,6 @@
 import { contextProvided } from '@lit-labs/context';
 import { ScopedElementsMixin } from '@open-wc/scoped-elements';
-import { LitElement, css, html } from 'lit';
+import { LitElement, TemplateResult, css, html } from 'lit';
 import { sensemakerStoreContext } from '../../contexts';
 import { property, state } from 'lit/decorators.js';
 import { CreateAssessmentInput, RangeValue, SensemakerStore } from '@neighbourhoods/client';
@@ -26,43 +26,15 @@ export class AssessResource extends ScopedElementsMixin(LitElement) {
 
     @state()
     isAssessedByMe = false;
+    
+    @property()
+    assessResourceWidget!: TemplateResult
 
     // TODO: could probably change the .resourceAssessents to take in a resource hash and a dimension hash
     listTasksAssessments = new StoreSubscriber(this, () => this.sensemakerStore.resourceAssessments());
 
     render() {
-        const resourceAssessments = this.listTasksAssessments.value[encodeHashToBase64(this.resourceEh)];
-
-        console.log('resourceAssessments', resourceAssessments);
-        const myResourceAssessmentsAlongDimension = resourceAssessments ? resourceAssessments.filter(assessment => {
-            return (encodeHashToBase64(assessment.author) === encodeHashToBase64(this.sensemakerStore.myAgentPubKey) && encodeHashToBase64(assessment.dimension_eh) === encodeHashToBase64(this.dimensionEh))
-        }) : [];
-        console.log('myResourceAssessmentsAlongDimension', myResourceAssessmentsAlongDimension)
-        this.isAssessedByMe = myResourceAssessmentsAlongDimension.length > 0 ? true : false;
-        switch (this.dimensionEh) {
-            case get(this.sensemakerStore.appletConfig()).dimensions["importance"]: {
-                return html`
-                    <mwc-checkbox 
-                        ?disabled=${this.isAssessedByMe} 
-                        ?checked=${this.isAssessedByMe} 
-                        @click=${() => !this.isAssessedByMe ? this.createAssessmet({
-                    Integer: 1
-                }) : null}
-                    ></mwc-checkbox>
-                `
-            }
-            case get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]: {
-                return html`
-                    <div class="heat-scale">
-                        <div @click=${() => this.createAssessmet({ Integer: 0 })}>🧊</div>
-                        <div @click=${() => this.createAssessmet({ Integer: 1 })}>❄️</div>
-                        <div @click=${() => this.createAssessmet({ Integer: 2 })}>💧</div>
-                        <div @click=${() => this.createAssessmet({ Integer: 3 })}>🌶️</div>
-                        <div @click=${() => this.createAssessmet({ Integer: 4 })}>🔥</div>
-                    </div>
-                `
-            }
-        }
+        return this.assessResourceWidget
     }
 
 

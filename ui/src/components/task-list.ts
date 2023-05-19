@@ -11,9 +11,12 @@ import { Assessment, CreateAssessmentInput, RangeValueInteger, SensemakerStore, 
 import { addMyAssessmentsToTasks } from "../utils";
 import { StoreSubscriber } from "lit-svelte-stores";
 import {repeat} from 'lit/directives/repeat.js';
-import { encodeHashToBase64 } from "@holochain/client";
+import { EntryHash, encodeHashToBase64 } from "@holochain/client";
 import { ResourceWrapper } from "./sensemaker/resource-wrapper";
 import { contextProvided } from "@lit-labs/context";
+import { ImportanceDimensionAssessment } from "./sensemaker/widgets/importance-dimension-assessment";
+import { HeatDimensionAssessment } from "./sensemaker/widgets/heat-dimension-assessment";
+import { Task, WrappedEntry } from "../types";
 
 
 // add item at the bottom
@@ -41,7 +44,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     
     // TODO: figure out how to get a more relevent derived store, based on a the list of items, maybe I can use get instead of this.listTasks.value
     listTasksAssessments = new StoreSubscriber(this, () => this.sensemakerStore.resourceAssessments());
-
+    appletUIConfig = new StoreSubscriber(this, () => this.sensemakerStore.appletUIConfig())
 
     render() {
         this.updateTaskList()
@@ -77,6 +80,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
                 <resource-wrapper 
                     .resourceEh=${task.entry_hash} 
                     .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
+                    .assessResourceWidget=${this.returnCurrentAssessmentWidget(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"], task)}
                 >
                     <task-item 
                         .task=${task} 
@@ -88,12 +92,39 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             `
         }
     }
+    returnCurrentAssessmentWidget(resourceDefEh: EntryHash, task: WrappedEntry<Task>) {
+        switch (this.appletUIConfig.value[encodeHashToBase64(resourceDefEh)].create_assessment_dimension) {
+                        case get(this.sensemakerStore.appletConfig()).dimensions["importance"]: {
+                            return html`
+                                <importance-dimension-assessment 
+                                    .resourceEh=${task.entry_hash}
+                                    .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
+                                    .dimensionEh=${get(this.sensemakerStore.appletConfig()).dimensions["importance"]}
+                                    .isAssessedByMe=${false}
+                                ></importance-dimension-assessment>
+                            `
+                        }
+                        // case get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]: {
+                        //     return html`
+                        //         <div class="heat-scale">
+                        //             <div @click=${() => this.createAssessmet({ Integer: 0 })}>🧊</div>
+                        //             <div @click=${() => this.createAssessmet({ Integer: 1 })}>❄️</div>
+                        //             <div @click=${() => this.createAssessmet({ Integer: 2 })}>💧</div>
+                        //             <div @click=${() => this.createAssessmet({ Integer: 3 })}>🌶️</div>
+                        //             <div @click=${() => this.createAssessmet({ Integer: 4 })}>🔥</div>
+                        //         </div>
+                        //     `
+                        // }
+                    }
+    }
     static get scopedElements() {
         return {
         'task-item': TaskItem,
         'add-item': AddItem,
         'mwc-list': List,
         'resource-wrapper': ResourceWrapper,
+        'importance-dimension-assessment': ImportanceDimensionAssessment,
+        'heat-dimension-assessment': HeatDimensionAssessment,
         };
     }
 }
