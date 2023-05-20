@@ -47,6 +47,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     appletUIConfig = new StoreSubscriber(this, () => this.sensemakerStore.appletUIConfig())
 
     render() {
+        
         this.updateTaskList()
 
         if (this.listName) {
@@ -77,7 +78,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             this.tasks = html`
             ${tasks.length > 0 ? repeat(tasks, (task) => task.entry_hash, (task, index) => {
                 return html`
-                <resource-wrapper 
+                <resource-wrapper @create-assessment=${() => console.log('assessment creation event handle')}
                     .resourceEh=${task.entry_hash} 
                     .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
                     .assessResourceWidget=${this.returnCurrentAssessmentWidget(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"], task)}
@@ -95,24 +96,22 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     returnCurrentAssessmentWidget(resourceDefEh: EntryHash, task: WrappedEntry<Task>) {
         switch (this.appletUIConfig.value[encodeHashToBase64(resourceDefEh)].create_assessment_dimension) {
                         case get(this.sensemakerStore.appletConfig()).dimensions["importance"]: {
-                            return html`
-                                <importance-dimension-assessment 
-                                    .resourceEh=${task.entry_hash}
-                                    .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
-                                    .dimensionEh=${get(this.sensemakerStore.appletConfig()).dimensions["importance"]}
-                                    .isAssessedByMe=${false}
-                                ></importance-dimension-assessment>
-                            `
+                            const importanceDimension = new ImportanceDimensionAssessment();
+                            importanceDimension.resourceEh = task.entry_hash;
+                            importanceDimension.resourceDefEh = get(this.sensemakerStore.appletConfig()).resource_defs["task_item"];
+                            importanceDimension.dimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["importance"];
+                            importanceDimension.isAssessedByMe = false;
+                            importanceDimension.addEventListener('create-assessment', (e) => console.log('assessment creation event handle', e));
+                            return importanceDimension.render();
                         }
                         case get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]: {
-                            return html`
-                                <heat-dimension-assessment 
-                                    .resourceEh=${task.entry_hash}
-                                    .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
-                                    .dimensionEh=${get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]}
-                                    .isAssessedByMe=${false}
-                                ></heat-dimension-assessment>
-                            `
+                            const heatDimension = new HeatDimensionAssessment();
+                            heatDimension.resourceEh = task.entry_hash;
+                            heatDimension.resourceDefEh = get(this.sensemakerStore.appletConfig()).resource_defs["task_item"];
+                            heatDimension.dimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"];
+                            heatDimension.isAssessedByMe = false;
+                            heatDimension.addEventListener('create-assessment', (e) => console.log('assessment creation event handle', e));
+                            return heatDimension.render();
                         }
                     }
     }

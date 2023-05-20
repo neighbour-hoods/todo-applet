@@ -33,6 +33,7 @@ export class ImportanceDimensionAssessment extends ScopedElementsMixin(LitElemen
 
 
     dispatchCreateAssessment(value: RangeValue) {
+         console.log("dispatched assessment creation")
         const assessment: CreateAssessmentInput = {
             value,
             dimension_eh: this.dimensionEh,

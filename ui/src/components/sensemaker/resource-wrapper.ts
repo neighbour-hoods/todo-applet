@@ -38,6 +38,7 @@ export class ResourceWrapper extends ScopedElementsMixin(LitElement) {
         `
     }
     async createAssessment(e: CustomEvent) {
+        console.log('handle create assessment in resource wrapper')
         const assessment: CreateAssessmentInput = e.detail.assessment;
         const assessmentEh = await this.sensemakerStore.createAssessment(assessment)
         console.log('created assessment', assessmentEh)
