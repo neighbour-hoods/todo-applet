@@ -1,7 +1,5 @@
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
-import { LitElement, css, html } from 'lit';
-import { property, state } from 'lit/decorators.js';
-import { CreateAssessmentInput, RangeValue } from '@neighbourhoods/client';
+import { css, html } from 'lit';
+import { property } from 'lit/decorators.js';
 import { EntryHash } from '@holochain/client';
 import { DimensionWidget } from './dimension-widget-interface';
 
