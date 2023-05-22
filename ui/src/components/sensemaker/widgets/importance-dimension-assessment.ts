@@ -2,9 +2,9 @@ import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { EntryHash } from '@holochain/client';
 import { Checkbox } from '@scoped-elements/material-web'
-import { DimensionWidget } from './dimension-widget-interface';
+import { AssessDimensionWidget } from './dimension-widget-interface';
 
-export class ImportanceDimensionAssessment extends DimensionWidget {
+export class ImportanceDimensionAssessment extends AssessDimensionWidget {
     @property()
     resourceEh!: EntryHash
 

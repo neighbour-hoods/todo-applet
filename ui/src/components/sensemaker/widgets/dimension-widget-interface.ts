@@ -1,19 +1,26 @@
 import { TemplateResult } from 'lit';
-import { CreateAssessmentInput, RangeValue } from '@neighbourhoods/client';
+import { Assessment, CreateAssessmentInput, RangeValue } from '@neighbourhoods/client';
 import { EntryHash } from '@holochain/client';
 import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import { LitElement } from 'lit';
 
-export interface IDimensionWidget {
+interface IDimensionWidget {
     resourceEh: EntryHash
     resourceDefEh: EntryHash
     dimensionEh: EntryHash
-    isAssessedByMe: boolean
     render(): TemplateResult
+}
+
+type IAssessDimensionWidget = IDimensionWidget & {
+    isAssessedByMe: boolean
     dispatchCreateAssessment(value: RangeValue): void
 }
 
-export abstract class DimensionWidget extends ScopedElementsMixin(LitElement) implements IDimensionWidget {
+type IDisplayDimensionWidget = IDimensionWidget & {
+    assessment: Assessment
+}
+
+export abstract class AssessDimensionWidget extends ScopedElementsMixin(LitElement) implements IAssessDimensionWidget {
     abstract resourceEh: EntryHash
     abstract resourceDefEh: EntryHash
     abstract dimensionEh: EntryHash
@@ -35,4 +42,12 @@ export abstract class DimensionWidget extends ScopedElementsMixin(LitElement) im
         };
         this.dispatchEvent(new CustomEvent('create-assessment', options))
     }
+}
+
+export abstract class DisplayDimensionWidget extends ScopedElementsMixin(LitElement) implements IDisplayDimensionWidget {
+    abstract resourceEh: EntryHash
+    abstract resourceDefEh: EntryHash
+    abstract dimensionEh: EntryHash
+    abstract assessment: Assessment
+    abstract render(): TemplateResult
 }

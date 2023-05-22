@@ -1,9 +1,9 @@
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { EntryHash } from '@holochain/client';
-import { DimensionWidget } from './dimension-widget-interface';
+import { AssessDimensionWidget } from './dimension-widget-interface';
 
-export class HeatDimensionAssessment extends DimensionWidget {
+export class HeatDimensionAssessment extends AssessDimensionWidget {
     @property()
     resourceEh!: EntryHash
 
@@ -35,7 +35,7 @@ export class HeatDimensionAssessment extends DimensionWidget {
     static styles = css`
         .heat-scale {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
         }
     `
 }
