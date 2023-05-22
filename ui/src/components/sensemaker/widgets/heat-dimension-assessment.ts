@@ -3,19 +3,19 @@ import { LitElement, css, html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { CreateAssessmentInput, RangeValue } from '@neighbourhoods/client';
 import { EntryHash } from '@holochain/client';
+import { DimensionWidget } from './dimension-widget-interface';
 
-export class HeatDimensionAssessment extends ScopedElementsMixin(LitElement) {
+export class HeatDimensionAssessment extends DimensionWidget {
     @property()
     resourceEh!: EntryHash
 
-    // TODO: could pass in just this and not the dimensionEh and get it from the store instead
     @property()
     resourceDefEh!: EntryHash
 
     @property()
     dimensionEh!: EntryHash
 
-    @state()
+    @property()
     isAssessedByMe = false;
 
     render() {
@@ -30,23 +30,6 @@ export class HeatDimensionAssessment extends ScopedElementsMixin(LitElement) {
                 `
     }
 
-
-    dispatchCreateAssessment(value: RangeValue) {
-        const assessment: CreateAssessmentInput = {
-            value,
-            dimension_eh: this.dimensionEh,
-            resource_eh: this.resourceEh,
-            resource_def_eh: this.resourceDefEh,
-            maybe_input_dataset: null,
-
-        }
-        const options = {
-            detail: { assessment },
-            bubbles: true,
-            composed: true
-        };
-        this.dispatchEvent(new CustomEvent('create-assessment', options))
-    }
     static get scopedElements() {
         return {
         }

@@ -4,19 +4,19 @@ import { property, state } from 'lit/decorators.js';
 import { CreateAssessmentInput, RangeValue } from '@neighbourhoods/client';
 import { EntryHash } from '@holochain/client';
 import { Checkbox } from '@scoped-elements/material-web'
+import { DimensionWidget } from './dimension-widget-interface';
 
-export class ImportanceDimensionAssessment extends ScopedElementsMixin(LitElement) {
+export class ImportanceDimensionAssessment extends DimensionWidget {
     @property()
     resourceEh!: EntryHash
 
-    // TODO: could pass in just this and not the dimensionEh and get it from the store instead
     @property()
     resourceDefEh!: EntryHash
 
     @property()
     dimensionEh!: EntryHash
 
-    @state()
+    @property()
     isAssessedByMe = false;
 
     render() {
@@ -31,24 +31,6 @@ export class ImportanceDimensionAssessment extends ScopedElementsMixin(LitElemen
         `
     }
 
-
-    dispatchCreateAssessment(value: RangeValue) {
-         console.log("dispatched assessment creation")
-        const assessment: CreateAssessmentInput = {
-            value,
-            dimension_eh: this.dimensionEh,
-            resource_eh: this.resourceEh,
-            resource_def_eh: this.resourceDefEh,
-            maybe_input_dataset: null,
-
-        }
-        const options = {
-            detail: { assessment },
-            bubbles: true,
-            composed: true
-        };
-        this.dispatchEvent(new CustomEvent('create-assessment', options))
-    }
     static get scopedElements() {
         return {
             'mwc-checkbox': Checkbox,
