@@ -95,25 +95,43 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     }
     returnCurrentAssessmentWidget(resourceDefEh: EntryHash, task: WrappedEntry<Task>) {
         switch (this.appletUIConfig.value[encodeHashToBase64(resourceDefEh)].create_assessment_dimension) {
-                        case get(this.sensemakerStore.appletConfig()).dimensions["importance"]: {
-                            const importanceDimension = new ImportanceDimensionAssessment();
-                            importanceDimension.resourceEh = task.entry_hash;
-                            importanceDimension.resourceDefEh = get(this.sensemakerStore.appletConfig()).resource_defs["task_item"];
-                            importanceDimension.dimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["importance"];
-                            importanceDimension.isAssessedByMe = false;
-                            importanceDimension.addEventListener('create-assessment', (e) => console.log('assessment creation event handle', e));
-                            return importanceDimension.render();
-                        }
-                        case get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]: {
-                            const heatDimension = new HeatDimensionAssessment();
-                            heatDimension.resourceEh = task.entry_hash;
-                            heatDimension.resourceDefEh = get(this.sensemakerStore.appletConfig()).resource_defs["task_item"];
-                            heatDimension.dimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"];
-                            heatDimension.isAssessedByMe = false;
-                            heatDimension.addEventListener('create-assessment', (e) => console.log('assessment creation event handle', e));
-                            return heatDimension.render();
-                        }
-                    }
+            case get(this.sensemakerStore.appletConfig()).dimensions["importance"]: {
+                const importanceDimension = new ImportanceDimensionAssessment();
+                importanceDimension.resourceEh = task.entry_hash;
+                importanceDimension.resourceDefEh = get(this.sensemakerStore.appletConfig()).resource_defs["task_item"];
+                importanceDimension.dimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["importance"];
+                importanceDimension.isAssessedByMe = false;
+                importanceDimension.addEventListener('create-assessment', (e) => this.createAssessment(e as CustomEvent));
+                return importanceDimension.render();
+            }
+            case get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]: {
+                const heatDimension = new HeatDimensionAssessment();
+                heatDimension.resourceEh = task.entry_hash;
+                heatDimension.resourceDefEh = get(this.sensemakerStore.appletConfig()).resource_defs["task_item"];
+                heatDimension.dimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"];
+                heatDimension.isAssessedByMe = false;
+                heatDimension.addEventListener('create-assessment', (e) => this.createAssessment(e as CustomEvent));
+                return heatDimension.render();
+            }
+        }
+    }
+    async createAssessment(e: CustomEvent) {
+        console.log('handle create assessment in resource wrapper')
+        const assessment: CreateAssessmentInput = e.detail.assessment;
+        const assessmentEh = await this.sensemakerStore.createAssessment(assessment)
+        console.log('created assessment', assessmentEh)
+        console.log('resource eh', get(this.sensemakerStore.appletUIConfig())[encodeHashToBase64(assessment.resource_def_eh)].method_for_created_assessment)
+        try {
+
+            const objectiveAssessment = await this.sensemakerStore.runMethod({
+                resource_eh: assessment.resource_eh,
+                method_eh: get(this.sensemakerStore.appletUIConfig())[encodeHashToBase64(assessment.resource_def_eh)].method_for_created_assessment,
+            })
+            console.log('method output', objectiveAssessment)
+        }
+        catch (e) {
+            console.log('method error', e)
+        }
     }
     static get scopedElements() {
         return {
