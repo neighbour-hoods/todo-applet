@@ -5,19 +5,19 @@ import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import { LitElement } from 'lit';
 
 interface IDimensionWidget {
-    resourceEh: EntryHash
-    resourceDefEh: EntryHash
-    dimensionEh: EntryHash
     render(): TemplateResult
 }
 
 type IAssessDimensionWidget = IDimensionWidget & {
+    resourceEh: EntryHash
+    resourceDefEh: EntryHash
+    dimensionEh: EntryHash
     isAssessedByMe: boolean
     dispatchCreateAssessment(value: RangeValue): void
 }
 
 type IDisplayDimensionWidget = IDimensionWidget & {
-    assessment: Assessment
+    assessment: Assessment | null;
 }
 
 export abstract class AssessDimensionWidget extends ScopedElementsMixin(LitElement) implements IAssessDimensionWidget {
@@ -45,9 +45,6 @@ export abstract class AssessDimensionWidget extends ScopedElementsMixin(LitEleme
 }
 
 export abstract class DisplayDimensionWidget extends ScopedElementsMixin(LitElement) implements IDisplayDimensionWidget {
-    abstract resourceEh: EntryHash
-    abstract resourceDefEh: EntryHash
-    abstract dimensionEh: EntryHash
-    abstract assessment: Assessment
+    abstract assessment: Assessment | null
     abstract render(): TemplateResult
 }

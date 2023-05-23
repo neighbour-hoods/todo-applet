@@ -7,7 +7,7 @@ import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "./add-item";
 import { List } from '@scoped-elements/material-web'
-import { Assessment, CreateAssessmentInput, RangeValueInteger, SensemakerStore, getLargestAssessment } from "@neighbourhoods/client";
+import { Assessment, CreateAssessmentInput, RangeValueInteger, SensemakerStore, getLargestAssessment, getLatestAssessment } from "@neighbourhoods/client";
 import { addMyAssessmentsToTasks } from "../utils";
 import { StoreSubscriber } from "lit-svelte-stores";
 import {repeat} from 'lit/directives/repeat.js';
@@ -17,6 +17,8 @@ import { contextProvided } from "@lit-labs/context";
 import { ImportanceDimensionAssessment } from "./sensemaker/widgets/importance-dimension-assessment";
 import { HeatDimensionAssessment } from "./sensemaker/widgets/heat-dimension-assessment";
 import { Task, WrappedEntry } from "../types";
+import { AverageHeatDimensionDisplay } from "./sensemaker/widgets/heat-dimension-display";
+import { ImportanceDimensionDisplay } from "./sensemaker/widgets/importance-dimension-display";
 
 
 // add item at the bottom
@@ -78,10 +80,11 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             this.tasks = html`
             ${tasks.length > 0 ? repeat(tasks, (task) => task.entry_hash, (task, index) => {
                 return html`
-                <resource-wrapper @create-assessment=${() => console.log('assessment creation event handle')}
+                <resource-wrapper
                     .resourceEh=${task.entry_hash} 
                     .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
-                    .assessResourceWidget=${this.returnCurrentAssessmentWidget(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"], task)}
+                    .assessDimensionWidget=${this.returnCurrentAssessmentWidget(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"], task)}
+                    .displayDimensionWidget=${this.returnCurrentDisplayWidget(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"], task)}
                 >
                     <task-item 
                         .task=${task} 
@@ -115,6 +118,25 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             }
         }
     }
+    returnCurrentDisplayWidget(resourceDefEh: EntryHash, task: WrappedEntry<Task>) {
+        const resourceAssessments = this.listTasksAssessments?.value[encodeHashToBase64(task.entry_hash)]
+        const appletConfig = get(this.sensemakerStore.appletConfig())
+        const objectiveDimension = this.appletUIConfig.value[encodeHashToBase64(resourceDefEh)].display_objective_dimension;
+        switch (objectiveDimension) {
+            case appletConfig.dimensions["total_importance"]: {
+                const latestAssessment = resourceAssessments ? getLatestAssessment(resourceAssessments, encodeHashToBase64(appletConfig.dimensions["total_importance"])) : null;
+                const totalImportanceDimension = new ImportanceDimensionDisplay();
+                totalImportanceDimension.assessment = latestAssessment;
+                return totalImportanceDimension.render();
+            }
+            case get(this.sensemakerStore.appletConfig()).dimensions["average_heat"]: {
+                const latestAssessment = resourceAssessments ? getLatestAssessment(resourceAssessments, encodeHashToBase64(appletConfig.dimensions["average_heat"])) : null;
+                const averageHeatDimension = new AverageHeatDimensionDisplay();
+                averageHeatDimension.assessment = latestAssessment;
+                return averageHeatDimension.render();
+            }
+        }
+    }
     async createAssessment(e: CustomEvent) {
         console.log('handle create assessment in resource wrapper')
         const assessment: CreateAssessmentInput = e.detail.assessment;
@@ -141,6 +163,8 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         'resource-wrapper': ResourceWrapper,
         'importance-dimension-assessment': ImportanceDimensionAssessment,
         'heat-dimension-assessment': HeatDimensionAssessment,
+        'average-heat-dimension-display': AverageHeatDimensionDisplay,
+        'importance-dimension-display': ImportanceDimensionDisplay,
         };
     }
 }

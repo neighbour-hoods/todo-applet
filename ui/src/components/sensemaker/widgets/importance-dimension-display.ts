@@ -1,21 +1,12 @@
-import { html } from 'lit';
+import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { EntryHash } from '@holochain/client';
 import { DisplayDimensionWidget } from './dimension-widget-interface';
 import { Assessment, RangeValueInteger } from '@neighbourhoods/client';
 
 export class ImportanceDimensionDisplay extends DisplayDimensionWidget {
-    @property()
-    resourceEh!: EntryHash
 
     @property()
-    resourceDefEh!: EntryHash
-
-    @property()
-    dimensionEh!: EntryHash
-
-    @property()
-    assessment!: Assessment
+    assessment!: Assessment | null
 
     render() {
         return html`
@@ -24,5 +15,15 @@ export class ImportanceDimensionDisplay extends DisplayDimensionWidget {
                     </div>
                 `
     }
+    static get scopedElements() {
+        return {
+        }
+    }
+    static styles = css`
+        .heat-scale {
+            display: flex;
+            flex-direction: row;
+        }
+    `
 }
 

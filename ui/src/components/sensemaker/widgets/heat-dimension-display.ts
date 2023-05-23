@@ -4,18 +4,9 @@ import { EntryHash } from '@holochain/client';
 import { DisplayDimensionWidget } from './dimension-widget-interface';
 import { Assessment, RangeValueInteger } from '@neighbourhoods/client';
 
-export class ImportanceDimensionDisplay extends DisplayDimensionWidget {
+export class AverageHeatDimensionDisplay extends DisplayDimensionWidget {
     @property()
-    resourceEh!: EntryHash
-
-    @property()
-    resourceDefEh!: EntryHash
-
-    @property()
-    dimensionEh!: EntryHash
-
-    @property()
-    assessment!: Assessment
+    assessment!: Assessment | null
 
     render() {
         const latestAssessmentValue = this.assessment ? (this.assessment.value as RangeValueInteger).Integer : 0
