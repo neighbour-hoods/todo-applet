@@ -20,8 +20,13 @@ import { get } from 'svelte/store';
 import { TodoStore } from './todo-store';
 import { CreateOrJoinNh } from './create-or-join-nh';
 import { SensemakerService, SensemakerStore } from '@neighbourhoods/client';
+
 import { TodoApp } from './index';
 import { appletConfig } from './appletConfig'
+import { TotalImportanceDimensionDisplay } from './components/sensemaker/widgets/total-importance-dimension-display';
+import { ImportanceDimensionAssessment } from './components/sensemaker/widgets/importance-dimension-assessment';
+import { AverageHeatDimensionDisplay } from './components/sensemaker/widgets/average-heat-dimension-display';
+import { HeatDimensionAssessment } from './components/sensemaker/widgets/heat-dimension-assessment';
 
 @customElement('todo-app-test-harness')
 export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
@@ -183,6 +188,18 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       get(this._sensemakerStore.appletConfig()).dimensions["total_importance"], 
       get(this._sensemakerStore.appletConfig()).dimensions["importance"],
       get(this._sensemakerStore.appletConfig()).methods["total_importance_method"],
+    )
+
+    // register widgets
+    await this._sensemakerStore.registerWidget(
+      encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["importance"]),
+      new TotalImportanceDimensionDisplay(),
+      new ImportanceDimensionAssessment()
+    )
+    await this._sensemakerStore.registerWidget(
+      encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
+      new AverageHeatDimensionDisplay(),
+      new HeatDimensionAssessment()
     )
   }
 

@@ -3,7 +3,7 @@ import { property } from 'lit/decorators.js';
 import { DisplayDimensionWidget } from './dimension-widget-interface';
 import { Assessment, RangeValueInteger } from '@neighbourhoods/client';
 
-export class ImportanceDimensionDisplay extends DisplayDimensionWidget {
+export class TotalImportanceDimensionDisplay extends DisplayDimensionWidget {
 
     @property()
     assessment!: Assessment | null
