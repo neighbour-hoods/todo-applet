@@ -7,7 +7,7 @@ import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "./add-item";
 import { List } from '@scoped-elements/material-web'
-import { Assessment, CreateAssessmentInput, RangeValueInteger, SensemakerStore, WidgetRegistry, getLargestAssessment, getLatestAssessment } from "@neighbourhoods/client";
+import { AssessDimensionWidget, Assessment, CreateAssessmentInput, RangeValueInteger, SensemakerStore, WidgetRegistry, getLargestAssessment, getLatestAssessment } from "@neighbourhoods/client";
 import { addMyAssessmentsToTasks } from "../utils";
 import { StoreSubscriber } from "lit-svelte-stores";
 import {repeat} from 'lit/directives/repeat.js';
@@ -68,6 +68,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         }
     }
     async addNewTask(e: CustomEvent) {
+        console.log('adding new item', e.detail.newValue)
        await this.todoStore.addTaskToList({
         task_description: e.detail.newValue,
         list: this.listName!,
@@ -77,6 +78,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     updateTaskList() {
         if (this.listName) {
             const tasks = this.listTasks.value;
+            console.log('tasks subscribed', tasks)
             this.tasks = html`
             ${tasks.length > 0 ? repeat(tasks, (task) => task.entry_hash, (task, index) => {
                 // return html`
@@ -87,22 +89,24 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
                 //     .displayDimensionWidget=${this.returnCurrentDisplayWidget(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"], task)}
                 // >
                 const thing = this.sensemakerStore
-                const assessmentDimensionEh = this.appletUIConfig.value[encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"])].create_assessment_dimension
-                // const widgetRegistry = get(this.sensemakerStore.widgetRegistry())
-                const assessDimensionWidget = (get(this.sensemakerStore.widgetRegistry()) as WidgetRegistry)[encodeHashToBase64(assessmentDimensionEh)].assess
-                const displayDimensionWidget = (get(this.sensemakerStore.widgetRegistry()) as WidgetRegistry)[encodeHashToBase64(assessmentDimensionEh)].display
+                const { create_assessment_dimension, method_for_created_assessment, display_objective_dimension }   = this.appletUIConfig.value[encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"])]
+                const assessDimensionWidget = (get(this.sensemakerStore.widgetRegistry()) as WidgetRegistry)[encodeHashToBase64(create_assessment_dimension)].assess
+                const displayDimensionWidget = (get(this.sensemakerStore.widgetRegistry()) as WidgetRegistry)[encodeHashToBase64(create_assessment_dimension)].display
                 console.log('assess widget from store', assessDimensionWidget)
                 assessDimensionWidget.resourceEh = task.entry_hash;
                 assessDimensionWidget.resourceDefEh = get(this.sensemakerStore.appletConfig()).resource_defs["task_item"];
-                assessDimensionWidget.dimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["importance"];
-                assessDimensionWidget.isAssessedByMe = false;
+                assessDimensionWidget.dimensionEh = create_assessment_dimension;
+                const byMe = get(this.sensemakerStore.isAssessedByMeAlongDimension(encodeHashToBase64(task.entry_hash), encodeHashToBase64(create_assessment_dimension)))
+                assessDimensionWidget.isAssessedByMe = byMe;
                 assessDimensionWidget.addEventListener('create-assessment', (e) => this.createAssessment(e as CustomEvent));
+
+                displayDimensionWidget.assessment = getLatestAssessment(this.listTasksAssessments.value[encodeHashToBase64(task.entry_hash)], encodeHashToBase64(create_assessment_dimension));
                 return html`
                 <resource-wrapper
                     .resourceEh=${task.entry_hash} 
                     .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
                     .assessDimensionWidget=${assessDimensionWidget.render()}
-                    .displayDimensionWidget=${this.returnCurrentDisplayWidget(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"], task)}
+                    .displayDimensionWidget=${displayDimensionWidget.render()}
                 >
                     <task-item 
                         .task=${task} 
@@ -158,11 +162,13 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     async createAssessment(e: CustomEvent) {
         console.log('handle create assessment in resource wrapper')
         const assessment: CreateAssessmentInput = e.detail.assessment;
-        const assessmentEh = await this.sensemakerStore.createAssessment(assessment)
-        console.log('created assessment', assessmentEh)
-        console.log('resource eh', get(this.sensemakerStore.appletUIConfig())[encodeHashToBase64(assessment.resource_def_eh)].method_for_created_assessment)
         try {
-
+            const assessmentEh = await this.sensemakerStore.createAssessment(assessment)
+        }
+        catch (e) {
+            console.log('error creating assessment', e)
+        }
+        try {
             const objectiveAssessment = await this.sensemakerStore.runMethod({
                 resource_eh: assessment.resource_eh,
                 method_eh: get(this.sensemakerStore.appletUIConfig())[encodeHashToBase64(assessment.resource_def_eh)].method_for_created_assessment,
@@ -179,10 +185,6 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         'add-item': AddItem,
         'mwc-list': List,
         'resource-wrapper': ResourceWrapper,
-        'importance-dimension-assessment': ImportanceDimensionAssessment,
-        'heat-dimension-assessment': HeatDimensionAssessment,
-        'average-heat-dimension-display': AverageHeatDimensionDisplay,
-        'importance-dimension-display': TotalImportanceDimensionDisplay,
         };
     }
 }

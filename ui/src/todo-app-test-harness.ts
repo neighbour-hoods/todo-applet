@@ -207,6 +207,10 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     return {
       'todo-app': TodoApp,
       'create-or-join-nh': CreateOrJoinNh,
+      'total-importance-dimension-display': TotalImportanceDimensionDisplay,
+      'importance-dimension-assessment': ImportanceDimensionAssessment,
+      'average-heat-dimension-display': AverageHeatDimensionDisplay,
+      'heat-dimension-assessment': HeatDimensionAssessment,
     };
   }
 
