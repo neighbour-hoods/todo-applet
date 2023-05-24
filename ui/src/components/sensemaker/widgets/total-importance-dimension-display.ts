@@ -1,6 +1,6 @@
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { DisplayDimensionWidget } from './dimension-widget-interface';
+import { DisplayDimensionWidget } from '@neighbourhoods/client';
 import { Assessment, RangeValueInteger } from '@neighbourhoods/client';
 
 export class TotalImportanceDimensionDisplay extends DisplayDimensionWidget {

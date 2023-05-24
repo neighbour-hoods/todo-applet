@@ -1,8 +1,6 @@
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
-import { EntryHash } from '@holochain/client';
-import { DisplayDimensionWidget } from './dimension-widget-interface';
-import { Assessment, RangeValueInteger } from '@neighbourhoods/client';
+import { Assessment, DisplayDimensionWidget, RangeValueInteger } from '@neighbourhoods/client';
 
 export class AverageHeatDimensionDisplay extends DisplayDimensionWidget {
     @property()
