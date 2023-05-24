@@ -19,7 +19,7 @@ import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import { get } from 'svelte/store';
 import { TodoStore } from './todo-store';
 import { CreateOrJoinNh } from './create-or-join-nh';
-import { SensemakerService, SensemakerStore } from '@neighbourhoods/client';
+import { CreateAssessmentInput, SensemakerService, SensemakerStore } from '@neighbourhoods/client';
 
 import { TodoApp } from './index';
 import { appletConfig } from './appletConfig'
@@ -142,6 +142,27 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     }, 2000)
   }
 
+    async createAssessment(e: CustomEvent) {
+        console.log('handle create assessment in resource wrapper')
+        const assessment: CreateAssessmentInput = e.detail.assessment;
+        try {
+            const assessmentEh = await this._sensemakerStore.createAssessment(assessment)
+        }
+        catch (e) {
+            console.log('error creating assessment', e)
+        }
+        try {
+            const objectiveAssessment = await this._sensemakerStore.runMethod({
+                resource_eh: assessment.resource_eh,
+                method_eh: get(this._sensemakerStore.appletUIConfig())[encodeHashToBase64(assessment.resource_def_eh)].method_for_created_assessment,
+            })
+            console.log('method output', objectiveAssessment)
+        }
+        catch (e) {
+            console.log('method error', e)
+        }
+    }
+
   render() {
     if (this.isSensemakerCloned && this.loading)
       return html`
@@ -190,16 +211,20 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       get(this._sensemakerStore.appletConfig()).methods["total_importance_method"],
     )
 
+    const importanceDimensionAssess = new ImportanceDimensionAssessment();
+    importanceDimensionAssess.addEventListener('create-assessment', (e) => this.createAssessment(e as CustomEvent));
+    const heatDimensionAssess = new HeatDimensionAssessment();
+    heatDimensionAssess.addEventListener('create-assessment', (e) => this.createAssessment(e as CustomEvent));
     // register widgets
     await this._sensemakerStore.registerWidget(
       encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["importance"]),
       new TotalImportanceDimensionDisplay(),
-      new ImportanceDimensionAssessment()
+      importanceDimensionAssess
     )
     await this._sensemakerStore.registerWidget(
       encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
       new AverageHeatDimensionDisplay(),
-      new HeatDimensionAssessment()
+      heatDimensionAssess
     )
   }
 
