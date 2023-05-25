@@ -1,9 +1,14 @@
 import { css, html } from 'lit';
-import { property } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { EntryHash } from '@holochain/client';
-import { AssessDimensionWidget } from '@neighbourhoods/client';
+import { AssessDimensionWidget, RangeValue, SensemakerStore, sensemakerStoreContext } from '@neighbourhoods/client';
+import { contextProvided } from '@lit-labs/context';
 
 export class HeatDimensionAssessment extends AssessDimensionWidget {
+    @contextProvided({ context: sensemakerStoreContext, subscribe: true })
+    @state()
+    sensemakerStore!: SensemakerStore;
+    
     @property()
     resourceEh!: EntryHash
 
@@ -14,16 +19,20 @@ export class HeatDimensionAssessment extends AssessDimensionWidget {
     dimensionEh!: EntryHash
 
     @property()
-    isAssessedByMe = false;
+    methodEh!: EntryHash
 
+    @property()
+    isAssessedByMe = false;
+    
     render() {
+        
         return html`
                     <div class="heat-scale">
-                        <div @click=${() => this.dispatchCreateAssessment({ Integer: 0 })}>🧊</div>
-                        <div @click=${() => this.dispatchCreateAssessment({ Integer: 1 })}>❄️</div>
-                        <div @click=${() => this.dispatchCreateAssessment({ Integer: 2 })}>💧</div>
-                        <div @click=${() => this.dispatchCreateAssessment({ Integer: 3 })}>🌶️</div>
-                        <div @click=${() => this.dispatchCreateAssessment({ Integer: 4 })}>🔥</div>
+                        <div @click=${() => this.assessResource({ Integer: 0 })}>🧊</div>
+                        <div @click=${() => this.assessResource({ Integer: 1 })}>❄️</div>
+                        <div @click=${() => this.assessResource({ Integer: 2 })}>💧</div>
+                        <div @click=${() => this.assessResource({ Integer: 3 })}>🌶️</div>
+                        <div @click=${() => this.assessResource({ Integer: 4 })}>🔥</div>
                     </div>
                 `
     }

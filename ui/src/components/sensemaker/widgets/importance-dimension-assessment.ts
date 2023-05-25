@@ -1,10 +1,15 @@
 import { css, html } from 'lit';
-import { property } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { EntryHash } from '@holochain/client';
 import { Checkbox } from '@scoped-elements/material-web'
-import { AssessDimensionWidget } from '@neighbourhoods/client';
+import { AssessDimensionWidget, RangeValue, SensemakerStore, sensemakerStoreContext } from '@neighbourhoods/client';
+import { contextProvided } from '@lit-labs/context';
 
 export class ImportanceDimensionAssessment extends AssessDimensionWidget {
+    @contextProvided({ context: sensemakerStoreContext, subscribe: true })
+    @state()
+    sensemakerStore!: SensemakerStore;
+    
     @property()
     resourceEh!: EntryHash
 
@@ -15,6 +20,9 @@ export class ImportanceDimensionAssessment extends AssessDimensionWidget {
     dimensionEh!: EntryHash
 
     @property()
+    methodEh!: EntryHash
+
+    @property()
     isAssessedByMe = false;
 
     render() {
@@ -22,7 +30,7 @@ export class ImportanceDimensionAssessment extends AssessDimensionWidget {
             <mwc-checkbox 
                 ?disabled=${this.isAssessedByMe} 
                 ?checked=${this.isAssessedByMe} 
-                @click=${() => !this.isAssessedByMe ? this.dispatchCreateAssessment({
+                @click=${() => !this.isAssessedByMe ? this.assessResource({
             Integer: 1
         }) : null}
             ></mwc-checkbox>

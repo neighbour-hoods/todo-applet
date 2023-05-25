@@ -84,16 +84,13 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
 
                 const byMe = get(this.sensemakerStore.isAssessedByMeAlongDimension(encodeHashToBase64(task.entry_hash), encodeHashToBase64(create_assessment_dimension)))
                 assessDimensionWidget.isAssessedByMe = byMe;
-                // assessDimensionWidget.removeEventListener('create-assessment', (e) => this.createAssessment(e as CustomEvent));
-                // assessDimensionWidget.addEventListener('create-assessment', (e) => this.createAssessment(e as CustomEvent));
 
                 displayDimensionWidget.assessment = getLatestAssessment(this.listTasksAssessments.value[encodeHashToBase64(task.entry_hash)] ? this.listTasksAssessments.value[encodeHashToBase64(task.entry_hash)] : [], encodeHashToBase64(display_objective_dimension));
                 return html`
-                <resource-wrapper
+                <resource-wrapper 
                     .resourceEh=${task.entry_hash} 
                     .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
-                    .assessDimensionWidget=${assessDimensionWidget.render()}
-                    .displayDimensionWidget=${displayDimensionWidget.render()}
+                    .uid=${index}
                 >
                     <task-item 
                         .task=${task} 

@@ -3,11 +3,10 @@ import { property, state } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css, TemplateResult } from "lit";
 import { sensemakerStoreContext } from "../../contexts";
-import { SensemakerStore } from "@neighbourhoods/client";
-import { EntryHash } from "@holochain/client";
-import { DisplayAssessment } from "./display-assessment";
-import { AssessResource } from "./assess-resource";
+import { CreateAssessmentInput, RangeValue, SensemakerStore, WidgetRegistry, getLatestAssessment } from "@neighbourhoods/client";
+import { EntryHash, encodeHashToBase64 } from "@holochain/client";
 import { StoreSubscriber } from "lit-svelte-stores";
+import { get } from "svelte/store";
 
 export class ResourceWrapper extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: sensemakerStoreContext, subscribe: true })
@@ -15,25 +14,36 @@ export class ResourceWrapper extends ScopedElementsMixin(LitElement) {
     public  sensemakerStore!: SensemakerStore
 
     @property()
+    uid!: number
+
+    @property()
     resourceEh!: EntryHash
 
     @property()
     resourceDefEh!: EntryHash
 
-    @property()
-    assessDimensionWidget!: TemplateResult
-
-    @property()
-    displayDimensionWidget!: TemplateResult
-
+    listTasksAssessments = new StoreSubscriber(this, () => this.sensemakerStore.resourceAssessments());
     appletUIConfig = new StoreSubscriber(this, () => this.sensemakerStore.appletUIConfig())
 
     render() {
+        const { create_assessment_dimension, display_objective_dimension, method_for_created_assessment } = this.appletUIConfig.value[encodeHashToBase64(this.resourceDefEh)]
+        const assessDimensionWidget = (get(this.sensemakerStore.widgetRegistry()) as WidgetRegistry)[encodeHashToBase64(create_assessment_dimension)].assess
+        const displayDimensionWidget = (get(this.sensemakerStore.widgetRegistry()) as WidgetRegistry)[encodeHashToBase64(create_assessment_dimension)].display
+        assessDimensionWidget.resourceEh = this.resourceEh;
+        assessDimensionWidget.resourceDefEh = this.resourceDefEh
+        assessDimensionWidget.dimensionEh = create_assessment_dimension;
+        assessDimensionWidget.methodEh = method_for_created_assessment;
+        assessDimensionWidget.sensemakerStore = this.sensemakerStore;
+
+        const byMe = get(this.sensemakerStore.isAssessedByMeAlongDimension(encodeHashToBase64(this.resourceEh), encodeHashToBase64(create_assessment_dimension)))
+        assessDimensionWidget.isAssessedByMe = byMe;
+
+        displayDimensionWidget.assessment = getLatestAssessment(this.listTasksAssessments.value[encodeHashToBase64(this.resourceEh)] ? this.listTasksAssessments.value[encodeHashToBase64(this.resourceEh)] : [], encodeHashToBase64(display_objective_dimension));
         return html`
             <div class="resource-wrapper">
                 <slot></slot>
-                ${this.displayDimensionWidget}
-                ${this.assessDimensionWidget}
+                ${displayDimensionWidget.render()}
+                ${assessDimensionWidget.render()}
             </div>
         `
     }
@@ -45,8 +55,6 @@ export class ResourceWrapper extends ScopedElementsMixin(LitElement) {
         `;
     static get scopedElements() {
         return {
-            'display-assessment': DisplayAssessment,
-            'assess-resource': AssessResource,
         }
     }
 }

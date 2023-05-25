@@ -212,9 +212,9 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     )
 
     const importanceDimensionAssess = new ImportanceDimensionAssessment();
-    importanceDimensionAssess.addEventListener('create-assessment', (e) => this.createAssessment(e as CustomEvent));
+    // importanceDimensionAssess.addEventListener('create-assessment', (e) => this.createAssessment(e as CustomEvent));
     const heatDimensionAssess = new HeatDimensionAssessment();
-    heatDimensionAssess.addEventListener('create-assessment', (e) => this.createAssessment(e as CustomEvent));
+    // heatDimensionAssess.addEventListener('create-assessment', (e) => this.createAssessment(e as CustomEvent));
     // register widgets
     await this._sensemakerStore.registerWidget(
       encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["importance"]),
