@@ -74,18 +74,6 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             console.log('tasks subscribed', tasks)
             this.tasks = html`
             ${tasks.length > 0 ? repeat(tasks, (task) => task.entry_hash, (task, index) => {
-                const { create_assessment_dimension, display_objective_dimension } = this.appletUIConfig.value[encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"])]
-                const assessDimensionWidget = (get(this.sensemakerStore.widgetRegistry()) as WidgetRegistry)[encodeHashToBase64(create_assessment_dimension)].assess
-                const displayDimensionWidget = (get(this.sensemakerStore.widgetRegistry()) as WidgetRegistry)[encodeHashToBase64(create_assessment_dimension)].display
-                console.log('assess widget from store', assessDimensionWidget)
-                assessDimensionWidget.resourceEh = task.entry_hash;
-                assessDimensionWidget.resourceDefEh = get(this.sensemakerStore.appletConfig()).resource_defs["task_item"];
-                assessDimensionWidget.dimensionEh = create_assessment_dimension;
-
-                const byMe = get(this.sensemakerStore.isAssessedByMeAlongDimension(encodeHashToBase64(task.entry_hash), encodeHashToBase64(create_assessment_dimension)))
-                assessDimensionWidget.isAssessedByMe = byMe;
-
-                displayDimensionWidget.assessment = getLatestAssessment(this.listTasksAssessments.value[encodeHashToBase64(task.entry_hash)] ? this.listTasksAssessments.value[encodeHashToBase64(task.entry_hash)] : [], encodeHashToBase64(display_objective_dimension));
                 return html`
                 <resource-wrapper 
                     .resourceEh=${task.entry_hash} 

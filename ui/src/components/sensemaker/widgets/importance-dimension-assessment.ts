@@ -30,9 +30,9 @@ export class ImportanceDimensionAssessment extends AssessDimensionWidget {
             <mwc-checkbox 
                 ?disabled=${this.isAssessedByMe} 
                 ?checked=${this.isAssessedByMe} 
-                @click=${() => !this.isAssessedByMe ? this.assessResource({
+                @click=${() => {console.log('resourceEh from widget implementation', this.resourceEh); !this.isAssessedByMe ? this.assessResource({
             Integer: 1
-        }) : null}
+        }) : null}}
             ></mwc-checkbox>
         `
     }
