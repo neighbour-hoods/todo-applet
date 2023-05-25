@@ -29,12 +29,10 @@ export class ResourceWrapper extends ScopedElementsMixin(LitElement) {
 
     render() {
         const { create_assessment_dimension, display_objective_dimension, method_for_created_assessment } = this.appletUIConfig.value[encodeHashToBase64(this.resourceDefEh)]
-        const assessDimensionWidgetType = (get(this.sensemakerStore.widgetRegistry()) as WidgetRegistry)[encodeHashToBase64(create_assessment_dimension)].assess
-        const displayDimensionWidgetType = (get(this.sensemakerStore.widgetRegistry()) as WidgetRegistry)[encodeHashToBase64(create_assessment_dimension)].display
-        const concreteDimensionWidgetType = assessDimensionWidgetType as unknown;
-        const assessDimensionWidget = new (concreteDimensionWidgetType as { new(): ImportanceDimensionAssessment })();
-        const concreteDisplayDimensionWidgetType = displayDimensionWidgetType as unknown;
-        const displayDimensionWidget = new (concreteDisplayDimensionWidgetType as { new(): TotalImportanceDimensionDisplay })();
+        const assessDimensionWidgetType = (get(this.sensemakerStore.widgetRegistry()))[encodeHashToBase64(create_assessment_dimension)].assess
+        const displayDimensionWidgetType = (get(this.sensemakerStore.widgetRegistry()))[encodeHashToBase64(create_assessment_dimension)].display
+        const assessDimensionWidget = new assessDimensionWidgetType();
+        const displayDimensionWidget = new displayDimensionWidgetType();
         assessDimensionWidget.resourceEh = this.resourceEh;
         assessDimensionWidget.resourceDefEh = this.resourceDefEh
         assessDimensionWidget.dimensionEh = create_assessment_dimension;
