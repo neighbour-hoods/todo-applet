@@ -7,11 +7,9 @@ import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "./add-item";
 import { List } from '@scoped-elements/material-web'
-import { CreateAssessmentInput, SensemakerStore, WidgetRegistry, getLatestAssessment } from "@neighbourhoods/client";
+import { SensemakerStore, SensemakeResource } from "@neighbourhoods/client";
 import { StoreSubscriber } from "lit-svelte-stores";
 import {repeat} from 'lit/directives/repeat.js';
-import { encodeHashToBase64 } from "@holochain/client";
-import { ResourceWrapper } from "./sensemaker/resource-wrapper";
 import { contextProvided } from "@lit-labs/context";
 
 // add item at the bottom
@@ -37,10 +35,6 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     // not sure if I can use a reactive value in the subscriber callback
     // listTasksAssessments = new StoreSubscriber(this, () => this.sensemakerStore.resourceAssessments(this.listTasks.value.map((task) => encodeHashToBase64(task.entry_hash))));
     
-    // TODO: figure out how to get a more relevent derived store, based on a the list of items, maybe I can use get instead of this.listTasks.value
-    listTasksAssessments = new StoreSubscriber(this, () => this.sensemakerStore.resourceAssessments());
-    appletUIConfig = new StoreSubscriber(this, () => this.sensemakerStore.appletUIConfig())
-
     render() {
         
         this.updateTaskList()
@@ -75,39 +69,18 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             this.tasks = html`
             ${tasks.length > 0 ? repeat(tasks, (task) => task.entry_hash, (task, index) => {
                 return html`
-                <resource-wrapper 
+                <sensemake-resource 
                     .resourceEh=${task.entry_hash} 
                     .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
-                    .uid=${index}
                 >
                     <task-item 
                         .task=${task} 
                         .completed=${('Complete' in task.entry.status)} 
                     ></task-item>
-                </resource-wrapper> 
+                </sensemake-resource> 
             `}) : html``}
             <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
             `
-        }
-    }
-    async createAssessment(e: CustomEvent) {
-        console.log('handle create assessment in resource wrapper')
-        const assessment: CreateAssessmentInput = e.detail.assessment;
-        try {
-            const assessmentEh = await this.sensemakerStore.createAssessment(assessment)
-        }
-        catch (e) {
-            console.log('error creating assessment', e)
-        }
-        try {
-            const objectiveAssessment = await this.sensemakerStore.runMethod({
-                resource_eh: assessment.resource_eh,
-                method_eh: get(this.sensemakerStore.appletUIConfig())[encodeHashToBase64(assessment.resource_def_eh)].method_for_created_assessment,
-            })
-            console.log('method output', objectiveAssessment)
-        }
-        catch (e) {
-            console.log('method error', e)
         }
     }
     static get scopedElements() {
@@ -115,7 +88,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         'task-item': TaskItem,
         'add-item': AddItem,
         'mwc-list': List,
-        'resource-wrapper': ResourceWrapper,
+        'sensemake-resource': SensemakeResource,
         };
     }
 }

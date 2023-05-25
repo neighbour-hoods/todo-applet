@@ -8,13 +8,8 @@ import { TodoStore } from "../../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "../add-item";
 import { List } from '@scoped-elements/material-web'
-import { Assessment, CreateAssessmentInput, RangeValueInteger, SensemakerStore, getLargestAssessment } from "@neighbourhoods/client";
-import { addMyAssessmentsToTasks } from "../../utils";
+import { SensemakerStore, SensemakeResource } from "@neighbourhoods/client";
 import { StoreSubscriber } from "lit-svelte-stores";
-import { repeat } from 'lit/directives/repeat.js';
-import { encodeHashToBase64 } from "@holochain/client";
-import { ResourceWrapper } from "./resource-wrapper";
-
 
 // add item at the bottom
 export class ContextView extends ScopedElementsMixin(LitElement) {
@@ -34,7 +29,7 @@ export class ContextView extends ScopedElementsMixin(LitElement) {
         // consider using `repeat()` instead of `map()`
         return html`
             ${this.tasksInContext.value.map((task) => html`
-                <resource-wrapper 
+                <sensemake-resource 
                     .resourceEh=${task.entry_hash} 
                     .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
                 >
@@ -42,7 +37,7 @@ export class ContextView extends ScopedElementsMixin(LitElement) {
                         .task=${task} 
                         .completed=${('Complete' in task.entry.status)} 
                     ></task-item>
-                </resource-wrapper>
+                </sensemake-resource>
             `)}
         `
     }
@@ -51,7 +46,7 @@ export class ContextView extends ScopedElementsMixin(LitElement) {
             'task-item': TaskItem,
             'add-item': AddItem,
             'mwc-list': List,
-            'resource-wrapper': ResourceWrapper,
+            'sensemake-resource': SensemakeResource,
         };
     }
 }
