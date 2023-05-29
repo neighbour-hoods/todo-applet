@@ -1,9 +1,10 @@
 import { css, html } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { EntryHash } from '@holochain/client';
 import { AssessDimensionWidget, RangeValue, SensemakerStore, sensemakerStoreContext } from '@neighbourhoods/client';
 import { contextProvided } from '@lit-labs/context';
 
+@customElement('heat-dimension-assessment')
 export class HeatDimensionAssessment extends AssessDimensionWidget {
     @contextProvided({ context: sensemakerStoreContext, subscribe: true })
     @state()
