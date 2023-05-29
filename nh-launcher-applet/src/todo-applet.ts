@@ -3,7 +3,7 @@ import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { CircularProgress } from "@scoped-elements/material-web";
 import { LitElement, html, css } from "lit";
 import { AppletInfo } from "@neighbourhoods/nh-launcher-applet";
-import { TodoApp, TodoStore, appletConfig } from "@neighbourhoods/todo-applet";
+import { TodoApp, TodoStore, appletConfig, ImportanceDimensionAssessment, TotalImportanceDimensionDisplay, HeatDimensionAssessment, AverageHeatDimensionDisplay } from "@neighbourhoods/todo-applet";
 import { AppWebsocket, CellType, ProvisionedCell, encodeHashToBase64 } from "@holochain/client";
 import { SensemakerStore } from "@neighbourhoods/client";
 import { get } from 'svelte/store';
@@ -36,11 +36,39 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
         await this.sensemakerStore.registerApplet(appletConfig)
       }
 
-      await this.sensemakerStore.updateAppletUIConfig(
+      await this.sensemakerStore.updateWidgetMappingConfig(
         encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]), 
+        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["importance"]),
         get(this.sensemakerStore.appletConfig()).dimensions["total_importance"], 
-        get(this.sensemakerStore.appletConfig()).dimensions["importance"],
         get(this.sensemakerStore.appletConfig()).methods["total_importance_method"],
+      )
+
+      await this.sensemakerStore.updateWidgetMappingConfig(
+        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]), 
+        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
+        get(this.sensemakerStore.appletConfig()).dimensions["average_heat"], 
+        get(this.sensemakerStore.appletConfig()).methods["average_heat_method"],
+      )
+      
+      // customElements.define('total-importance-dimension-display', TotalImportanceDimensionDisplay);
+      // customElements.define('importance-dimension-assessment', ImportanceDimensionAssessment);
+      // customElements.define('average-heat-dimension-display', AverageHeatDimensionDisplay);
+      // customElements.define('heat-dimension-assessment', HeatDimensionAssessment);
+      await this.sensemakerStore.registerWidget(
+        [
+          encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["importance"]),
+          encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["total_importance"]),
+        ],
+        TotalImportanceDimensionDisplay,
+        ImportanceDimensionAssessment
+      )
+      await this.sensemakerStore.registerWidget(
+        [
+          encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
+          encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["average_heat"]),
+        ],
+        AverageHeatDimensionDisplay,
+        HeatDimensionAssessment
       )
       const appWs = await AppWebsocket.connect(this.appWebsocket.client.socket.url)
       this.todoStore = new TodoStore(
@@ -87,6 +115,10 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
     return {
       "mwc-circular-progress": CircularProgress,
       "todo-app": TodoApp,
+      'total-importance-dimension-display': TotalImportanceDimensionDisplay,
+      'importance-dimension-assessment': ImportanceDimensionAssessment,
+      'average-heat-dimension-display': AverageHeatDimensionDisplay,
+      'heat-dimension-assessment': HeatDimensionAssessment,
       // TODO: add any elements that you have in your applet
     };
   }

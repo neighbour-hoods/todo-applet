@@ -142,27 +142,6 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     }, 2000)
   }
 
-    async createAssessment(e: CustomEvent) {
-        console.log('handle create assessment in resource wrapper')
-        const assessment: CreateAssessmentInput = e.detail.assessment;
-        try {
-            const assessmentEh = await this._sensemakerStore.createAssessment(assessment)
-        }
-        catch (e) {
-            console.log('error creating assessment', e)
-        }
-        try {
-            const objectiveAssessment = await this._sensemakerStore.runMethod({
-                resource_eh: assessment.resource_eh,
-                method_eh: get(this._sensemakerStore.appletUIConfig())[encodeHashToBase64(assessment.resource_def_eh)].method_for_created_assessment,
-            })
-            console.log('method output', objectiveAssessment)
-        }
-        catch (e) {
-            console.log('method error', e)
-        }
-    }
-
   render() {
     if (this.isSensemakerCloned && this.loading)
       return html`
@@ -204,21 +183,34 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     })
     
     // initialize the default UI settings
-    await this._sensemakerStore.updateAppletUIConfig(
+    await this._sensemakerStore.updateWidgetMappingConfig(
       encodeHashToBase64(get(this._sensemakerStore.appletConfig()).resource_defs["task_item"]), 
+      encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["importance"]),
       get(this._sensemakerStore.appletConfig()).dimensions["total_importance"], 
-      get(this._sensemakerStore.appletConfig()).dimensions["importance"],
       get(this._sensemakerStore.appletConfig()).methods["total_importance_method"],
     )
 
+    await this._sensemakerStore.updateWidgetMappingConfig(
+      encodeHashToBase64(get(this._sensemakerStore.appletConfig()).resource_defs["task_item"]), 
+      encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
+      get(this._sensemakerStore.appletConfig()).dimensions["average_heat"], 
+      get(this._sensemakerStore.appletConfig()).methods["average_heat_method"],
+    )
+    
     // register widgets
     await this._sensemakerStore.registerWidget(
-      encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["importance"]),
+      [
+        encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["importance"]),
+        encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["total_importance"]),
+      ],
       TotalImportanceDimensionDisplay,
       ImportanceDimensionAssessment
     )
     await this._sensemakerStore.registerWidget(
-      encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
+      [
+        encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
+        encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["average_heat"]),
+      ],
       AverageHeatDimensionDisplay,
       HeatDimensionAssessment
     )
