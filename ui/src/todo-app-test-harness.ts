@@ -172,7 +172,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
 
   // attempt to fetch assessments for each task to have an up-to-date sensemaker state (currently just of assessments)
   async updateSensemakerState() {
-    await this._sensemakerStore.checkIfAppletConfigExists("todo_applet")
+    await this._sensemakerStore.registerApplet(appletConfig)
     const allTaskEntryHashes = get(this._todoStore.allTaskEntryHashes())
     const importanceDimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["importance"]
     const totalImportanceDimensionEh = get(this._sensemakerStore.appletConfig()).dimensions["total_importance"]
@@ -182,21 +182,6 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       dimension_ehs: [importanceDimensionEh, totalImportanceDimensionEh, perceivedHeatDimensionEh, averageHeatDimensionEh],
       resource_ehs: allTaskEntryHashes
     })
-    
-    // initialize the default UI settings
-    await this._sensemakerStore.updateWidgetMappingConfig(
-      encodeHashToBase64(get(this._sensemakerStore.appletConfig()).resource_defs["task_item"]), 
-      encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["importance"]),
-      get(this._sensemakerStore.appletConfig()).dimensions["total_importance"], 
-      get(this._sensemakerStore.appletConfig()).methods["total_importance_method"],
-    )
-
-    await this._sensemakerStore.updateWidgetMappingConfig(
-      encodeHashToBase64(get(this._sensemakerStore.appletConfig()).resource_defs["task_item"]), 
-      encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
-      get(this._sensemakerStore.appletConfig()).dimensions["average_heat"], 
-      get(this._sensemakerStore.appletConfig()).methods["average_heat_method"],
-    )
     
     // register widgets
     this._sensemakerStore.registerWidget(
