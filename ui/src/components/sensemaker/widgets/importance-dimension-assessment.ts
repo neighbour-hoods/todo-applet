@@ -24,7 +24,7 @@ export class ImportanceDimensionAssessment extends AssessDimensionWidget {
     methodEh!: EntryHash
 
     @property()
-    isAssessedByMe = false;
+    latestAssessment = null;
 
     render() {
         // return html`
@@ -42,9 +42,9 @@ export class ImportanceDimensionAssessment extends AssessDimensionWidget {
                     type="checkbox" 
                     name="myCheckbox" 
                     value="important" 
-                    ?checked=${this.isAssessedByMe}
-                    ?disabled=${this.isAssessedByMe} 
-                    @click=${() => {console.log('resourceEh from widget implementation', this.resourceEh); !this.isAssessedByMe ? this.assessResource({
+                    ?checked=${this.latestAssessment}
+                    ?disabled=${this.latestAssessment} 
+                    @click=${() => {console.log('resourceEh from widget implementation', this.resourceEh); !this.latestAssessment ? this.assessResource({
                 Integer: 1
             }) : null}}
                 >

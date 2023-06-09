@@ -83,15 +83,15 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
 
   toggleDefaultUISettings() {
     if (this.defaultUISettings) {
-      this.sensemakerStore.updateActiveDimension(
+      this.sensemakerStore.updateActiveMethod(
         encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]),
-        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
+        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).methods["average_heat_method"]),
       )
     }
     else {
-      this.sensemakerStore.updateActiveDimension(
+      this.sensemakerStore.updateActiveMethod(
         encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]),
-        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["importance"]),
+        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).methods["total_importance_method"]),
       )
     }
     this.defaultUISettings = !this.defaultUISettings;

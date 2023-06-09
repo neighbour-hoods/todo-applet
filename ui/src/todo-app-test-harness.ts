@@ -136,7 +136,8 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     await this.cloneSensemakerCell(e.detail.newValue)
     // wait some time for the dht to sync, otherwise checkIfAppletConfigExists returns null
     setTimeout(async () => {
-      const _todoConfig = await this._sensemakerStore.checkIfAppletConfigExists("todo_applet")
+      // const _todoConfig = await this._sensemakerStore.checkIfAppletConfigExists("todo_applet")
+      const _todoConfig = await this._sensemakerStore.registerApplet(appletConfig);
       await this.updateSensemakerState()
       this.loading = false;
     }, 2000)
@@ -198,7 +199,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
     )
     
     // register widgets
-    await this._sensemakerStore.registerWidget(
+    this._sensemakerStore.registerWidget(
       [
         encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["importance"]),
         encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["total_importance"]),
@@ -206,7 +207,7 @@ export class TodoAppTestHarness extends ScopedElementsMixin(LitElement) {
       TotalImportanceDimensionDisplay,
       ImportanceDimensionAssessment
     )
-    await this._sensemakerStore.registerWidget(
+    this._sensemakerStore.registerWidget(
       [
         encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
         encodeHashToBase64(get(this._sensemakerStore.appletConfig()).dimensions["average_heat"]),

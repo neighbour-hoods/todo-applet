@@ -23,7 +23,7 @@ export class HeatDimensionAssessment extends AssessDimensionWidget {
     methodEh!: EntryHash
 
     @property()
-    isAssessedByMe = false;
+    latestAssessment = null;
     
     render() {
         
