@@ -31,24 +31,24 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
       const cellInfo = todoAppletInfo.appInfo.cell_info[appletRoleName][0]
       const todoCellInfo = (cellInfo as { [CellType.Provisioned]: ProvisionedCell }).provisioned;
 
-      const maybeAppletConfig = await this.sensemakerStore.checkIfAppletConfigExists(appletConfig.applet_config_input.name)
-      if (!maybeAppletConfig) {
+      // const maybeAppletConfig = await this.sensemakerStore.checkIfAppletConfigExists(appletConfig.applet_config_input.name)
+      // if (!maybeAppletConfig) {
         await this.sensemakerStore.registerApplet(appletConfig)
-      }
+      // }
 
-      await this.sensemakerStore.updateWidgetMappingConfig(
-        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]), 
-        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["importance"]),
-        get(this.sensemakerStore.appletConfig()).dimensions["total_importance"], 
-        get(this.sensemakerStore.appletConfig()).methods["total_importance_method"],
-      )
+      // await this.sensemakerStore.updateWidgetMappingConfig(
+      //   encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]), 
+      //   encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["importance"]),
+      //   get(this.sensemakerStore.appletConfig()).dimensions["total_importance"], 
+      //   get(this.sensemakerStore.appletConfig()).methods["total_importance_method"],
+      // )
 
-      await this.sensemakerStore.updateWidgetMappingConfig(
-        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]), 
-        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
-        get(this.sensemakerStore.appletConfig()).dimensions["average_heat"], 
-        get(this.sensemakerStore.appletConfig()).methods["average_heat_method"],
-      )
+      // await this.sensemakerStore.updateWidgetMappingConfig(
+      //   encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]), 
+      //   encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
+      //   get(this.sensemakerStore.appletConfig()).dimensions["average_heat"], 
+      //   get(this.sensemakerStore.appletConfig()).methods["average_heat_method"],
+      // )
       
       // customElements.define('total-importance-dimension-display', TotalImportanceDimensionDisplay);
       // customElements.define('importance-dimension-assessment', ImportanceDimensionAssessment);
