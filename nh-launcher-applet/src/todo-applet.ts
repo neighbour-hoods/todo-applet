@@ -83,7 +83,7 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
       const perceivedHeatDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]
       const averageHeatDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["average_heat"]
       await this.sensemakerStore.getAssessmentsForResources({
-      dimension_ehs: [importanceDimensionEh, totalImportanceDimensionEh, perceivedHeatDimensionEh, averageHeatDimensionEh],
+      dimension_ehs: null,
       resource_ehs: allTaskEntryHashes
     })
       this.loaded = true;
