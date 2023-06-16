@@ -3,8 +3,9 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { EntryHash } from '@holochain/client';
 import { AssessDimensionWidget, RangeValue, SensemakerStore, sensemakerStoreContext } from '@neighbourhoods/client';
 import { contextProvided } from '@lit-labs/context';
+import { variables } from '../../../styles/variables';
 
-@customElement('heat-dimension-assessment')
+// @customElement('heat-dimension-assessment')
 export class HeatDimensionAssessment extends AssessDimensionWidget {
     @contextProvided({ context: sensemakerStoreContext, subscribe: true })
     @state()
@@ -29,11 +30,11 @@ export class HeatDimensionAssessment extends AssessDimensionWidget {
         
         return html`
                     <div class="heat-scale">
-                        <div @click=${() => this.assessResource({ Integer: 0 })}>🧊</div>
-                        <div @click=${() => this.assessResource({ Integer: 1 })}>❄️</div>
-                        <div @click=${() => this.assessResource({ Integer: 2 })}>💧</div>
-                        <div @click=${() => this.assessResource({ Integer: 3 })}>🌶️</div>
-                        <div @click=${() => this.assessResource({ Integer: 4 })}>🔥</div>
+                        <span class="emoji-option" @click=${() => this.assessResource({ Integer: 0 })}>🧊</span>
+                        <span class="emoji-option" @click=${() => this.assessResource({ Integer: 1 })}>❄️</span>
+                        <span class="emoji-option" @click=${() => this.assessResource({ Integer: 2 })}>💧</span>
+                        <span class="emoji-option" @click=${() => this.assessResource({ Integer: 3 })}>🌶️</span>
+                        <span class="emoji-option" @click=${() => this.assessResource({ Integer: 4 })}>🔥</span>
                     </div>
                 `
     }
@@ -42,11 +43,29 @@ export class HeatDimensionAssessment extends AssessDimensionWidget {
         return {
         }
     }
-    static styles = css`
+    static get styles() {
+        return [
+        variables,
+        css`
         .heat-scale {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            background-color: var(--nh-theme-bg-surface);
+            padding: 2px;
+            border-radius: var(--border-r-tiny);
+            display: block;
+            margin: 2px;
+            border-color: var(--nh-theme-accent-muted);
+            border-style: solid;
+            border-width: 1px;
         }
-    `
+        .emoji-option {
+            position: relative;
+            display: inline-block;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    `]
+    }
 }
 
