@@ -65,6 +65,9 @@ export class HeatDimensionAssessment extends AssessDimensionWidget {
             top: 50%;
             transform: translateY(-50%);
         }
+        .emoji-option:hover {
+            cursor: pointer;
+        }
     `]
     }
 }
