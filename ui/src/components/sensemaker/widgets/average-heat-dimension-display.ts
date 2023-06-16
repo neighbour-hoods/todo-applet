@@ -53,6 +53,7 @@ export class AverageHeatDimensionDisplay extends DisplayDimensionWidget {
                     position: relative;
                     top: 50%;
                     transform: translateY(-55%);
+                    font-size: 16px;
                 }
                 .display-box-wrapper {
                     position: relative;

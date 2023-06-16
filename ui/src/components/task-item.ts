@@ -37,6 +37,7 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
                     background-color: var(--nh-theme-bg-surface);
                     border-radius: var(--border-r-tiny);
                     margin: 4px;
+                    font-size: 16px;
                   }
                   .check-list-item {
                     color: var(--nh-theme-fg-default);

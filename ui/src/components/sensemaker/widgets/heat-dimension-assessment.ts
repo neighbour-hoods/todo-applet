@@ -59,6 +59,7 @@ export class HeatDimensionAssessment extends AssessDimensionWidget {
             border-style: solid;
             border-width: 1px;
             margin: 4px;
+            font-size: 16px;
         }
         .emoji-option {
             position: relative;
