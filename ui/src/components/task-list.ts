@@ -1,16 +1,18 @@
 import { property, state } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
-import { LitElement, html } from "lit";
+import { LitElement, css, html } from "lit";
 import { TaskItem } from "./task-item";
 import { sensemakerStoreContext, todoStoreContext } from "../contexts";
 import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
 import { AddItem } from "./add-item";
 import { List } from '@scoped-elements/material-web'
-import { SensemakerStore, SensemakeResource } from "@neighbourhoods/client";
+import { SensemakerStore } from "@neighbourhoods/client";
+import { SensemakeResource } from "./sensemaker/sensemake-resource";
 import { StoreSubscriber } from "lit-svelte-stores";
 import {repeat} from 'lit/directives/repeat.js';
 import { contextProvided } from "@lit-labs/context";
+import { variables } from "../styles/variables";
 
 // add item at the bottom
 export class TaskList extends ScopedElementsMixin(LitElement) {
@@ -82,6 +84,16 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
             `
         }
+    }
+    static get styles() {
+        return [
+        variables,
+        css`
+        add-item {
+            position: absolute;
+            bottom: 0;
+        }
+    `]
     }
     static get scopedElements() {
         return {
