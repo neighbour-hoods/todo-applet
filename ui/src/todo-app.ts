@@ -39,6 +39,7 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
     // the task list component is also used to display a cultural context, so we need to pass a flag to it
     // TODO: instead of having one task-list component, might be best to have separate ones - context view, empty list, etc. and just pass through the list itself
     const taskList = html`
+      <div class="task-list-header">${this.activeList}</div>
       <task-list listName=${this.activeList}></task-list>
     `;
 
@@ -169,7 +170,21 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
                 position: absolute;
                 bottom: 0;
             }
-          ;
+            .task-list-header {
+                width: 99%;
+                height: 58px;
+                background-color: var(--nh-theme-accent-muted);
+                border-radius: var(--border-r-tiny);
+                margin: 4px;
+                margin-top: 6px;
+                margin-right: -16px;
+                align-items: center;
+                justify-content: center;
+                display: flex;
+            }
+            .view {
+              width: 620px;
+            }
             `
         ]
     }
