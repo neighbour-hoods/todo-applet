@@ -50,7 +50,7 @@ export class HeatDimensionAssessment extends AssessDimensionWidget {
         .heat-scale {
             display: flex;
             flex-direction: row;
-            background-color: var(--nh-theme-bg-surface);
+            background-color: var(--nh-theme-bg-muted);
             padding: 2px;
             border-radius: var(--border-r-tiny);
             display: block;
@@ -58,6 +58,7 @@ export class HeatDimensionAssessment extends AssessDimensionWidget {
             border-color: var(--nh-theme-accent-muted);
             border-style: solid;
             border-width: 1px;
+            margin: 4px;
         }
         .emoji-option {
             position: relative;
