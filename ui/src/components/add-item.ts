@@ -1,7 +1,8 @@
 import { property, query, state } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
-import { LitElement, html } from "lit";
+import { LitElement, css, html } from "lit";
 import { TextField, Button } from '@scoped-elements/material-web'
+import { variables } from "../styles/variables";
 
 export class AddItem extends ScopedElementsMixin(LitElement) {
     @property()
@@ -39,6 +40,24 @@ export class AddItem extends ScopedElementsMixin(LitElement) {
         }
     }
 
+    static get styles() {
+        return [
+            variables,
+            css`
+                #new-item-input {
+                    --mdc-theme-primary: var(--nh-theme-fg-default);
+                    --mdc-text-field-fill-color: var(--nh-theme-bg-surface);
+                    color: var(--nh-theme-fg-default);
+                }
+                #new-item-input::part(input) {
+                    color: white;
+                }
+                #new-item-input::placeholder {
+                    color: var(--nh-theme-fg-default);
+                }
+            `
+        ]
+    }
     static get scopedElements() {
         return {
             'mwc-textfield': TextField,

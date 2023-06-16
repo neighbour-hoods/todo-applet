@@ -41,6 +41,7 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
                   }
                   .check-list-item {
                     color: var(--nh-theme-fg-default);
+                    width: 100%;
                   }
                 `
         ]

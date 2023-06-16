@@ -12,6 +12,7 @@ import { ContextSelector } from './components/sensemaker/context-selector';
 import { ContextView } from './components/sensemaker/context-view';
 import { Checkbox } from '@scoped-elements/material-web'
 import { encodeHashToBase64 } from '@holochain/client';
+import { variables } from './styles/variables';
 
 export class TodoApp extends ScopedElementsMixin(LitElement) {
   @contextProvider({ context: todoStoreContext })
@@ -50,8 +51,11 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
         <div class="home-page">
           <mwc-checkbox @click=${this.toggleDefaultUISettings}></mwc-checkbox>
           <div class="view-selectors">
-            <context-selector @list-selected=${this.computeContext}></context-selector>
+            <div class="view-selector-heading">Lists</div>
             <list-list @list-selected=${this.updateActiveList}></list-list>
+            <div class="view-selector-heading">Sensemaker Contexts</div>
+            <context-selector @list-selected=${this.computeContext}></context-selector>
+            <add-item itemType="list" @new-item=${this.addNewList}></add-item>
           </div>
           <div class="view">
             ${this.activeContext ? contextResult : taskList}
@@ -61,6 +65,9 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
     `;
   }
 
+    async addNewList(e: CustomEvent) {
+       await this.todoStore.createNewList(e.detail.newValue)
+    }
   // handle the @list-selected event from the list-list component
   updateActiveList(e: CustomEvent) {
     this.activeList = e.detail.selectedList;
@@ -107,42 +114,63 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
     };
   }
 
-  static styles = css`
-    .home-page {
-      display: flex;
-      flex-direction: row;
-    }  
-
-    :host {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      font-size: calc(10px + 2vmin);
-      color: #1a2b42;
-      max-width: 960px;
-      margin: 0 auto;
-      text-align: center;
-      background-color: var(--lit-element-background-color);
+    static get styles() {
+        return [
+            variables,
+            css`
+            .home-page {
+              display: flex;
+              flex-direction: row;
+              background-color: var(--nh-theme-bg-canvas);
+              color: var(--nh-theme-fg-default);
+              width: 100%;
+              height: 99%;
+            }  
+        
+            :host {
+              min-height: 100vh;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: flex-start;
+              font-size: calc(10px + 2vmin);
+              color: var(--nh-theme-fg-default);
+              margin:  0px;
+              text-align: center;
+              background-color: var(--lit-element-background-color);
+            }
+        
+            main {
+              flex-grow: 1;
+              width: 100%;
+              background-color: var(--nh-theme-bg-canvas);
+            }
+        
+            .app-footer {
+              font-size: calc(12px + 0.5vmin);
+              align-items: center;
+            }
+        
+            .app-footer a {
+              margin-left: 5px;
+            }
+        
+            .view-selectors {
+                display: flex;
+                flex-direction: column;
+                background-color: var(--nh-theme-bg-surface);
+                width: 300px;
+                border-radius: var(--border-r-tiny);
+                margin: 4px;
+                margin-top: 6px;
+                height: 100%;
+            }
+            add-item {
+                position: absolute;
+                bottom: 0;
+            }
+          ;
+            `
+        ]
     }
-
-    main {
-      flex-grow: 1;
-    }
-
-    .app-footer {
-      font-size: calc(12px + 0.5vmin);
-      align-items: center;
-    }
-
-    .app-footer a {
-      margin-left: 5px;
-    }
-
-    .view-selectors {
-        display: flex;
-        flex-direction: column;
-    }
-  `;
 }
