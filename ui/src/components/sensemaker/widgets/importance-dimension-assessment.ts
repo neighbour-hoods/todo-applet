@@ -4,6 +4,7 @@ import { EntryHash } from '@holochain/client';
 import { Checkbox } from '@scoped-elements/material-web'
 import { AssessDimensionWidget, RangeValue, SensemakerStore, sensemakerStoreContext } from '@neighbourhoods/client';
 import { contextProvided } from '@lit-labs/context';
+import { variables } from '../../../styles/variables';
 
 @customElement('importance-dimension-assessment')
 export class ImportanceDimensionAssessment extends AssessDimensionWidget {
@@ -38,17 +39,21 @@ export class ImportanceDimensionAssessment extends AssessDimensionWidget {
         //         ></mwc-checkbox>
         return html`
             <div class="importance-toggle">
+            <label class="star-checkbox">
                 <input 
-                    type="checkbox" 
+                    type="checkbox"
                     name="myCheckbox" 
                     value="important" 
                     ?checked=${this.latestAssessment}
                     ?disabled=${this.latestAssessment} 
                     @click=${() => {console.log('resourceEh from widget implementation', this.resourceEh); !this.latestAssessment ? this.assessResource({
-                Integer: 1
-            }) : null}}
+                        Integer: 1
+                    }) : null}}
                 >
+                <span class="star"></span>
+            </label>
             </div>
+          
         `
     }
 
@@ -57,10 +62,59 @@ export class ImportanceDimensionAssessment extends AssessDimensionWidget {
             'mwc-checkbox': Checkbox,
         }
     }
-    static styles = css`
-        .heat-scale {
-            display: flex;
-            flex-direction: row;
-        }
-    `
+    static get styles() {
+        return [
+            variables,
+            css`
+            .importance-toggle {
+                display: flex;
+                flex-direction: row;
+                background-color: var(--nh-theme-bg-muted);
+                padding: 2px;
+                border-radius: var(--border-r-tiny);
+                display: block;
+                margin: 2px;
+                border-color: var(--nh-theme-accent-muted);
+                border-style: solid;
+                border-width: 1px;
+                margin: 4px;
+                font-size: 16px;
+                width: 40px;
+            }
+            .star-checkbox {
+                display: inline-block;
+                position: relative;
+                cursor: pointer;
+                top: 50%;
+                transform: translateY(-50%);
+              }
+              
+              .star-checkbox input[type="checkbox"] {
+                display: none;
+              }
+              
+              .star-checkbox .star {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                background-color: #ccc;
+                clip-path: polygon(
+                  50% 0%,
+                  63% 38%,
+                  100% 38%,
+                  69% 59%,
+                  82% 100%,
+                  50% 75%,
+                  18% 100%,
+                  31% 59%,
+                  0% 38%,
+                  37% 38%
+                );
+              }
+              
+              .star-checkbox input[type="checkbox"]:checked + .star {
+                background-color: #ffdd00; /* Replace with your desired color */
+              }
+        `]
+    }
 }
