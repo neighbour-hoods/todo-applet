@@ -13,6 +13,7 @@ import { ContextView } from './components/sensemaker/context-view';
 import { Checkbox } from '@scoped-elements/material-web'
 import { encodeHashToBase64 } from '@holochain/client';
 import { variables } from './styles/variables';
+import { AddItem } from './components/add-item';
 
 export class TodoApp extends ScopedElementsMixin(LitElement) {
   @contextProvider({ context: todoStoreContext })
@@ -61,15 +62,26 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
           </div>
           <div class="view">
             ${this.activeContext ? contextResult : taskList}
+            ${this.activeContext ? null : html`
+              <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
+            `}
+
           </div>
         </div>
       </main>
     `;
   }
 
-    async addNewList(e: CustomEvent) {
-       await this.todoStore.createNewList(e.detail.newValue)
-    }
+  async addNewList(e: CustomEvent) {
+      await this.todoStore.createNewList(e.detail.newValue)
+  }
+  async addNewTask(e: CustomEvent) {
+      console.log('adding new item', e.detail.newValue)
+      await this.todoStore.addTaskToList({
+      task_description: e.detail.newValue,
+      list: this.activeList!,
+  })
+  }
   // handle the @list-selected event from the list-list component
   updateActiveList(e: CustomEvent) {
     this.activeList = e.detail.selectedList;
@@ -113,6 +125,7 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
       'context-selector': ContextSelector,
       'context-view': ContextView,
       'mwc-checkbox': Checkbox,
+      'add-item': AddItem,
     };
   }
 
@@ -166,10 +179,11 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
                 margin: 4px;
                 margin-top: 6px;
                 height: 100%;
+                position: relative;
             }
             add-item {
-                position: absolute;
-                bottom: 0;
+              position: absolute;
+              bottom: 0px;
             }
             .task-list-header {
                 width: 99%;
@@ -186,6 +200,10 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
             }
             .view {
               width: 620px;
+              position: relative;
+            }
+            task-list {
+              height: 100%;
             }
             `
         ]
