@@ -3,7 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { Assessment, DisplayDimensionWidget, RangeValueInteger } from '@neighbourhoods/client';
 import { variables } from '../../../styles/variables';
 
-// @customElement('average-heat-dimension-display')
+@customElement('average-heat-dimension-display')
 export class AverageHeatDimensionDisplay extends DisplayDimensionWidget {
     @property()
     assessment!: Assessment | null

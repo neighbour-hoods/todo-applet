@@ -5,7 +5,7 @@ import { AssessDimensionWidget, RangeValue, SensemakerStore, sensemakerStoreCont
 import { contextProvided } from '@lit-labs/context';
 import { variables } from '../../../styles/variables';
 
-// @customElement('heat-dimension-assessment')
+@customElement('heat-dimension-assessment')
 export class HeatDimensionAssessment extends AssessDimensionWidget {
     @contextProvided({ context: sensemakerStoreContext, subscribe: true })
     @state()
