@@ -44,6 +44,7 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
     `;
 
     const contextResult = html`
+      <div class="task-list-header">${this.activeContext}</div>
       <context-view contextName=${this.activeContext}></context-view>
     `;
 
@@ -181,6 +182,7 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
                 align-items: center;
                 justify-content: center;
                 display: flex;
+                font-size: 20px;
             }
             .view {
               width: 620px;
