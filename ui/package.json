@@ -24,11 +24,12 @@
     "@material/mwc-button": "^0.25.3",
     "@material/mwc-circular-progress": "^0.25.3",
     "@msgpack/msgpack": "^2.7.2",
-    "@neighbourhoods/client": "0.0.2",
+    "@neighbourhoods/client": "0.0.3",
     "@type-craft/content": "^0.0.7",
     "@type-craft/title": "^0.0.8",
     "lit": "^2.0.2",
-    "lit-svelte-stores": "0.2.5"
+    "lit-svelte-stores": "0.2.5",
+    "neighbourhoods-design-system-components": "^0.0.12"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.15.0",
