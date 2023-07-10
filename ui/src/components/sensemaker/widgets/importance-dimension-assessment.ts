@@ -11,7 +11,7 @@ export class ImportanceDimensionAssessment extends AssessDimensionWidget {
     @contextProvided({ context: sensemakerStoreContext, subscribe: true })
     @state()
     sensemakerStore!: SensemakerStore;
-    
+
     @property()
     resourceEh!: EntryHash
 
@@ -46,9 +46,11 @@ export class ImportanceDimensionAssessment extends AssessDimensionWidget {
                     value="important" 
                     ?checked=${this.latestAssessment}
                     ?disabled=${this.latestAssessment} 
-                    @click=${() => {console.log('resourceEh from widget implementation', this.resourceEh); !this.latestAssessment ? this.assessResource({
-                        Integer: 1
-                    }) : null}}
+                    @click=${() => {
+                console.log('resourceEh from widget implementation', this.resourceEh); !this.latestAssessment ? this.assessResource({
+                    Integer: 1
+                }) : null
+            }}
                 >
                 <span class="star"></span>
             </label>
@@ -72,21 +74,20 @@ export class ImportanceDimensionAssessment extends AssessDimensionWidget {
                 background-color: var(--nh-theme-bg-muted);
                 padding: 2px;
                 border-radius: var(--border-r-tiny);
-                display: block;
-                margin: 2px;
                 border-color: var(--nh-theme-accent-muted);
                 border-style: solid;
                 border-width: 1px;
                 margin: 4px;
                 font-size: 16px;
-                width: 40px;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                flex-wrap: nowrap;
             }
             .star-checkbox {
-                display: inline-block;
-                position: relative;
-                cursor: pointer;
-                top: 50%;
-                transform: translateY(-50%);
+                display: flex;
+                padding-left: 10px;
+                padding-right: 10px;
               }
               
               .star-checkbox input[type="checkbox"] {

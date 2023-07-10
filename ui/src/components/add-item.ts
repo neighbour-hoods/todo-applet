@@ -18,8 +18,8 @@ export class AddItem extends ScopedElementsMixin(LitElement) {
     render() {
         return html`
             <div class="add-item-container">
-            <input id="new-item-input" type="text" .value="${this.inputValue}" @input="${this.handleInput}">
-            <button @click="${this.dispatchNewItem}">Add</button>
+                <input id="new-item-input" type="text" .value="${this.inputValue}" @input="${this.handleInput}">
+                <button @click="${this.dispatchNewItem}">Add</button>
             </div>
         `
     }
@@ -50,9 +50,10 @@ export class AddItem extends ScopedElementsMixin(LitElement) {
         return [
             variables,
             css`
-                add-item-container {
+                .add-item-container {
                     display: flex;
-                    width: 100%;
+                    flex-basis: 100%;
+                    gap: 8px;
                 }
                 input {
                     background-color: var(--nh-theme-bg-subtle);
@@ -61,17 +62,29 @@ export class AddItem extends ScopedElementsMixin(LitElement) {
                     border-radius: var(--border-r-tiny);
                     font-size: 16px;
                     border: none;
-                    left: 0;
-                    right: 0;
+                    display: flex;
+                    flex: 1;
                 }
                 button {
-                    position: absolute;
+                    display: flex;
                     border-radius: var(--border-r-tiny);
                     height: 36px;
-                    background-color: var(--nh-theme-accent-muted);
+                    background-color: var(--nh-theme-accent);
                     color: var(--nh-theme-fg-default);
                     font-size: 16px;
-                    width: 64px;
+                    flex-basis: 54px;
+                    border: 0px solid transparent;
+                    text-align: center;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+                }
+                button:hover {
+                    background-color: var(--nh-theme-accent-muted);
+                }
+                button:active {
+                    box-shadow: 0px 0px 8px var(--nh-theme-accent);
                 }
             `
         ]

@@ -37,7 +37,6 @@ export class ListList extends ScopedElementsMixin(LitElement) {
     static get scopedElements() {
         return {
         'list-item': ListItem,
-        'add-item': AddItem,
         'mwc-list': List,
         'mwc-list-item': MWCListItem,
         };
@@ -48,6 +47,7 @@ export class ListList extends ScopedElementsMixin(LitElement) {
                 .list-list-container {
                     display: flex;
                     flex-direction: column;
+                    width: 100%;
                 }
                 .todo-list-list-item:hover {
                     background-color: var(--nh-theme-accent-muted);

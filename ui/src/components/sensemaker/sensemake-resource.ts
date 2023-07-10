@@ -65,6 +65,9 @@ export class SensemakeResource extends ScopedElementsMixin(LitElement) {
                 width: 100%;
                 height: 100%;
             }
+            ::slotted(*) {
+                flex: 1;
+            }
         `]};
     static get scopedElements() {
         return {

@@ -52,21 +52,22 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
     return html`
       <main>
         <div class="home-page">
-          <mwc-checkbox @click=${this.toggleDefaultUISettings}></mwc-checkbox>
           <div class="view-selectors">
-            <div class="view-selector-heading">Lists</div>
-            <list-list @list-selected=${this.updateActiveList}></list-list>
-            <div class="view-selector-heading">Sensemaker Contexts</div>
-            <context-selector @list-selected=${this.computeContext}></context-selector>
-            <add-item itemType="list" @new-item=${this.addNewList}></add-item>
+            <div class="top-elements">
+              <div class="view-selector-heading">Lists</div>
+              <list-list @list-selected=${this.updateActiveList}></list-list>
+              <div class="view-selector-heading">Sensemaker Contexts</div>
+              <context-selector @list-selected=${this.computeContext}></context-selector>
+            </div>
+            <div class="bottom-elements">
+              <add-item itemType="list" @new-item=${this.addNewList}></add-item>
+            </div>
           </div>
           <div class="view">
             ${this.activeContext ? contextResult : taskList}
-            ${this.activeContext ? null : html`
               <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
-            `}
-
           </div>
+          <mwc-checkbox @click=${this.toggleDefaultUISettings}></mwc-checkbox>
         </div>
       </main>
     `;
@@ -74,6 +75,8 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
 
   async addNewList(e: CustomEvent) {
       await this.todoStore.createNewList(e.detail.newValue)
+      this.activeList = e.detail.newValue;
+      this.activeContext = undefined;
   }
   async addNewTask(e: CustomEvent) {
       console.log('adding new item', e.detail.newValue)
@@ -153,12 +156,17 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
               margin:  0px;
               text-align: center;
               background-color: var(--lit-element-background-color);
+              --mdc-ripple-color: var(--nh-theme-accent-muted);
+              --mdc-ripple-hover-opacity: 0.2;
+              --mdc-ripple-press-opacity: 0.5;
+              --mdc-ripple-fg-opacity: var(--mdc-ripple-press-opacity, 0.12);
             }
         
             main {
               flex-grow: 1;
               width: 100%;
               background-color: var(--nh-theme-bg-canvas);
+              padding-bottom: 76px;
             }
         
             .app-footer {
@@ -180,10 +188,14 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
                 margin-top: 6px;
                 height: 100%;
                 position: relative;
+                justify-content: space-between;
+                padding: 8px;
+                box-sizing: border-box;
             }
-            add-item {
-              position: absolute;
-              bottom: 0px;
+            .view-selector-heading {
+              text-align: center;
+              display: flex;
+              justify-content: center;
             }
             .task-list-header {
                 width: 99%;
@@ -200,10 +212,29 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
             }
             .view {
               width: 620px;
-              position: relative;
+              justify-content: space-between;
+              display: flex;
+              flex-direction: column;
+              padding: 8px;
             }
-            task-list {
+            task-list, context-view {
               height: 100%;
+            }
+            .top-elements, .bottom-elements, .view-selector-heading {
+              display: flex;
+            }
+            .top-elements {
+              flex-direction: column;
+            }
+            .top-elements > *, .bottom-elements > * {
+              display: flex;
+              width: 100%;
+            }
+            .bottom-elements {
+              margin-bottom: 8px;
+            }
+            context-view + add-item {
+              display: none;
             }
             `
         ]

@@ -53,19 +53,18 @@ export class HeatDimensionAssessment extends AssessDimensionWidget {
             background-color: var(--nh-theme-bg-muted);
             padding: 2px;
             border-radius: var(--border-r-tiny);
-            display: block;
-            margin: 2px;
             border-color: var(--nh-theme-accent-muted);
             border-style: solid;
             border-width: 1px;
             margin: 4px;
             font-size: 16px;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: nowrap;
         }
         .emoji-option {
-            position: relative;
-            display: inline-block;
-            top: 50%;
-            transform: translateY(-50%);
+            display: flex;
         }
         .emoji-option:hover {
             cursor: pointer;

@@ -30,7 +30,6 @@ export class ContextView extends ScopedElementsMixin(LitElement) {
         // consider using `repeat()` instead of `map()`
         return html`
             ${this.tasksInContext.value.map((task) => html`
-                <div class="sensemake-resource-wrapper">
                 <sensemake-resource class="sensemake-resource"
                     .resourceEh=${task.entry_hash} 
                     .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
@@ -40,14 +39,12 @@ export class ContextView extends ScopedElementsMixin(LitElement) {
                         .completed=${('Complete' in task.entry.status)} 
                     ></task-item>
                 </sensemake-resource>
-                </div>
             `)}
         `
     }
     static get scopedElements() {
         return {
             'task-item': TaskItem,
-            'add-item': AddItem,
             'mwc-list': List,
             'sensemake-resource': SensemakeResource,
         };
@@ -55,8 +52,13 @@ export class ContextView extends ScopedElementsMixin(LitElement) {
     static get styles() {
         return [
             css`
-                .sensemake-resource-wrapper {
+                .sensemake-resource {
                     height: 60px;
+                    display: flex;
+                }
+                task-item {
+                    display: flex;
+                    flex: 1;
                 }
             `
         ]

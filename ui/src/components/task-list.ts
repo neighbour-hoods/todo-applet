@@ -38,7 +38,6 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     // listTasksAssessments = new StoreSubscriber(this, () => this.sensemakerStore.resourceAssessments(this.listTasks.value.map((task) => encodeHashToBase64(task.entry_hash))));
     
     render() {
-        
         this.updateTaskList()
 
         if (this.listName) {
@@ -81,7 +80,6 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
                     ></task-item>
                 </sensemake-resource> 
             `}) : html``}
-            <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
             `
         }
     }
@@ -89,16 +87,19 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         return [
         variables,
         css`
+        mwc-list {
+            position: relative;
+        }
         add-item {
-            position: absolute;
-            bottom: 0;
+        }
+        task-list-container {
+            height: 100vh;
         }
     `]
     }
     static get scopedElements() {
         return {
         'task-item': TaskItem,
-        'add-item': AddItem,
         'mwc-list': List,
         'sensemake-resource': SensemakeResource,
         };

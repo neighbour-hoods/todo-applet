@@ -33,7 +33,7 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
                     display: flex;
                     flex-direction: row;
                     color: var(--nh-theme-fg-default);
-                    width: 400px;
+                    flex: 1;
                     background-color: var(--nh-theme-bg-surface);
                     border-radius: var(--border-r-tiny);
                     margin: 4px;
