@@ -13,7 +13,7 @@
     "test": "npm run build:happ && npm t -w tests",
     "start:happ": "concurrently \"RUST_LOG=warn echo \"pass\" | hc s --piped -f=$HC_ADMIN_PORT generate ./workdir/sensemaker-enabled/todo-sensemaker.happ --run=$HC_PORT -a todo network mdns\" \"npm run playground\"",
     "launch:happ": "RUST_LOG=warn echo \"pass\" | hc launch --piped -n $AGENTS ./workdir/sensemaker-enabled/todo-sensemaker.happ --ui-path ui/dist network mdns",
-    "package": "npm run build:happ && npm run ts-build -w ui && npm run package:ui -w nh-launcher-applet && hc web-app pack workdir",
+    "package": "npm run build:happ && npm run package:ui -w ui && hc web-app pack workdir",
     "build:happ": "npm run build:dnas && hc app pack ./workdir",
     "build:test-happ": "npm run download-sensemaker && npm run build:dnas && hc app pack ./workdir/sensemaker-enabled",
     "build:dnas": "npm run build:zomes && hc dna pack ./dna/workdir",
