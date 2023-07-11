@@ -60,8 +60,25 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
       await this.connectHolochain()
       const installedCells = this.appInfo.cell_info;
 
+      // mocking what gets passed to the applet
+      this.appletInfo = [{
+        weInfo: {
+            logoSrc: "",
+            name: ""
+        },
+        appInfo: this.appInfo
+      }];
+
       // check if sensemaker has been cloned yet
       const sensemakerCellInfo: CellInfo[] = installedCells["sensemaker"];
+      console.log('sensemakerCell', sensemakerCellInfo)
+      if (sensemakerCellInfo.length > 1) {
+        this.isSensemakerCloned = true;
+        const clonedSMCellId = (sensemakerCellInfo[1] as { cloned: ClonedCell }).cloned.clone_id;
+        console.log('clonedSMCellId', clonedSMCellId);
+        await this.initializeSensemakerStore(clonedSMCellId);
+        this.loading = false;
+      }
       const todoCellInfo: CellInfo[] = installedCells["todo_lists"];
       let todoCellId: CellId;
       if (CellType.Provisioned in todoCellInfo[0]) {
@@ -71,15 +88,6 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
 
       }
       this.agentPubkey = encodeHashToBase64(todoCellId[1]);
-
-      // mocking what gets passed to the applet
-      this.appletInfo = [{
-        weInfo: {
-            logoSrc: "",
-            name: ""
-        },
-        appInfo: this.appInfo
-      }];
     }
     catch (e) {
       console.log("error registering applet", e)
