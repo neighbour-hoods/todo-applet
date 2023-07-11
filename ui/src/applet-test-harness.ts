@@ -21,10 +21,10 @@ import { SensemakerStore } from '@neighbourhoods/client';
 import { appletConfig } from './appletConfig'
 import todoApplet from './applet/index'
 import { AppletInfo, AppletRenderers } from '@neighbourhoods/nh-launcher-applet';
-import { RenderBlock } from "./render-block";
+import { RenderBlock } from "./applet/render-block";
 
-@customElement('bundle-harness')
-export class BundleHarness extends ScopedElementsMixin(LitElement) {
+@customElement('applet-test-harness')
+export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   @state() loading = true;
   @state() actionHash: ActionHash | undefined;
   @state() currentSelectedList: string | undefined;
