@@ -71,11 +71,9 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
 
       // check if sensemaker has been cloned yet
       const sensemakerCellInfo: CellInfo[] = installedCells["sensemaker"];
-      console.log('sensemakerCell', sensemakerCellInfo)
       if (sensemakerCellInfo.length > 1) {
         this.isSensemakerCloned = true;
         const clonedSMCellId = (sensemakerCellInfo[1] as { cloned: ClonedCell }).cloned.clone_id;
-        console.log('clonedSMCellId', clonedSMCellId);
         await this.initializeSensemakerStore(clonedSMCellId);
         this.loading = false;
       }
