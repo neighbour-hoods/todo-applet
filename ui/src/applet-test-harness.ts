@@ -22,6 +22,7 @@ import { appletConfig } from './appletConfig'
 import todoApplet from './applet/index'
 import { AppletInfo, AppletRenderers } from '@neighbourhoods/nh-launcher-applet';
 import { RenderBlock } from "./applet/render-block";
+import { getCellId } from './utils';
 
 @customElement('applet-test-harness')
 export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
@@ -59,6 +60,14 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
     try {
       await this.connectHolochain()
       const installedCells = this.appInfo.cell_info;
+      await Promise.all(
+        Object.keys(installedCells).map(roleName => {
+          installedCells[roleName].map(cellInfo => {
+            console.log('cell info map', cellInfo)
+            this.adminWebsocket.authorizeSigningCredentials(getCellId(cellInfo)!);
+          })
+        })
+      );
 
       // mocking what gets passed to the applet
       this.appletInfo = [{
@@ -93,7 +102,7 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   }
 
   async initializeSensemakerStore(clonedSensemakerRoleName: string) {
-    const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(``, "todo-sensemaker");
+    const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(`ws://localhost:9001`, "todo-sensemaker");
     this._sensemakerStore = new SensemakerStore(appAgentWebsocket, clonedSensemakerRoleName);
     // @ts-ignore
     this.renderers = await todoApplet.appletRenderers(this.appWebsocket, this.adminWebsocket, { sensemakerStore: this._sensemakerStore }, this.appletInfo);
@@ -114,6 +123,7 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
         },
     }});
     this.isSensemakerCloned = true;
+    await this.adminWebsocket.authorizeSigningCredentials(clonedSensemakerCell.cell_id);
     await this.initializeSensemakerStore(clonedSensemakerCell.clone_id)
   }
 
@@ -156,11 +166,12 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   }
 
   async connectHolochain() {
-    this.adminWebsocket = await AdminWebsocket.connect(``);
-    this.appWebsocket = await AppWebsocket.connect(``);
+    this.adminWebsocket = await AdminWebsocket.connect(`ws://localhost:9000`);
+    this.appWebsocket = await AppWebsocket.connect(`ws://localhost:9001`);
     this.appInfo = await this.appWebsocket.appInfo({
-      installed_app_id: 'todo',
+      installed_app_id: 'todo-sensemaker',
     });
+    console.log("appInfo", this.appInfo)
   }
 
   static get scopedElements() {

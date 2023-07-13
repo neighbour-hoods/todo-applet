@@ -23,6 +23,7 @@ const todoApplet: NhLauncherApplet = {
         element.innerHTML = `<todo-applet></todo-applet>`;
         const appletElement = element.querySelector("todo-applet") as any;
         appletElement.appWebsocket = appWebsocket;
+        appletElement.adminWebsocket = adminWebsocket;
         appletElement.appletAppInfo = appletAppInfo;
         appletElement.sensemakerStore = weStore.sensemakerStore;
       },

@@ -10,11 +10,11 @@
     ".": "./dist/index.js"
   },
   "scripts": {
+    "start": "vite dev --clearScreen false --port $UI_PORT",
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
     "build": "rimraf dist && rollup -c prod.rollup.config.js",
     "build:watch": "vite build --config dev.vite.config.js -w",
-    "start": "tsc && concurrently -r \"npm run build:watch\" \"wds\"",
     "package:ui": "rimraf ui.zip && npm run build && cd ./dist && bestzip ../ui.zip index.js icon.png"
   },
   "dependencies": {
@@ -23,6 +23,9 @@
     "@material/mwc-button": "^0.25.3",
     "@material/mwc-circular-progress": "^0.25.3",
     "@msgpack/msgpack": "^2.7.2",
+    "@neighbourhoods/nh-launcher-applet": "0.0.10",
+    "@scoped-elements/material-web": "^0.0.19",
+    "@open-wc/scoped-elements": "^2.1.1",
     "@neighbourhoods/client": "0.0.3",
     "@type-craft/content": "^0.0.7",
     "@type-craft/title": "^0.0.8",
