@@ -13,9 +13,9 @@
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
     "build": "rimraf dist && rollup -c prod.rollup.config.js",
-    "build:watch": "vite build -w",
+    "build:watch": "vite build --config dev.vite.config.js -w",
     "start": "tsc && concurrently -r \"npm run build:watch\" \"wds\"",
-    "package:ui": "rimraf ui.zip && npm run build && cd ./dist && bestzip ../ui.zip index.js icon.png"
+    "package:ui": "rimraf ui.zip && cd ./dist && bestzip ../ui.zip index.js icon.png"
   },
   "dependencies": {
     "@holochain/client": "0.12.0",
