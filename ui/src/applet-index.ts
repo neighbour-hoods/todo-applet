@@ -1,6 +1,8 @@
 import {
   AdminWebsocket,
   AppWebsocket,
+  CellType,
+  ProvisionedCell,
 } from "@holochain/client";
 import {
   NhLauncherApplet,
@@ -8,7 +10,7 @@ import {
   WeServices,
   AppletInfo,
 } from "@neighbourhoods/nh-launcher-applet";
-import { TodoApplet } from "./todo-applet";
+import { TodoApplet } from "./applet/todo-applet";
 
 const todoApplet: NhLauncherApplet = {
   async appletRenderers(
