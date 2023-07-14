@@ -55,7 +55,7 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
       )
       const appWs = await AppWebsocket.connect(this.appWebsocket.client.socket.url)
       this.todoStore = new TodoStore(
-        appWs,
+        this.appWebsocket,
         todoCellInfo.cell_id,
         appletRoleName
       );
