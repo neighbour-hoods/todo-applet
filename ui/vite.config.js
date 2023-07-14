@@ -1,10 +1,9 @@
 import { defineConfig } from 'vite'
-import typescript from '@rollup/plugin-typescript'
 
 export default defineConfig(({ mode }) => {
-//   const isProduction = mode === 'production'
+  const isProduction = mode === 'production'
 
-  return {
+  return isProduction ? {
     plugins: [
       {
         name: 'copy-assets',
@@ -26,5 +25,5 @@ export default defineConfig(({ mode }) => {
         formats: ['es'],
       }
     },
-  }
+  } : {}
 })

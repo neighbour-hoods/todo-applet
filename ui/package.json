@@ -10,10 +10,10 @@
     ".": "./dist/index.js"
   },
   "scripts": {
-    "start": "vite dev --config dev.vite.config.js --clearScreen false --port $UI_PORT",
+    "start": "vite dev --mode development --clearScreen false --port $UI_PORT",
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
-    "build": "vite build",
+    "build": "vite build --mode production",
     "build:watch": "vite build --config dev.vite.config.js -w",
     "package:ui": "rimraf ui.zip && npm run build && cd ./dist && bestzip ../ui.zip index.js icon.png"
   },
