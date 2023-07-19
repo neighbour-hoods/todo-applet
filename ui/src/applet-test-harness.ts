@@ -24,6 +24,8 @@ import { AppletInfo, AppletRenderers } from '@neighbourhoods/nh-launcher-applet'
 import { RenderBlock } from "./applet/render-block";
 import { getCellId } from './utils';
 
+const INSTALLED_APP_ID = 'todo-sensemaker';
+
 @customElement('applet-test-harness')
 export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   @state() loading = true;
@@ -101,14 +103,15 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   }
 
   async initializeSensemakerStore(clonedSensemakerRoleName: string) {
-    const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(`ws://localhost:${import.meta.env.VITE_HC_PORT}`, "todo-sensemaker");
+    const hcPort = import.meta.env.VITE_AGENT === "2" ? import.meta.env.VITE_HC_PORT_2 : import.meta.env.VITE_HC_PORT;
+    const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(`ws://localhost:${hcPort}`, INSTALLED_APP_ID);
     this._sensemakerStore = new SensemakerStore(appAgentWebsocket, clonedSensemakerRoleName);
     // @ts-ignore
     this.renderers = await todoApplet.appletRenderers(this.appWebsocket, this.adminWebsocket, { sensemakerStore: this._sensemakerStore }, this.appletInfo);
   }
   async cloneSensemakerCell(ca_pubkey: string) {
     const clonedSensemakerCell: ClonedCell = await this.appWebsocket.createCloneCell({
-      app_id: 'todo-sensemaker',
+      app_id: INSTALLED_APP_ID,
       role_name: "sensemaker",
       modifiers: {
         network_seed: '',
@@ -165,10 +168,12 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   }
 
   async connectHolochain() {
-    this.adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${import.meta.env.VITE_ADMIN_PORT}`);
-    this.appWebsocket = await AppWebsocket.connect(`ws://localhost:${import.meta.env.VITE_HC_PORT}`);
+    const hcPort = import.meta.env.VITE_AGENT === "2" ? import.meta.env.VITE_HC_PORT_2 : import.meta.env.VITE_HC_PORT;
+    const adminPort = import.meta.env.VITE_AGENT === "2" ? import.meta.env.VITE_ADMIN_PORT_2 : import.meta.env.VITE_ADMIN_PORT;
+    this.adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`);
+    this.appWebsocket = await AppWebsocket.connect(`ws://localhost:${hcPort}`);
     this.appInfo = await this.appWebsocket.appInfo({
-      installed_app_id: 'todo-sensemaker',
+      installed_app_id: INSTALLED_APP_ID,
     });
 
   }
