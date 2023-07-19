@@ -6,9 +6,9 @@
     "tests"
   ],
   "scripts": {
-    "start": "AGENTS=2 npm run network",
-    "dev": "AGENTS=2 npm run network:dev",
-    "network:dev": "hc s clean && npm run build:test-happ && UI_PORT=8888 concurrently \"open-cli http://localhost:8888 && cd ui && npm start\" \"ADMIN_PORT=9000 HC_PORT=9001 npm run start:dev\"",
+    "start": "dotenv -- npm run network",
+    "dev": "dotenv -- npm run network:dev",
+    "network:dev": "hc s clean && npm run build:test-happ && dotenv -- concurrently \"open-cli http://localhost:${UI_PORT} && cd ui && npm start\" \"dotenv -- npm run start:dev\"",
     "start:dev": "RUST_LOG=warn WASM_LOG=debug echo \"pass\" | hc s --piped -f=$ADMIN_PORT generate ./workdir/sensemaker-enabled/todo-sensemaker.happ --run $HC_PORT -a todo-sensemaker network mdns",
     "network": "hc s clean && npm run build:test-happ && concurrently \"npm run build:watch -w ui\" \"npm run launch:happ\"",
     "test": "npm run build:happ && npm t -w tests",
@@ -27,8 +27,9 @@
     "concurrently-repeat": "^0.0.1",
     "cross-env": "^7.0.3",
     "new-port-cli": "^1.0.0",
-    "rimraf": "^3.0.2",
     "open-cli": "^7.2.0",
+    "rimraf": "^3.0.2",
+    "dotenv-cli": "^7.2.1",
     "run-singleton-cli": "^0.0.5"
   },
   "engines": {

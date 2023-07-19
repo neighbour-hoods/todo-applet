@@ -19,7 +19,7 @@ import { TodoStore } from './todo-store';
 import { CreateOrJoinNh } from './create-or-join-nh';
 import { SensemakerStore } from '@neighbourhoods/client';
 import { appletConfig } from './appletConfig'
-import todoApplet from './applet/index'
+import todoApplet from './applet-index'
 import { AppletInfo, AppletRenderers } from '@neighbourhoods/nh-launcher-applet';
 import { RenderBlock } from "./applet/render-block";
 import { getCellId } from './utils';
@@ -63,7 +63,6 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
       await Promise.all(
         Object.keys(installedCells).map(roleName => {
           installedCells[roleName].map(cellInfo => {
-            console.log('cell info map', cellInfo)
             this.adminWebsocket.authorizeSigningCredentials(getCellId(cellInfo)!);
           })
         })
@@ -102,7 +101,7 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   }
 
   async initializeSensemakerStore(clonedSensemakerRoleName: string) {
-    const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(`ws://localhost:9001`, "todo-sensemaker");
+    const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(`ws://localhost:${import.meta.env.VITE_HC_PORT}`, "todo-sensemaker");
     this._sensemakerStore = new SensemakerStore(appAgentWebsocket, clonedSensemakerRoleName);
     // @ts-ignore
     this.renderers = await todoApplet.appletRenderers(this.appWebsocket, this.adminWebsocket, { sensemakerStore: this._sensemakerStore }, this.appletInfo);
@@ -166,12 +165,12 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   }
 
   async connectHolochain() {
-    this.adminWebsocket = await AdminWebsocket.connect(`ws://localhost:9000`);
-    this.appWebsocket = await AppWebsocket.connect(`ws://localhost:9001`);
+    this.adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${import.meta.env.VITE_ADMIN_PORT}`);
+    this.appWebsocket = await AppWebsocket.connect(`ws://localhost:${import.meta.env.VITE_HC_PORT}`);
     this.appInfo = await this.appWebsocket.appInfo({
       installed_app_id: 'todo-sensemaker',
     });
-    console.log("appInfo", this.appInfo)
+
   }
 
   static get scopedElements() {
