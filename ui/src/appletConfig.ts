@@ -84,13 +84,13 @@ const heatThreshold: ConfigThreshold = {
 
 // ==========CULTURAL CONTEXTS==========
 const mostImportantTasksContext: ConfigCulturalContext = {
-    "name": "most_important_tasks",
+    "name": "important",
     "resource_def": taskItemResourceDef,
     "thresholds": [importanceThreshold],
     "order_by": [[totalImportanceDimension, { "Biggest": null }]]
 }
 const hottestTasksContext: ConfigCulturalContext = {
-    "name": "hottest_tasks 🔥 🌶️",
+    "name": "urgent",
     "resource_def": taskItemResourceDef,
     "thresholds": [heatThreshold],
     "order_by": [[averageHeatDimension, { "Biggest": null }]]

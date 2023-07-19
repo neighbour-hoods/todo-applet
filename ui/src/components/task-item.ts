@@ -7,6 +7,7 @@ import { Checkbox, ListItem, CheckListItem } from '@scoped-elements/material-web
 import { sensemakerStoreContext, todoStoreContext } from "../contexts";
 import { SensemakerStore } from "@neighbourhoods/client";
 import { TodoStore } from "../todo-store";
+import { variables } from "../styles/variables";
 
 export class TaskItem extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: sensemakerStoreContext, subscribe: true })
@@ -24,18 +25,33 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
     @state()
     task!: WrappedEntry<Task>
 
-    static styles = css`
-          .task-item-container {
-            display: flex;
-            flex-direction: row;
-          }
-        `;
+    static get styles() {
+        return [
+            variables,
+            css`
+                  .task-item-container {
+                    display: flex;
+                    flex-direction: row;
+                    color: var(--nh-theme-fg-default);
+                    flex: 1;
+                    background-color: var(--nh-theme-bg-surface);
+                    border-radius: var(--border-r-tiny);
+                    margin: 4px;
+                    font-size: 16px;
+                  }
+                  .check-list-item {
+                    color: var(--nh-theme-fg-default);
+                    width: 100%;
+                  }
+                `
+        ]
+    } 
 
     render() {
         console.log(this.completed)
         return html`
             <div class="task-item-container">
-                <mwc-check-list-item 
+                <mwc-check-list-item class="check-list-item"
                     left 
                     ?selected=${this.completed} 
                     @click=${this.toggleTaskStatus}

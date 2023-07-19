@@ -1,6 +1,6 @@
 import { Task, WrappedEntry, WrappedTaskWithAssessment } from "./types";
 import { Assessment } from "@neighbourhoods/client";
-import { encodeHashToBase64 } from "@holochain/client";
+import { CellId, CellInfo, encodeHashToBase64 } from "@holochain/client";
 
 // this function is used to add assessments by the current agent to the tasks so that the 
 // UI can display if the task has been assessed by the user
@@ -21,5 +21,14 @@ function addMyAssessmentsToTasks(myPubKey: string, tasks: WrappedEntry<Task>[], 
     })
     return tasksWithMyAssessments
   }
-
-  export { addMyAssessmentsToTasks }
+function getCellId(cellInfo: CellInfo): CellId | undefined {
+  if ("provisioned" in cellInfo) {
+    return cellInfo.provisioned.cell_id;
+  }
+  if ("cloned" in cellInfo) {
+    return cellInfo.cloned.cell_id;
+  }
+  return undefined;
+}
+  
+export { addMyAssessmentsToTasks, getCellId }

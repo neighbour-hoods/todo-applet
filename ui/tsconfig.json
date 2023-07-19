@@ -16,7 +16,8 @@
     "rootDir": "./src",
     "declaration": true,
     "incremental": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["vite/client"]
   },
   "include": ["src/**/*.ts"]
 }

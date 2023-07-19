@@ -23,9 +23,8 @@ export class ListList extends ScopedElementsMixin(LitElement) {
             <div class="list-list-container">
                 <mwc-list>
                     ${this.lists?.value?.map((listName) => html`
-                        <list-item listName=${listName}></list-item> 
+                        <list-item class="todo-list-list-item" listName=${listName}></list-item> 
                     `)}
-                    <add-item itemType="list" @new-item=${this.addNewList}></add-item>
                 <mwc-list>
             </div>
         `
@@ -38,15 +37,24 @@ export class ListList extends ScopedElementsMixin(LitElement) {
     static get scopedElements() {
         return {
         'list-item': ListItem,
-        'add-item': AddItem,
         'mwc-list': List,
         'mwc-list-item': MWCListItem,
         };
     }
-    static styles = css`
-        .list-list-container {
-            display: flex;
-            flex-direction: column;
-        }
-    `
+    static get styles() {
+        return [
+            css`
+                .list-list-container {
+                    display: flex;
+                    flex-direction: column;
+                    width: 100%;
+                }
+                .todo-list-list-item:hover {
+                    background-color: var(--nh-theme-accent-muted);
+                }
+
+
+            `
+        ]
+    } 
 }

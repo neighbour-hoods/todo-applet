@@ -10,13 +10,12 @@
     ".": "./dist/index.js"
   },
   "scripts": {
+    "start": "vite dev --mode development --clearScreen false --port $UI_PORT",
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
-    "build": "rimraf dist && tsc && rollup -c rollup.config.js",
-    "ts-build": "tsc",
-    "build:watch": "rimraf dist && rimraf tsconfig.tsbuildinfo && rollup -c rollup.config.js -w",
-    "start": "tsc && concurrently -r \"npm run build:watch\" \"wds\"",
-    "package": "npm run build && cd dist && bestzip ../dist.zip *"
+    "build": "vite build --mode production",
+    "build:watch": "vite build --config dev.vite.config.js -w",
+    "package:ui": "rimraf ui.zip && npm run build && cd ./dist && bestzip ../ui.zip index.js icon.png"
   },
   "dependencies": {
     "@holochain/client": "0.12.0",
@@ -24,11 +23,15 @@
     "@material/mwc-button": "^0.25.3",
     "@material/mwc-circular-progress": "^0.25.3",
     "@msgpack/msgpack": "^2.7.2",
-    "@neighbourhoods/client": "0.0.2",
+    "@neighbourhoods/client": "0.0.3",
+    "@neighbourhoods/nh-launcher-applet": "0.0.10",
+    "@open-wc/scoped-elements": "^2.1.1",
+    "@scoped-elements/material-web": "^0.0.19",
     "@type-craft/content": "^0.0.7",
     "@type-craft/title": "^0.0.8",
     "lit": "^2.0.2",
-    "lit-svelte-stores": "0.2.5"
+    "lit-svelte-stores": "0.2.5",
+    "neighbourhoods-design-system-components": "^0.0.12"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.15.0",
@@ -56,11 +59,13 @@
     "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
     "rollup": "^2.56.2",
+    "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-workbox": "^6.2.0",
     "run-singleton-cli": "^0.0.5",
     "tslib": "^2.3.1",
-    "typescript": "^4.5.5"
+    "typescript": "^4.5.5",
+    "vite": "^4.4.3"
   },
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",

@@ -38,7 +38,6 @@ export class ContextSelector extends ScopedElementsMixin(LitElement) {
     static get scopedElements() {
         return {
         'list-item': ListItem,
-        'add-item': AddItem,
         'mwc-list': List,
         'mwc-list-item': MWCListItem,
         };
@@ -47,6 +46,7 @@ export class ContextSelector extends ScopedElementsMixin(LitElement) {
         .list-list-container {
             display: flex;
             flex-direction: column;
+            width: 100%;
         }
     `
 }

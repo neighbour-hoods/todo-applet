@@ -107,6 +107,7 @@ export class TodoStore {
 
   async addTaskToList(task: TaskToListInput) {
     let newTask = await this.service.addTaskToList(task);
+    console.log('task from service', newTask)
 
     this.#tasksInLists.update(lists => {
       lists[task.list] = [...lists[task.list], newTask];
