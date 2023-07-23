@@ -1,8 +1,6 @@
 import {
-  AdminWebsocket,
+  AppAgentClient,
   AppWebsocket,
-  CellType,
-  ProvisionedCell,
 } from "@holochain/client";
 import {
   NhLauncherApplet,
@@ -13,11 +11,12 @@ import {
 import { TodoApplet } from "./applet/todo-applet";
 
 const todoApplet: NhLauncherApplet = {
+  // @ts-ignore
   async appletRenderers(
-    appWebsocket: AppWebsocket,
-    adminWebsocket: AdminWebsocket,
     weStore: WeServices,
-    appletAppInfo: AppletInfo[]
+    appletAppInfo: AppletInfo[],
+    appWebsocket: AppWebsocket,
+    appAgentWebsocket: AppAgentClient,
   ): Promise<AppletRenderers> {
     return {
       full(element: HTMLElement, registry: CustomElementRegistry) {
@@ -25,7 +24,7 @@ const todoApplet: NhLauncherApplet = {
         element.innerHTML = `<todo-applet></todo-applet>`;
         const appletElement = element.querySelector("todo-applet") as any;
         appletElement.appWebsocket = appWebsocket;
-        appletElement.adminWebsocket = adminWebsocket;
+        appletElement.appAgentWebsocket = appAgentWebsocket;
         appletElement.appletAppInfo = appletAppInfo;
         appletElement.sensemakerStore = weStore.sensemakerStore;
       },

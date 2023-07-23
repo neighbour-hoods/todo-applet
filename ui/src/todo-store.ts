@@ -16,7 +16,7 @@ export class TodoStore {
   // }
 
   constructor(
-    protected client: AppWebsocket,
+    protected client: AppAgentClient,
     protected cellId: CellId,
     roleName: RoleName,
   ) {

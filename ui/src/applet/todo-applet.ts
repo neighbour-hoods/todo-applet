@@ -4,7 +4,7 @@ import { CircularProgress } from "@scoped-elements/material-web";
 import { LitElement, html, css } from "lit";
 import { AppletInfo } from "@neighbourhoods/nh-launcher-applet";
 import { TodoApp, TodoStore, appletConfig, ImportanceDimensionAssessment, TotalImportanceDimensionDisplay, HeatDimensionAssessment, AverageHeatDimensionDisplay, getCellId } from "../index";
-import { AdminWebsocket, AppWebsocket, CellType, ProvisionedCell, encodeHashToBase64 } from "@holochain/client";
+import { AppAgentClient, AppWebsocket, encodeHashToBase64 } from "@holochain/client";
 import { SensemakerStore } from "@neighbourhoods/client";
 import { get } from 'svelte/store';
 
@@ -16,7 +16,7 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
   appWebsocket!: AppWebsocket;
 
   @property()
-  adminWebsocket!: AdminWebsocket;
+  appAgentWebsocket!: AppAgentClient;
 
   @property()
   sensemakerStore!: SensemakerStore;
@@ -33,7 +33,6 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
       const todoAppletInfo = this.appletAppInfo[0];
       const cellInfo = todoAppletInfo.appInfo.cell_info[appletRoleName][0]
       const cellId = getCellId(cellInfo);
-      await this.adminWebsocket.authorizeSigningCredentials(cellId!);
 
       await this.sensemakerStore.registerApplet(appletConfig)
 
@@ -54,7 +53,7 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
         HeatDimensionAssessment
       )
       this.todoStore = new TodoStore(
-        this.appWebsocket,
+        this.appAgentWebsocket,
         cellId!,
         appletRoleName
       );
