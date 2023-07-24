@@ -97,7 +97,7 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
     const selectedContextName = e.detail.selectedList;
     const contextResultInput: ComputeContextInput = {
       resource_ehs: get(this.todoStore.allTaskEntryHashes()),
-      context_eh: get(this.sensemakerStore.appletConfig()).cultural_contexts[selectedContextName],
+      context_eh: get(this.sensemakerStore.flattenedAppletConfigs()).cultural_contexts[selectedContextName],
       can_publish_result: false,
     }
     const contextResult = await this.sensemakerStore.computeContext(selectedContextName, contextResultInput)
@@ -108,14 +108,14 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
   toggleDefaultUISettings() {
     if (this.defaultUISettings) {
       this.sensemakerStore.updateActiveMethod(
-        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]),
-        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).methods["average_heat_method"]),
+        encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).resource_defs["task_item"]),
+        encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).methods["average_heat_method"]),
       )
     }
     else {
       this.sensemakerStore.updateActiveMethod(
-        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]),
-        encodeHashToBase64(get(this.sensemakerStore.appletConfig()).methods["total_importance_method"]),
+        encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).resource_defs["task_item"]),
+        encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).methods["total_importance_method"]),
       )
     }
     this.defaultUISettings = !this.defaultUISettings;

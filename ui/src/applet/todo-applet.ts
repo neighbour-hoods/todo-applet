@@ -29,25 +29,29 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
 
   async firstUpdated() {
     try {
+      console.log("applet app info", this.appletAppInfo)
       const appletRoleName = "todo_lists";
       const todoAppletInfo = this.appletAppInfo[0];
       const cellInfo = todoAppletInfo.appInfo.cell_info[appletRoleName][0]
       const cellId = getCellId(cellInfo);
+      const installAppId = todoAppletInfo.appInfo.installed_app_id;
+      appletConfig.applet_config_input.name = installAppId;
 
-      await this.sensemakerStore.registerApplet(appletConfig)
+      const todoConfig = await this.sensemakerStore.registerApplet(appletConfig)
+      console.log("todoConfig", todoConfig)
 
       await this.sensemakerStore.registerWidget(
         [
-          encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["importance"]),
-          encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["total_importance"]),
+          encodeHashToBase64(get(this.sensemakerStore.appletConfigs())[installAppId].dimensions["importance"]),
+          encodeHashToBase64(get(this.sensemakerStore.appletConfigs())[installAppId].dimensions["total_importance"]),
         ],
         TotalImportanceDimensionDisplay,
         ImportanceDimensionAssessment
       )
       await this.sensemakerStore.registerWidget(
         [
-          encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
-          encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["average_heat"]),
+          encodeHashToBase64(get(this.sensemakerStore.appletConfigs())[installAppId].dimensions["perceived_heat"]),
+          encodeHashToBase64(get(this.sensemakerStore.appletConfigs())[installAppId].dimensions["average_heat"]),
         ],
         AverageHeatDimensionDisplay,
         HeatDimensionAssessment
@@ -59,10 +63,10 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
       );
       const allTasks = await this.todoStore.fetchAllTasks()
       const allTaskEntryHashes = get(this.todoStore.allTaskEntryHashes())
-      const importanceDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["importance"]
-      const totalImportanceDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["total_importance"]
-      const perceivedHeatDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]
-      const averageHeatDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["average_heat"]
+      // const importanceDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["importance"]
+      // const totalImportanceDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["total_importance"]
+      // const perceivedHeatDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]
+      // const averageHeatDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["average_heat"]
       await this.sensemakerStore.getAssessmentsForResources({
       dimension_ehs: null,
       resource_ehs: allTaskEntryHashes
