@@ -33,6 +33,61 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
 }
 
 #[hdk_extern]
+pub fn get_latest_task_with_eh(entry_hash: EntryHash) -> ExternResult<Option<Task>> {
+    match get_details(entry_hash.clone(), GetOptions::default())? {
+        Some(Details::Record(details)) => {
+            match details.updates.len() {
+                // pass out the action associated with this entry
+                0 => Ok(Some(
+                    entry_from_record(details.record)?
+                )),
+                _ => {
+                    let mut sortlist = details.updates.to_vec();
+                    // unix timestamp should work for sorting
+                    sortlist.sort_by_key(|update| update.action().timestamp().as_millis());
+                    // sorts in ascending order, so take the last record
+                    let last = sortlist.last().unwrap().to_owned();
+                    let hash = last.action_address();
+                    match get(hash.clone(), GetOptions::default())? {
+                        Some(record) => {
+                            Ok(Some(entry_from_record(record)?))
+                        }
+                        None => Ok(None),
+                    }
+                }
+            }
+        }
+        Some(Details::Entry(details)) => {
+            match details.updates.len() {
+                0 => {
+                    let entry: Entry = details.entry;
+                    let task = entry.as_app_entry().map(|entry| 
+                        Task::try_from(SerializedBytes::from(entry.to_owned())).map_err(|err| wasm_error!(WasmErrorInner::Guest(err.into()))))
+                            .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+                                "Malformed task"
+                            ))))??;
+                    Ok(Some(task))
+                },
+                _ => {
+                    let mut sortlist = details.updates.to_vec();
+                    // unix timestamp should work for sorting
+                    sortlist.sort_by_key(|update| update.action().timestamp().as_millis());
+                    // sorts in ascending order, so take the last record
+                    let last = sortlist.last().unwrap().to_owned();
+                    let hash = last.action_address();
+                    match get(hash.clone(), GetOptions::default())? {
+                        Some(record) => {
+                            Ok(Some(entry_from_record(record)?))
+                        }
+                        None => Ok(None),
+                    }
+                }
+            }
+        }
+        _ => Ok(None),
+    }
+}
+#[hdk_extern]
 pub fn get_latest_task(action_hash: ActionHash) -> ExternResult<Option<Task>> {
     match get_details(action_hash.clone(), GetOptions::default())? {
         Some(Details::Record(details)) => {
