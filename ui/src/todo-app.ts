@@ -85,7 +85,7 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
         list: this.activeList!,
       })
           const options = {
-              detail: { hash: createdTask.action_hash },
+              detail: { hash: createdTask.entry_hash },
               bubbles: true,
               composed: true
           };

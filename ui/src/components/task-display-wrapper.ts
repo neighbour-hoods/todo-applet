@@ -14,7 +14,7 @@ import { TaskItem } from "./task-item";
 @customElement("task-display-wrapper")
 export class TaskDisplayWrapper extends ScopedElementsMixin(LitElement) {
     @property()
-    resourceHash!: ActionHash;
+    resourceHash!: EntryHash;
 
     @property()
     appAgentWebsocket!: AppAgentClient;
@@ -29,7 +29,7 @@ export class TaskDisplayWrapper extends ScopedElementsMixin(LitElement) {
             cap_secret: null,
             role_name: "todo_lists",
             zome_name: "todo",
-            fn_name: "get_latest_task",
+            fn_name: "get_latest_task_with_eh",
             payload: this.resourceHash,
           }
         const task = await this.appAgentWebsocket.callZome(req);

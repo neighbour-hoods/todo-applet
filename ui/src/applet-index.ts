@@ -2,6 +2,7 @@ import {
   ActionHash,
   AppAgentClient,
   AppWebsocket,
+  EntryHash,
 } from "@holochain/client";
 import {
   NhLauncherApplet,
@@ -32,7 +33,7 @@ const todoApplet: NhLauncherApplet = {
       blocks: [],
       //@ts-ignore
       resourceRenderers: {
-        "task_item": (element: HTMLElement, resourceHash: ActionHash) => {
+        "task_item": (element: HTMLElement, resourceHash: EntryHash) => {
           console.log('trying to render task item', resourceHash) 
           render(html`
             <task-display-wrapper
