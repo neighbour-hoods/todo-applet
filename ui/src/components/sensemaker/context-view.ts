@@ -37,6 +37,7 @@ export class ContextView extends ScopedElementsMixin(LitElement) {
                     <task-item 
                         .task=${task} 
                         .completed=${('Complete' in task.entry.status)} 
+                        @task-toggle=${this.todoStore.toggleTaskStatus(task)}
                     ></task-item>
                 </sensemake-resource>
             `)}
