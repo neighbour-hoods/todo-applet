@@ -80,10 +80,16 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
   }
   async addNewTask(e: CustomEvent) {
       console.log('adding new item', e.detail.newValue)
-      await this.todoStore.addTaskToList({
-      task_description: e.detail.newValue,
-      list: this.activeList!,
-  })
+      const createdTask = await this.todoStore.addTaskToList({
+        task_description: e.detail.newValue,
+        list: this.activeList!,
+      })
+          const options = {
+              detail: { hash: createdTask.action_hash },
+              bubbles: true,
+              composed: true
+          };
+      this.dispatchEvent(new CustomEvent('task-hash-created', options))
   }
   // handle the @list-selected event from the list-list component
   updateActiveList(e: CustomEvent) {

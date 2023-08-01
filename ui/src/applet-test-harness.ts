@@ -23,6 +23,8 @@ import todoApplet from './applet-index'
 import { AppletInfo, AppletRenderers } from '@neighbourhoods/nh-launcher-applet';
 import { RenderBlock } from "./applet/render-block";
 import { getCellId } from './utils';
+import './components/task-display-wrapper'
+import { ref } from "lit/directives/ref.js";
 
 const INSTALLED_APP_ID = 'todo-sensemaker';
 
@@ -55,6 +57,11 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
 
   renderers!: AppletRenderers;
   appletInfo!: AppletInfo[];
+  
+  @state()
+  taskHash?: ActionHash;
+  
+  appAgentWebsocket!: AppAgentWebsocket;
 
 
   async firstUpdated() {
@@ -105,9 +112,10 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   async initializeSensemakerStore(clonedSensemakerRoleName: string) {
     const hcPort = import.meta.env.VITE_AGENT === "2" ? import.meta.env.VITE_HC_PORT_2 : import.meta.env.VITE_HC_PORT;
     const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(`ws://localhost:${hcPort}`, INSTALLED_APP_ID);
+    this.appAgentWebsocket = appAgentWebsocket;
     this._sensemakerStore = new SensemakerStore(appAgentWebsocket, clonedSensemakerRoleName);
     // @ts-ignore
-    this.renderers = await todoApplet.appletRenderers({ sensemakerStore: this._sensemakerStore }, this.appletInfo, this.appWebsocket, appAgentWebsocket);
+    this.renderers = await todoApplet.appletRenderers(appAgentWebsocket, { sensemakerStore: this._sensemakerStore }, this.appletInfo);
   }
   async cloneSensemakerCell(ca_pubkey: string) {
     const clonedSensemakerCell: ClonedCell = await this.appWebsocket.createCloneCell({
@@ -161,7 +169,11 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
         <render-block
             .renderer=${this.renderers.full}
             style="flex: 1"
+            @task-hash-created=${(e: CustomEvent) => { console.log('task created with hash:', e.detail.hash); this.taskHash = e.detail.hash }}
         ></render-block>
+        </div>
+        <div class="app-footer">
+          ${this.taskHash ? (this.renderers as any).resourceRenderers["task_item"](document.body, this.taskHash) : html``}
         </div>
       </main>
     `;

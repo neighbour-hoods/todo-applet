@@ -105,7 +105,7 @@ export class TodoStore {
     });
   }
 
-  async addTaskToList(task: TaskToListInput) {
+  async addTaskToList(task: TaskToListInput): Promise<WrappedEntry<Task>> {
     let newTask = await this.service.addTaskToList(task);
     console.log('task from service', newTask)
 
@@ -113,6 +113,7 @@ export class TodoStore {
       lists[task.list] = [...lists[task.list], newTask];
       return lists;
     });
+    return newTask
   }
 
   async toggleTaskStatus(wrappedTask: WrappedEntry<Task>) {

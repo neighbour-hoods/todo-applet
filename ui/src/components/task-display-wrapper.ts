@@ -1,5 +1,5 @@
 import { contextProvided } from "@lit-labs/context";
-import { property, state } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html, css, PropertyValueMap } from "lit";
 import { Task, WrappedEntry, WrappedTaskWithAssessment } from "../types";
@@ -11,6 +11,7 @@ import { variables } from "../styles/variables";
 import { ActionHash, AppAgentCallZomeRequest, AppAgentClient, EntryHash } from "@holochain/client";
 import { TaskItem } from "./task-item";
 
+@customElement("task-display-wrapper")
 export class TaskDisplayWrapper extends ScopedElementsMixin(LitElement) {
     @property()
     resourceHash!: ActionHash;
