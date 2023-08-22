@@ -19,7 +19,7 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
         (),
     )?;
 
-    // set up capability grants to allow for remote signals    
+    // set up capability grants to allow for remote signals
     let mut functions = BTreeSet::new();
     functions.insert((zome_info()?.name, FunctionName("recv_remote_signal".into())));
     let cap_grant_entry: CapGrantEntry = CapGrantEntry::new(
@@ -166,12 +166,15 @@ pub fn get_tasks_in_list(list: String) -> ExternResult<Vec<WrappedEntry<Task>>> 
         None,
     )?;
     for list in links {
-        let task = get_latest_task(list.target.clone().into())?.ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+        let list_action_hash = list.target.into_action_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Malformed task"
+        ))))?;
+        let task = get_latest_task(list_action_hash.to_owned())?.ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
             "Malformed task"
         ))))?;
         // tasks.push((list.target.into(),task))
         tasks.push(WrappedEntry {
-            action_hash: list.target.into(),
+            action_hash: list_action_hash,
             entry_hash: hash_entry(task.clone())?,
             entry: task,
         })
