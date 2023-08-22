@@ -6,6 +6,7 @@
 
     holochain-flake.url = "github:holochain/holochain";
     holochain-flake.inputs.versions.follows = "versions";
+    holochain-flake.inputs.holochain.url = "github:holochain/holochain/holochain-0.2.1";
 
     nixpkgs.follows = "holochain-flake/nixpkgs";
     flake-parts.follows = "holochain-flake/flake-parts";
@@ -27,10 +28,10 @@
           }: {
             devShells.default = pkgs.mkShell {
               inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
-              packages = [
+              packages = with pkgs; [
                 pkgs.nodejs-18_x
-                # more packages go here
-              ];             
+                nodePackages.pnpm
+              ];
             };
           };
       };
