@@ -30,8 +30,10 @@
     "@type-craft/content": "^0.0.7",
     "@type-craft/title": "^0.0.8",
     "lit": "^2.0.2",
+    "lit-element": "^3.3.3",
     "lit-svelte-stores": "0.2.5",
-    "neighbourhoods-design-system-components": "^0.0.12"
+    "neighbourhoods-design-system-components": "^0.0.12",
+    "svelte": "^4.2.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.15.0",
