@@ -78,6 +78,7 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
       );
 
       // mocking what gets passed to the applet
+      // TODO: update this to reference new nh-launcher-applet release
       this.appletInfo = [{
         weInfo: {
             logoSrc: "",
@@ -116,6 +117,9 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
     this._sensemakerStore = new SensemakerStore(appAgentWebsocket, clonedSensemakerRoleName);
     // @ts-ignore
     this.renderers = await todoApplet.appletRenderers(appAgentWebsocket, { sensemakerStore: this._sensemakerStore }, this.appletInfo);
+    // TODO: todoApplet.appletConfig register that with sensemaker
+    // TODO: register widgets todoApplet.widgetPairs
+
   }
   async cloneSensemakerCell(ca_pubkey: string) {
     const clonedSensemakerCell: ClonedCell = await this.appWebsocket.createCloneCell({
