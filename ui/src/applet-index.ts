@@ -1,24 +1,36 @@
 import {
-  ActionHash,
   AppAgentClient,
-  AppWebsocket,
   EntryHash,
 } from "@holochain/client";
 import {
-  NhLauncherApplet,
+  NeighbourhoodApplet,
   AppletRenderers,
-  WeServices,
+  NeighbourhoodServices,
   AppletInfo,
 } from "@neighbourhoods/nh-launcher-applet";
 import { TodoApplet } from "./applet/todo-applet";
 import { html, render } from "lit";
 import "./components/task-display-wrapper";
+import { appletConfig } from "./appletConfig";
+import { AverageHeatDimensionDisplay, HeatDimensionAssessment, ImportanceDimensionAssessment, TotalImportanceDimensionDisplay } from "./components/sensemaker/widgets";
 
-const todoApplet: NhLauncherApplet = {
-  // @ts-ignore
+const todoApplet: NeighbourhoodApplet = {
+  appletConfig: appletConfig,
+  widgetPairs: [
+    {
+      assess: ImportanceDimensionAssessment,
+      display: TotalImportanceDimensionDisplay,
+      compatibleDimensions: ["importance", "total_importance"],
+    },
+    {
+      assess: HeatDimensionAssessment,
+      display: AverageHeatDimensionDisplay,
+      compatibleDimensions: ["perceived_heat", "average_heat"],
+    }
+  ],
   async appletRenderers(
     appAgentWebsocket: AppAgentClient,
-    weStore: WeServices,
+    weStore: NeighbourhoodServices,
     appletAppInfo: AppletInfo[],
   ): Promise<AppletRenderers> {
     return {
@@ -30,8 +42,6 @@ const todoApplet: NhLauncherApplet = {
         appletElement.appletAppInfo = appletAppInfo;
         appletElement.sensemakerStore = weStore.sensemakerStore;
       },
-      blocks: [],
-      //@ts-ignore
       resourceRenderers: {
         "task_item": (element: HTMLElement, resourceHash: EntryHash) => {
           console.log('trying to render task item', resourceHash) 
