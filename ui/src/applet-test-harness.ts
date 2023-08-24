@@ -177,9 +177,6 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
           @task-hash-created=${(e: CustomEvent) => { console.log('task created with hash:', e.detail.hash); this.taskHash = e.detail.hash }}
         >
         </div>
-        <div class="app-footer">
-          ${this.taskHash ? (this.renderers as any).resourceRenderers["task_item"](document.body, this.taskHash) : html``}
-        </div>
       </main>
     `;
   }
