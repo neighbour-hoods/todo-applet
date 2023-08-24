@@ -21,7 +21,6 @@ import { SensemakerStore } from '@neighbourhoods/client';
 import { appletConfig } from './appletConfig'
 import todoApplet from './applet-index'
 import { AppletInfo, AppletRenderers } from '@neighbourhoods/nh-launcher-applet';
-import { RenderBlock } from "./applet/render-block";
 import { getCellId } from './utils';
 import './components/task-display-wrapper'
 import { ref } from "lit/directives/ref.js";
@@ -173,12 +172,10 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
     return html`
       <main>
         <h3>My Pubkey: ${this.agentPubkey}</h3>
-        <div class="home-page">
-        <render-block
-            .renderer=${this.renderers.full}
-            style="flex: 1"
-            @task-hash-created=${(e: CustomEvent) => { console.log('task created with hash:', e.detail.hash); this.taskHash = e.detail.hash }}
-        ></render-block>
+        <div class="home-page"
+          ${ref((e) => this.renderers.full(e as HTMLElement, customElements))}
+          @task-hash-created=${(e: CustomEvent) => { console.log('task created with hash:', e.detail.hash); this.taskHash = e.detail.hash }}
+        >
         </div>
         <div class="app-footer">
           ${this.taskHash ? (this.renderers as any).resourceRenderers["task_item"](document.body, this.taskHash) : html``}
@@ -201,7 +198,6 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   static get scopedElements() {
     return {
       'create-or-join-nh': CreateOrJoinNh,
-      'render-block': RenderBlock,
     };
   }
 
