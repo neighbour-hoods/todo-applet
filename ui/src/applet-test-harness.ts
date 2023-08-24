@@ -25,6 +25,7 @@ import { RenderBlock } from "./applet/render-block";
 import { getCellId } from './utils';
 import './components/task-display-wrapper'
 import { ref } from "lit/directives/ref.js";
+import { get } from "svelte/store";
 
 const INSTALLED_APP_ID = 'todo-sensemaker';
 
@@ -78,9 +79,8 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
       );
 
       // mocking what gets passed to the applet
-      // TODO: update this to reference new nh-launcher-applet release
       this.appletInfo = [{
-        weInfo: {
+        neighbourhoodInfo: {
             logoSrc: "",
             name: ""
         },
@@ -115,11 +115,15 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
     const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(`ws://localhost:${hcPort}`, INSTALLED_APP_ID);
     this.appAgentWebsocket = appAgentWebsocket;
     this._sensemakerStore = new SensemakerStore(appAgentWebsocket, clonedSensemakerRoleName);
-    // @ts-ignore
     this.renderers = await todoApplet.appletRenderers(appAgentWebsocket, { sensemakerStore: this._sensemakerStore }, this.appletInfo);
-    // TODO: todoApplet.appletConfig register that with sensemaker
-    // TODO: register widgets todoApplet.widgetPairs
-
+    await this._sensemakerStore.registerApplet(todoApplet.appletConfig)
+    todoApplet.widgetPairs.map((widgetPair) => {
+      this._sensemakerStore.registerWidget(
+        widgetPair.compatibleDimensions.map((dimensionName: string) => encodeHashToBase64(get(this._sensemakerStore.flattenedAppletConfigs()).dimensions[dimensionName])),
+        widgetPair.display,
+        widgetPair.assess,
+      ) 
+    });
   }
   async cloneSensemakerCell(ca_pubkey: string) {
     const clonedSensemakerCell: ClonedCell = await this.appWebsocket.createCloneCell({
