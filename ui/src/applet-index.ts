@@ -1,35 +1,58 @@
 import {
-  AdminWebsocket,
-  AppWebsocket,
-  CellType,
-  ProvisionedCell,
+  AppAgentClient,
+  EntryHash,
 } from "@holochain/client";
 import {
-  NhLauncherApplet,
+  NeighbourhoodApplet,
   AppletRenderers,
-  WeServices,
+  NeighbourhoodServices,
   AppletInfo,
 } from "@neighbourhoods/nh-launcher-applet";
 import { TodoApplet } from "./applet/todo-applet";
+import { html, render } from "lit";
+import "./components/task-display-wrapper";
+import { appletConfig } from "./appletConfig";
+import { AverageHeatDimensionDisplay, HeatDimensionAssessment, ImportanceDimensionAssessment, TotalImportanceDimensionDisplay } from "./components/sensemaker/widgets";
 
-const todoApplet: NhLauncherApplet = {
+const todoApplet: NeighbourhoodApplet = {
+  appletConfig: appletConfig,
+  widgetPairs: [
+    {
+      assess: ImportanceDimensionAssessment,
+      display: TotalImportanceDimensionDisplay,
+      compatibleDimensions: ["importance", "total_importance"],
+    },
+    {
+      assess: HeatDimensionAssessment,
+      display: AverageHeatDimensionDisplay,
+      compatibleDimensions: ["perceived_heat", "average_heat"],
+    }
+  ],
   async appletRenderers(
-    appWebsocket: AppWebsocket,
-    adminWebsocket: AdminWebsocket,
-    weStore: WeServices,
-    appletAppInfo: AppletInfo[]
+    appAgentWebsocket: AppAgentClient,
+    weStore: NeighbourhoodServices,
+    appletAppInfo: AppletInfo[],
   ): Promise<AppletRenderers> {
     return {
       full(element: HTMLElement, registry: CustomElementRegistry) {
         registry.define("todo-applet", TodoApplet);
         element.innerHTML = `<todo-applet></todo-applet>`;
         const appletElement = element.querySelector("todo-applet") as any;
-        appletElement.appWebsocket = appWebsocket;
-        appletElement.adminWebsocket = adminWebsocket;
+        appletElement.appAgentWebsocket = appAgentWebsocket;
         appletElement.appletAppInfo = appletAppInfo;
         appletElement.sensemakerStore = weStore.sensemakerStore;
       },
-      blocks: [],
+      resourceRenderers: {
+        "task_item": (element: HTMLElement, resourceHash: EntryHash) => {
+          console.log('trying to render task item', resourceHash) 
+          render(html`
+            <task-display-wrapper
+              .resourceHash=${resourceHash}
+              .appAgentWebsocket=${appAgentWebsocket}
+            ></task-display-wrapper>
+          `, element)
+        }
+      }
     };
   },
 };

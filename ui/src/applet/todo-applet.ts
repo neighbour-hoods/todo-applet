@@ -4,7 +4,7 @@ import { CircularProgress } from "@scoped-elements/material-web";
 import { LitElement, html, css } from "lit";
 import { AppletInfo } from "@neighbourhoods/nh-launcher-applet";
 import { TodoApp, TodoStore, appletConfig, ImportanceDimensionAssessment, TotalImportanceDimensionDisplay, HeatDimensionAssessment, AverageHeatDimensionDisplay, getCellId } from "../index";
-import { AdminWebsocket, AppWebsocket, CellType, ProvisionedCell, encodeHashToBase64 } from "@holochain/client";
+import { AppAgentClient, AppWebsocket } from "@holochain/client";
 import { SensemakerStore } from "@neighbourhoods/client";
 import { get } from 'svelte/store';
 
@@ -16,7 +16,7 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
   appWebsocket!: AppWebsocket;
 
   @property()
-  adminWebsocket!: AdminWebsocket;
+  appAgentWebsocket!: AppAgentClient;
 
   @property()
   sensemakerStore!: SensemakerStore;
@@ -29,45 +29,25 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
 
   async firstUpdated() {
     try {
+      console.log("applet app info", this.appletAppInfo)
       const appletRoleName = "todo_lists";
       const todoAppletInfo = this.appletAppInfo[0];
       const cellInfo = todoAppletInfo.appInfo.cell_info[appletRoleName][0]
       const cellId = getCellId(cellInfo);
-      await this.adminWebsocket.authorizeSigningCredentials(cellId!);
+      const installAppId = todoAppletInfo.appInfo.installed_app_id;
+      appletConfig.applet_config_input.name = installAppId;
 
-      await this.sensemakerStore.registerApplet(appletConfig)
-
-      await this.sensemakerStore.registerWidget(
-        [
-          encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["importance"]),
-          encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["total_importance"]),
-        ],
-        TotalImportanceDimensionDisplay,
-        ImportanceDimensionAssessment
-      )
-      await this.sensemakerStore.registerWidget(
-        [
-          encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]),
-          encodeHashToBase64(get(this.sensemakerStore.appletConfig()).dimensions["average_heat"]),
-        ],
-        AverageHeatDimensionDisplay,
-        HeatDimensionAssessment
-      )
       this.todoStore = new TodoStore(
-        this.appWebsocket,
+        this.appAgentWebsocket,
         cellId!,
         appletRoleName
       );
       const allTasks = await this.todoStore.fetchAllTasks()
       const allTaskEntryHashes = get(this.todoStore.allTaskEntryHashes())
-      const importanceDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["importance"]
-      const totalImportanceDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["total_importance"]
-      const perceivedHeatDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["perceived_heat"]
-      const averageHeatDimensionEh = get(this.sensemakerStore.appletConfig()).dimensions["average_heat"]
       await this.sensemakerStore.getAssessmentsForResources({
-      dimension_ehs: null,
-      resource_ehs: allTaskEntryHashes
-    })
+        dimension_ehs: null,
+        resource_ehs: allTaskEntryHashes
+      })
       this.loaded = true;
     }
     catch (e) {

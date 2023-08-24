@@ -32,11 +32,12 @@ export class ContextView extends ScopedElementsMixin(LitElement) {
             ${this.tasksInContext.value.map((task) => html`
                 <sensemake-resource class="sensemake-resource"
                     .resourceEh=${task.entry_hash} 
-                    .resourceDefEh=${get(this.sensemakerStore.appletConfig()).resource_defs["task_item"]}
+                    .resourceDefEh=${get(this.sensemakerStore.flattenedAppletConfigs()).resource_defs["task_item"]}
                 >
                     <task-item 
                         .task=${task} 
                         .completed=${('Complete' in task.entry.status)} 
+                        @task-toggle=${this.todoStore.toggleTaskStatus(task)}
                     ></task-item>
                 </sensemake-resource>
             `)}

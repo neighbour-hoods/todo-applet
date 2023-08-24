@@ -2,7 +2,7 @@ import { ActionHash, AgentPubKey, AppAgentCallZomeRequest, AppAgentClient, AppWe
 import { Task, TaskToListInput, WrappedEntry } from './types';
 
 export class TodoService {
-  constructor(public client: AppWebsocket, public cellId: CellId, public roleName: RoleName, public zomeName = 'todo') {}
+  constructor(public client: AppAgentClient, public cellId: CellId, public roleName: RoleName, public zomeName = 'todo') {}
 
   async createNewList(input: string): Promise<null> {
     return this.callZome('create_new_list', input);
@@ -33,12 +33,12 @@ export class TodoService {
   }
   
   private callZome(fn_name: string, payload: any) {
-    const req: CallZomeRequest = {
-      cell_id: this.cellId,
+    const req: AppAgentCallZomeRequest = {
+      cap_secret: null,
+      role_name: this.roleName,
       zome_name: this.zomeName,
       fn_name: fn_name,
       payload: payload,
-      provenance: this.cellId[1],
     }
     return this.client.callZome(req);
   }

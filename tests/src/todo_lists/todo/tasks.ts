@@ -49,7 +49,7 @@ export default () => test("todo tasks CRUD tests", async (t) => {
         task_description: "apples",
         list: "groceries"
       };
-      const { action_hash: createAction }: any = await alice.cells[0].callZome({
+      const { action_hash: createAction, entry_hash: createEntryHash, entry: createEntry }: any = await alice.cells[0].callZome({
         zome_name: "todo",
         fn_name: "add_task_to_list",
         payload: task,
@@ -87,8 +87,16 @@ export default () => test("todo tasks CRUD tests", async (t) => {
       t.deepEqual(groceryTasks.length, 2)
 
       console.log('list', groceryTasks)
-      t.ok(groceryTasks.find(({ action_hash, entry }) => encodeHashToBase64(action_hash) === encodeHashToBase64(createAction) && JSON.stringify(entry) === JSON.stringify({ description: 'apples', status: { Incomplete: null } })))
-      t.ok(groceryTasks.find(({ action_hash, entry }) => encodeHashToBase64(action_hash) === encodeHashToBase64(createAction2) && JSON.stringify(entry) === JSON.stringify({ description: 'bananas', status: { Incomplete: null } })))
+      t.ok(groceryTasks.find(({ action_hash, entry }) => encodeHashToBase64(action_hash) === encodeHashToBase64(createAction) && JSON.stringify(entry) === JSON.stringify({ description: 'apples', status: { Incomplete: null }, list: 'groceries' })))
+      t.ok(groceryTasks.find(({ action_hash, entry }) => encodeHashToBase64(action_hash) === encodeHashToBase64(createAction2) && JSON.stringify(entry) === JSON.stringify({ description: 'bananas', status: { Incomplete: null }, list: 'groceries' })))
+      
+      // check if properly getting the task from the entry hash
+      let latestTaskFromEh = await bob.cells[0].callZome({
+        zome_name: "todo",
+        fn_name: "get_latest_task_with_eh",
+        payload: createEntryHash,
+      });
+      t.deepEqual(latestTaskFromEh, { description: 'apples', status: { Incomplete: null }, list: 'groceries' })
 
       const updateAction = await alice.cells[0].callZome({
         zome_name: "todo",
@@ -104,8 +112,23 @@ export default () => test("todo tasks CRUD tests", async (t) => {
         payload: "groceries",
       });
       t.deepEqual(groceryTasks.length, 2)
-      t.ok(updatedGroceryTasks.find(({ action_hash, entry }) => encodeHashToBase64(action_hash) === encodeHashToBase64(createAction) && JSON.stringify(entry) === JSON.stringify({ description: 'apples', status: { Complete: null } })))
-      t.ok(updatedGroceryTasks.find(({ action_hash, entry }) => encodeHashToBase64(action_hash) === encodeHashToBase64(createAction2) && JSON.stringify(entry) === JSON.stringify({ description: 'bananas', status: { Incomplete: null } })))
+      t.ok(updatedGroceryTasks.find(({ action_hash, entry }) => encodeHashToBase64(action_hash) === encodeHashToBase64(createAction) && JSON.stringify(entry) === JSON.stringify({ description: 'apples', status: { Complete: null }, list: 'groceries'})))
+      t.ok(updatedGroceryTasks.find(({ action_hash, entry }) => encodeHashToBase64(action_hash) === encodeHashToBase64(createAction2) && JSON.stringify(entry) === JSON.stringify({ description: 'bananas', status: { Incomplete: null }, list: 'groceries'})))
+
+      // get latest task from both hash types
+      const latestTask = await bob.cells[0].callZome({
+        zome_name: "todo",
+        fn_name: "get_latest_task",
+        payload: createAction,
+      });
+      t.deepEqual(latestTask, { description: 'apples', status: { Complete: null }, list: 'groceries' })
+
+      latestTaskFromEh = await bob.cells[0].callZome({
+        zome_name: "todo",
+        fn_name: "get_latest_task_with_eh",
+        payload: createEntryHash,
+      });
+      t.deepEqual(latestTaskFromEh, { description: 'apples', status: { Complete: null }, list: 'groceries' })
 
       const allTasks: { [list: string]: any[] } = await bob.cells[0].callZome({
         zome_name: "todo",

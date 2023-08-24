@@ -10,10 +10,6 @@ import { TodoStore } from "../todo-store";
 import { variables } from "../styles/variables";
 
 export class TaskItem extends ScopedElementsMixin(LitElement) {
-    @contextProvided({ context: sensemakerStoreContext, subscribe: true })
-    @property({ attribute: false })
-    public sensemakerStore!: SensemakerStore
-
     @contextProvided({ context: todoStoreContext, subscribe: true })
     @state()
     public todoStore!: TodoStore
@@ -54,13 +50,17 @@ export class TaskItem extends ScopedElementsMixin(LitElement) {
                 <mwc-check-list-item class="check-list-item"
                     left 
                     ?selected=${this.completed} 
-                    @click=${this.toggleTaskStatus}
+                    @click=${this.dispatchTaskToggle}
                 >
                     ${this.task.entry.description}
                 </mwc-check-list-item>
             </div>
         `
     }
+    dispatchTaskToggle() {
+        this.dispatchEvent(new CustomEvent('task-toggle'))
+    }
+
     async toggleTaskStatus() {
         await this.todoStore.toggleTaskStatus(this.task)
     }
