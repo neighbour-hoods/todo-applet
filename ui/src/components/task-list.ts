@@ -72,7 +72,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
                 return html`
                 <sensemake-resource 
                     .resourceEh=${task.entry_hash} 
-                    .resourceDefEh=${get(this.sensemakerStore.flattenedAppletConfigs()).resource_defs["task_item"]}
+                    .resourceDefEh=${get(this.sensemakerStore.flattenedAppletConfigs()).resource_defs["todo_lists"]["todo"]["task_item"]}
                 >
                     <task-item 
                         .task=${task} 
