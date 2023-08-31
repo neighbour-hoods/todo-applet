@@ -1,4 +1,4 @@
-import { AppletConfigInput, ConfigCulturalContext, ConfigDimension, ConfigMethod, ConfigResourceDef, ConfigThreshold, CreateAppletConfigInput, Dimension, Range } from '@neighbourhoods/client'
+import { AppletConfigInput, ConfigCulturalContext, ConfigDimension, ConfigMethod, ConfigResourceDef, ConfigThreshold, Dimension, Range } from '@neighbourhoods/client'
 
 // ==========RANGES==========
 const importanceRange: Range = {
@@ -97,18 +97,13 @@ const hottestTasksContext: ConfigCulturalContext = {
 }
 
 // ==========APPLET CONFIG==========
-const appletConfigInput: AppletConfigInput = {
+const appletConfig: AppletConfigInput = {
     "name": "todo_applet",
     "ranges": [importanceRange, totalImportanceRange, perceivedHeatRange],
     "dimensions": [importanceDimension, totalImportanceDimension, perceivedHeatDimension, averageHeatDimension],
-    "resource_defs": [taskItemResourceDef],
+    "resource_defs": { "todo_lists": { "todo": [taskItemResourceDef] } },
     "methods": [totalImportanceMethod, totalHeatMethod],
     "cultural_contexts": [mostImportantTasksContext, hottestTasksContext]
 }
-
-const appletConfig: CreateAppletConfigInput = {
-    "applet_config_input": appletConfigInput,
-    "role_name": "todo_lists"
-} 
 
 export  { appletConfig }

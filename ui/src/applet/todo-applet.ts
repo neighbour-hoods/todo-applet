@@ -35,7 +35,7 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
       const cellInfo = todoAppletInfo.appInfo.cell_info[appletRoleName][0]
       const cellId = getCellId(cellInfo);
       const installAppId = todoAppletInfo.appInfo.installed_app_id;
-      appletConfig.applet_config_input.name = installAppId;
+      appletConfig.name = installAppId;
 
       this.todoStore = new TodoStore(
         this.appAgentWebsocket,
@@ -45,7 +45,6 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
       const allTasks = await this.todoStore.fetchAllTasks()
       const allTaskEntryHashes = get(this.todoStore.allTaskEntryHashes())
       await this.sensemakerStore.getAssessmentsForResources({
-        dimension_ehs: null,
         resource_ehs: allTaskEntryHashes
       })
       this.loaded = true;

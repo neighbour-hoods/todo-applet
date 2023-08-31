@@ -114,13 +114,13 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
   toggleDefaultUISettings() {
     if (this.defaultUISettings) {
       this.sensemakerStore.updateActiveMethod(
-        encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).resource_defs["task_item"]),
+        encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).resource_defs["todo_lists"]["todo"]["task_item"]),
         encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).methods["average_heat_method"]),
       )
     }
     else {
       this.sensemakerStore.updateActiveMethod(
-        encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).resource_defs["task_item"]),
+        encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).resource_defs["todo_lists"]["todo"]["task_item"]),
         encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).methods["total_importance_method"]),
       )
     }
