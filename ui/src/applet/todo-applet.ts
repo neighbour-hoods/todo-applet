@@ -45,7 +45,6 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
       const allTasks = await this.todoStore.fetchAllTasks()
       const allTaskEntryHashes = get(this.todoStore.allTaskEntryHashes())
       await this.sensemakerStore.getAssessmentsForResources({
-        dimension_ehs: null,
         resource_ehs: allTaskEntryHashes
       })
       this.loaded = true;

@@ -23,7 +23,7 @@
     "@material/mwc-button": "^0.25.3",
     "@material/mwc-circular-progress": "^0.25.3",
     "@msgpack/msgpack": "^2.7.2",
-    "@neighbourhoods/client": "0.0.5",
+    "@neighbourhoods/client": "0.0.6",
     "@neighbourhoods/nh-launcher-applet": "0.0.13",
     "@open-wc/scoped-elements": "^2.1.1",
     "@scoped-elements/material-web": "^0.0.19",
