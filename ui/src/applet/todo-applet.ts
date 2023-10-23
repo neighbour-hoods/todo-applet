@@ -68,7 +68,7 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`;
     return html`
-      <todo-app style="height: 100vh; width: 100%; margin-bottom: 70px" .sensemakerStore=${this.sensemakerStore} .todoStore=${this.todoStore}></todo-app>
+      <todo-app style="height: 100vh; width: 100%; margin-bottom: 70px" .sensemakerStore=${this.sensemakerStore} .todoStore=${this.todoStore} .appletAppInfo=${this.appletAppInfo}></todo-app>
     `;
   }
 

@@ -14,8 +14,12 @@ import { Checkbox } from '@scoped-elements/material-web'
 import { encodeHashToBase64 } from '@holochain/client';
 import { variables } from './styles/variables';
 import { AddItem } from './components/add-item';
+import { AppletInfo } from '@neighbourhoods/nh-launcher-applet';
 
 export class TodoApp extends ScopedElementsMixin(LitElement) {
+  @property()
+  appletAppInfo!: AppletInfo[];
+  
   @contextProvider({ context: todoStoreContext })
   @property()
   todoStore!: TodoStore;
@@ -56,8 +60,8 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
             <div class="top-elements">
               <div class="view-selector-heading">Lists</div>
               <list-list @list-selected=${this.updateActiveList}></list-list>
-              <div class="view-selector-heading">Sensemaker Contexts</div>
-              <context-selector @list-selected=${this.computeContext}></context-selector>
+              <div class="view-selector-heading">Data Views</div>
+              <context-selector .appletAppInfo=${this.appletAppInfo} @list-selected=${this.computeContext}></context-selector>
             </div>
             <div class="bottom-elements">
               <add-item itemType="list" @new-item=${this.addNewList}></add-item>
