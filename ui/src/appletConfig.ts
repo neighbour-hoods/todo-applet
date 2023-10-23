@@ -22,13 +22,13 @@ const totalImportanceRange: Range = {
 
 // ==========DIMENSIONS==========
 const importanceDimension: ConfigDimension = {
-    "name": "importance",
+    "name": "Votes",
     "range": importanceRange,
     "computed": false
 }
 
 const perceivedHeatDimension: ConfigDimension = {
-    "name": "perceived_heat",
+    "name": "Prority level",
     "range": perceivedHeatRange,
     "computed": false
 }
