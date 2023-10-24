@@ -20,12 +20,12 @@ const todoApplet: NeighbourhoodApplet = {
     {
       assess: ImportanceDimensionAssessment,
       display: TotalImportanceDimensionDisplay,
-      compatibleDimensions: ["importance", "total_importance"],
+      compatibleDimensions: ["Vote", "Votes"],
     },
     {
       assess: HeatDimensionAssessment,
       display: AverageHeatDimensionDisplay,
-      compatibleDimensions: ["perceived_heat", "average_heat"],
+      compatibleDimensions: ["Priority", "Priority level"],
     }
   ],
   async appletRenderers(
