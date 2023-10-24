@@ -28,7 +28,7 @@ const importanceDimension: ConfigDimension = {
 }
 
 const perceivedHeatDimension: ConfigDimension = {
-    "name": "Prority level",
+    "name": "Priority level",
     "range": perceivedHeatRange,
     "computed": false
 }
