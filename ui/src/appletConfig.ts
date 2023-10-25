@@ -22,23 +22,23 @@ const totalImportanceRange: Range = {
 
 // ==========DIMENSIONS==========
 const importanceDimension: ConfigDimension = {
-    "name": "importance",
+    "name": "Vote",
     "range": importanceRange,
     "computed": false
 }
 
 const perceivedHeatDimension: ConfigDimension = {
-    "name": "perceived_heat",
+    "name": "Priority",
     "range": perceivedHeatRange,
     "computed": false
 }
 const totalImportanceDimension = {
-    "name": "total_importance",
+    "name": "Votes",
     "range": totalImportanceRange,
     "computed": true
 }
 const averageHeatDimension = {
-    "name": "average_heat",
+    "name": "Priority level",
     "range": perceivedHeatRange,
     "computed": true
 }
@@ -52,7 +52,7 @@ const taskItemResourceDef: ConfigResourceDef = {
 
 // ==========METHODS==========
 const totalImportanceMethod: ConfigMethod = {
-    "name": "total_importance_method",
+    "name": "Votes_method",
     "target_resource_def": taskItemResourceDef,
     "input_dimensions": [importanceDimension],
     "output_dimension": totalImportanceDimension,
@@ -61,7 +61,7 @@ const totalImportanceMethod: ConfigMethod = {
     "requires_validation": false
 }
 const totalHeatMethod: ConfigMethod = {
-    "name": "average_heat_method",
+    "name": "Priority_level_method",
     "target_resource_def": taskItemResourceDef,
     "input_dimensions": [perceivedHeatDimension],
     "output_dimension": averageHeatDimension,
