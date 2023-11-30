@@ -15,19 +15,25 @@ import { appletConfig } from "./appletConfig";
 import { AverageHeatDimensionDisplay, HeatDimensionAssessment, ImportanceDimensionAssessment, TotalImportanceDimensionDisplay } from "./components/sensemaker/widgets";
 
 const todoApplet: NeighbourhoodApplet = {
+  //@ts-ignore
   appletConfig: appletConfig,
   widgetPairs: [
     {
+    //@ts-ignore
       assess: ImportanceDimensionAssessment,
+    //@ts-ignore
       display: TotalImportanceDimensionDisplay,
       compatibleDimensions: ["Vote", "Votes"],
     },
     {
+    //@ts-ignore
       assess: HeatDimensionAssessment,
+    //@ts-ignore
       display: AverageHeatDimensionDisplay,
       compatibleDimensions: ["Priority", "Priority level"],
     }
   ],
+  //@ts-ignore
   async appletRenderers(
     appAgentWebsocket: AppAgentClient,
     weStore: NeighbourhoodServices,

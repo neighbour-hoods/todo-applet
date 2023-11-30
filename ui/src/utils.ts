@@ -1,5 +1,5 @@
 import { Task, WrappedEntry, WrappedTaskWithAssessment } from "./types";
-import { Assessment } from "@neighbourhoods/client";
+import { Assessment, Dimension, ResourceDef } from "@neighbourhoods/client";
 import { CellId, CellInfo, encodeHashToBase64 } from "@holochain/client";
 
 // this function is used to add assessments by the current agent to the tasks so that the 
@@ -31,4 +31,24 @@ function getCellId(cellInfo: CellInfo): CellId | undefined {
   return undefined;
 }
   
-export { addMyAssessmentsToTasks, getCellId }
+interface Named {
+  name: string;
+}
+
+function getHashesFromNames<T extends Named>(names: string[], map: Map<string, T>): string[] {  
+  let kvPairs = Array.from(map.entries());
+  return kvPairs.filter((kvPair: [string, T]) => {
+    return names.includes(kvPair[1].name);
+  }).map((kvPair: [string, T]) => {
+    return kvPair[0];
+  });
+}
+function getHashesFromResourceDefNames(names: string[], map: Map<string, ResourceDef>): string[] {  
+  let kvPairs = Array.from(map.entries());
+  return kvPairs.filter((kvPair: [string, ResourceDef]) => {
+    return names.includes(kvPair[1].resource_name);
+  }).map((kvPair: [string, ResourceDef]) => {
+    return kvPair[0];
+  });
+}
+export { addMyAssessmentsToTasks, getCellId, getHashesFromNames, getHashesFromResourceDefNames }

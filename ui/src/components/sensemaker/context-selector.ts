@@ -10,8 +10,9 @@ import { ListItem } from "../list-item";
 import { AddItem } from "../add-item";
 import { List, ListItem as MWCListItem } from '@scoped-elements/material-web'
 import { StoreSubscriber } from "lit-svelte-stores";
-import { SensemakerStore, AppletConfig } from "@neighbourhoods/client";
+import { SensemakerStore, AppletConfig, CulturalContext } from "@neighbourhoods/client";
 import { AppletInfo } from "@neighbourhoods/nh-launcher-applet";
+import { EntryHashB64 } from "@holochain/client";
 
 export class ContextSelector extends ScopedElementsMixin(LitElement) {
     @property()
@@ -23,21 +24,25 @@ export class ContextSelector extends ScopedElementsMixin(LitElement) {
     @state()
     public  sensemakerStore!: SensemakerStore
 
-    contexts: StoreSubscriber<AppletConfig> = new StoreSubscriber(this, () => {
-        
+    contexts: StoreSubscriber<Map<EntryHashB64, CulturalContext>> = new StoreSubscriber(this, () => {
       const todoAppletInfo = this.appletAppInfo[0];
       const installAppId = todoAppletInfo.appInfo.installed_app_id;
-      return derived(this.sensemakerStore.appletConfigs(), (appletConfigs) => {
-        return appletConfigs[installAppId]
+      console.log('installAppId', installAppId)
+      return derived(this.sensemakerStore.contexts, (culturalContexts) => {
+        return culturalContexts.get(installAppId)!;
       })
     });
 
+    // contexts: StoreSubscriber<Map<string, Map<EntryHashB64, CulturalContext>>> = new StoreSubscriber(this, () => {
+    //   return this.sensemakerStore.contexts;
+    // });
     render() {
+        console.log('rendering context selector', get(this.sensemakerStore.contexts), this.contexts?.value)
         return html`
             <div class="list-list-container">
                 <mwc-list>
-                    ${Object.keys(this.contexts?.value?.cultural_contexts).map((contextName) => html`
-                        <list-item listName=${contextName}></list-item> 
+                    ${Array.from(this.contexts?.value?.values()).map((culturalContext) => html`
+                        <list-item listName=${culturalContext.name}></list-item> 
                     `)}
                 <mwc-list>
             </div>

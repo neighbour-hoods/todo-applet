@@ -17,16 +17,16 @@ import '@material/mwc-circular-progress';
 import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import { TodoStore } from './todo-store';
 import { CreateOrJoinNh } from './create-or-join-nh';
-import { SensemakerStore } from '@neighbourhoods/client';
-import { appletConfig } from './appletConfig'
+import { Dimension, SensemakerStore } from '@neighbourhoods/client';
+import { INSTALLED_APP_ID, appletConfig } from './appletConfig'
 import todoApplet from './applet-index'
 import { AppletInfo, AppletRenderers } from '@neighbourhoods/nh-launcher-applet';
 import { getCellId } from './utils';
 import './components/task-display-wrapper'
 import { ref } from "lit/directives/ref.js";
 import { get } from "svelte/store";
+import { getHashesFromNames } from './utils';
 
-const INSTALLED_APP_ID = 'todo-sensemaker';
 
 @customElement('applet-test-harness')
 export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
@@ -111,14 +111,17 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
 
   async initializeSensemakerStore(clonedSensemakerRoleName: string) {
     const hcPort = import.meta.env.VITE_AGENT === "2" ? import.meta.env.VITE_HC_PORT_2 : import.meta.env.VITE_HC_PORT;
-    const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(`ws://localhost:${hcPort}`, INSTALLED_APP_ID);
+    const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(new URL(`ws://localhost:${hcPort}`), INSTALLED_APP_ID);
     this.appAgentWebsocket = appAgentWebsocket;
     this._sensemakerStore = new SensemakerStore(appAgentWebsocket, clonedSensemakerRoleName);
+    // @ts-ignore
     this.renderers = await todoApplet.appletRenderers(appAgentWebsocket, { sensemakerStore: this._sensemakerStore }, this.appletInfo);
+    // @ts-ignore
     await this._sensemakerStore.registerApplet(todoApplet.appletConfig)
     todoApplet.widgetPairs.map((widgetPair) => {
       this._sensemakerStore.registerWidget(
-        widgetPair.compatibleDimensions.map((dimensionName: string) => encodeHashToBase64(get(this._sensemakerStore.flattenedAppletConfigs()).dimensions[dimensionName])),
+        getHashesFromNames(widgetPair.compatibleDimensions, get(this._sensemakerStore.dimensions)),
+        // @ts-ignore
         widgetPair.display,
         widgetPair.assess,
       ) 
@@ -184,8 +187,8 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   async connectHolochain() {
     const hcPort = import.meta.env.VITE_AGENT === "2" ? import.meta.env.VITE_HC_PORT_2 : import.meta.env.VITE_HC_PORT;
     const adminPort = import.meta.env.VITE_AGENT === "2" ? import.meta.env.VITE_ADMIN_PORT_2 : import.meta.env.VITE_ADMIN_PORT;
-    this.adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`);
-    this.appWebsocket = await AppWebsocket.connect(`ws://localhost:${hcPort}`);
+    this.adminWebsocket = await AdminWebsocket.connect(new URL(`ws://localhost:${adminPort}`));
+    this.appWebsocket = await AppWebsocket.connect(new URL(`ws://localhost:${hcPort}`));
     this.appInfo = await this.appWebsocket.appInfo({
       installed_app_id: INSTALLED_APP_ID,
     });
@@ -232,4 +235,3 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
     }
   `;
 }
-

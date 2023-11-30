@@ -11,6 +11,8 @@ import { List } from '@scoped-elements/material-web'
 import { SensemakerStore } from "@neighbourhoods/client";
 import { SensemakeResource } from "./sensemake-resource";
 import { StoreSubscriber } from "lit-svelte-stores";
+import { getHashesFromResourceDefNames } from "../../utils";
+import { decodeHashFromBase64 } from "@holochain/client";
 
 // add item at the bottom
 export class ContextView extends ScopedElementsMixin(LitElement) {
@@ -32,7 +34,7 @@ export class ContextView extends ScopedElementsMixin(LitElement) {
             ${this.tasksInContext.value.map((task) => html`
                 <sensemake-resource class="sensemake-resource"
                     .resourceEh=${task.entry_hash} 
-                    .resourceDefEh=${get(this.sensemakerStore.flattenedAppletConfigs()).resource_defs["todo_lists"]["todo"]["task_item"]}
+                    .resourceDefEh=${decodeHashFromBase64(getHashesFromResourceDefNames(["task_item"], get(this.sensemakerStore.resourceDefinitions))[0])}
                 >
                     <task-item 
                         .task=${task} 

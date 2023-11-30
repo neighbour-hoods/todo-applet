@@ -13,6 +13,8 @@ import { StoreSubscriber } from "lit-svelte-stores";
 import {repeat} from 'lit/directives/repeat.js';
 import { contextProvided } from "@lit-labs/context";
 import { variables } from "../styles/variables";
+import { getHashesFromResourceDefNames } from "../utils";
+import { decodeHashFromBase64 } from "@holochain/client";
 
 // add item at the bottom
 export class TaskList extends ScopedElementsMixin(LitElement) {
@@ -72,7 +74,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
                 return html`
                 <sensemake-resource 
                     .resourceEh=${task.entry_hash} 
-                    .resourceDefEh=${get(this.sensemakerStore.flattenedAppletConfigs()).resource_defs["todo_lists"]["todo"]["task_item"]}
+                    .resourceDefEh=${decodeHashFromBase64(getHashesFromResourceDefNames(["task_item"], get(this.sensemakerStore.resourceDefinitions))[0])}
                 >
                     <task-item 
                         .task=${task} 

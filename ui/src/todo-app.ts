@@ -6,12 +6,12 @@ import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import { todoStoreContext, sensemakerStoreContext } from './contexts';
 import { TodoStore } from './todo-store';
 import { ComputeContextInput, SensemakerStore } from '@neighbourhoods/client';
-import { ListList, TaskList } from './index'
+import { ListList, TaskList, getHashesFromNames, getHashesFromResourceDefNames } from './index'
 import { get } from 'svelte/store';
 import { ContextSelector } from './components/sensemaker/context-selector';
 import { ContextView } from './components/sensemaker/context-view';
 import { Checkbox } from '@scoped-elements/material-web'
-import { encodeHashToBase64 } from '@holochain/client';
+import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
 import { variables } from './styles/variables';
 import { AddItem } from './components/add-item';
 import { AppletInfo } from '@neighbourhoods/nh-launcher-applet';
@@ -107,7 +107,7 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
     const selectedContextName = e.detail.selectedList;
     const contextResultInput: ComputeContextInput = {
       resource_ehs: get(this.todoStore.allTaskEntryHashes()),
-      context_eh: get(this.sensemakerStore.flattenedAppletConfigs()).cultural_contexts[selectedContextName],
+      context_eh: decodeHashFromBase64(getHashesFromNames([selectedContextName], get(this.sensemakerStore.contexts).get(this.appletAppInfo[0].appInfo.installed_app_id)!)[0]),
       can_publish_result: false,
     }
     const contextResult = await this.sensemakerStore.computeContext(selectedContextName, contextResultInput)
@@ -118,14 +118,14 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
   toggleDefaultUISettings() {
     if (this.defaultUISettings) {
       this.sensemakerStore.updateActiveMethod(
-        encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).resource_defs["todo_lists"]["todo"]["task_item"]),
-        encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).methods["average_heat_method"]),
+        getHashesFromResourceDefNames(["task_item"], get(this.sensemakerStore.resourceDefinitions))[0],
+        getHashesFromNames(["Votes_method"], get(this.sensemakerStore.methods))[0],
       )
     }
     else {
       this.sensemakerStore.updateActiveMethod(
-        encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).resource_defs["todo_lists"]["todo"]["task_item"]),
-        encodeHashToBase64(get(this.sensemakerStore.flattenedAppletConfigs()).methods["total_importance_method"]),
+        getHashesFromResourceDefNames(["task_item"], get(this.sensemakerStore.resourceDefinitions))[0],
+        getHashesFromNames(["Priority_level_method"], get(this.sensemakerStore.methods))[0],
       )
     }
     this.defaultUISettings = !this.defaultUISettings;

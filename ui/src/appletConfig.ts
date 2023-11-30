@@ -1,4 +1,5 @@
 import { AppletConfigInput, ConfigCulturalContext, ConfigDimension, ConfigMethod, ConfigResourceDef, ConfigThreshold, Dimension, Range } from '@neighbourhoods/client'
+export const INSTALLED_APP_ID = 'todo-sensemaker';
 
 // ==========RANGES==========
 const importanceRange: Range = {
@@ -45,15 +46,17 @@ const averageHeatDimension = {
 
 // ==========RESOURCE DEFS==========
 const taskItemResourceDef: ConfigResourceDef = {
-    "name": "task_item",
+    "resource_name": "task_item",
     "base_types": [{ "entry_index": 0, "zome_index": 0, "visibility": { "Public": null } }],
-    "dimensions": [importanceDimension, totalImportanceDimension, perceivedHeatDimension, averageHeatDimension]
+    "dimensions": [importanceDimension, totalImportanceDimension, perceivedHeatDimension, averageHeatDimension],
+    "role_name": "todo_lists",
+    "zome_name": "todo",
+    "installed_app_id": INSTALLED_APP_ID
 }
 
 // ==========METHODS==========
 const totalImportanceMethod: ConfigMethod = {
     "name": "Votes_method",
-    "target_resource_def": taskItemResourceDef,
     "input_dimensions": [importanceDimension],
     "output_dimension": totalImportanceDimension,
     "program": { "Sum": null },
@@ -62,7 +65,6 @@ const totalImportanceMethod: ConfigMethod = {
 }
 const totalHeatMethod: ConfigMethod = {
     "name": "Priority_level_method",
-    "target_resource_def": taskItemResourceDef,
     "input_dimensions": [perceivedHeatDimension],
     "output_dimension": averageHeatDimension,
     "program": { "Average": null },
@@ -98,10 +100,10 @@ const hottestTasksContext: ConfigCulturalContext = {
 
 // ==========APPLET CONFIG==========
 const appletConfig: AppletConfigInput = {
-    "name": "todo_applet",
+    "name": INSTALLED_APP_ID,
     "ranges": [importanceRange, totalImportanceRange, perceivedHeatRange],
     "dimensions": [importanceDimension, totalImportanceDimension, perceivedHeatDimension, averageHeatDimension],
-    "resource_defs": { "todo_lists": { "todo": [taskItemResourceDef] } },
+    "resource_defs": [taskItemResourceDef],
     "methods": [totalImportanceMethod, totalHeatMethod],
     "cultural_contexts": [mostImportantTasksContext, hottestTasksContext]
 }
