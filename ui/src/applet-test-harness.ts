@@ -20,13 +20,9 @@ import { CreateOrJoinNh } from './create-or-join-nh';
 import { Dimension, SensemakerStore } from '@neighbourhoods/client';
 import { INSTALLED_APP_ID, appletConfig } from './appletConfig'
 import todoApplet from './applet-index'
-import { AppletInfo, AppletRenderers } from '@neighbourhoods/nh-launcher-applet';
+import { AppBlockDelegate, AppletInfo, NHDelegateReceiver } from '@neighbourhoods/nh-launcher-applet';
 import { getCellId } from './utils';
 import './components/task-display-wrapper'
-import { ref } from "lit/directives/ref.js";
-import { get } from "svelte/store";
-import { getHashesFromNames } from './utils';
-
 
 @customElement('applet-test-harness')
 export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
@@ -55,7 +51,6 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   @property()
   agentPubkey!: string;
 
-  renderers!: AppletRenderers;
   appletInfo!: AppletInfo[];
   
   @state()
@@ -63,6 +58,7 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   
   appAgentWebsocket!: AppAgentWebsocket;
 
+  fullApplet: NHDelegateReceiver<AppBlockDelegate> & LitElement | null = null;
 
   async firstUpdated() {
     // connect to holochain conductor and set up websocket connections
@@ -92,8 +88,10 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
         this.isSensemakerCloned = true;
         const clonedSMCellId = (sensemakerCellInfo[1] as { cloned: ClonedCell }).cloned.clone_id;
         await this.initializeSensemakerStore(clonedSMCellId);
+        
         this.loading = false;
       }
+
       const todoCellInfo: CellInfo[] = installedCells["todo_lists"];
       let todoCellId: CellId;
       if (CellType.Provisioned in todoCellInfo[0]) {
@@ -114,18 +112,19 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
     const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(new URL(`ws://localhost:${hcPort}`), INSTALLED_APP_ID);
     this.appAgentWebsocket = appAgentWebsocket;
     this._sensemakerStore = new SensemakerStore(appAgentWebsocket, clonedSensemakerRoleName);
+    
+    let fullAppletConstructor = todoApplet.appletRenderers.full;
+    let fullApplet = new fullAppletConstructor();
+    fullApplet.nhDelegate = {
+      appAgentWebsocket: appAgentWebsocket,
+      appletInfo: this.appletInfo,
+      sensemakerStore: this._sensemakerStore,
+      // @ts-ignore
+      profilesStore: undefined,
+    };
     // @ts-ignore
-    this.renderers = await todoApplet.appletRenderers(appAgentWebsocket, { sensemakerStore: this._sensemakerStore }, this.appletInfo);
-    // @ts-ignore
+    this.fullApplet = fullApplet;
     await this._sensemakerStore.registerApplet(todoApplet.appletConfig)
-    todoApplet.widgetPairs.map((widgetPair) => {
-      this._sensemakerStore.registerWidget(
-        getHashesFromNames(widgetPair.compatibleDimensions, get(this._sensemakerStore.dimensions)),
-        // @ts-ignore
-        widgetPair.display,
-        widgetPair.assess,
-      ) 
-    });
   }
   async cloneSensemakerCell(ca_pubkey: string) {
     const clonedSensemakerCell: ClonedCell = await this.appWebsocket.createCloneCell({
@@ -176,9 +175,12 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
       <main>
         <h3>My Pubkey: ${this.agentPubkey}</h3>
         <div class="home-page"
-          ${ref((e) => this.renderers.full(e as HTMLElement, customElements))}
           @task-hash-created=${(e: CustomEvent) => { console.log('task created with hash:', e.detail.hash); this.taskHash = e.detail.hash }}
         >
+        ${
+          //@ts-ignore
+          this.fullApplet!.render()
+        }
         </div>
       </main>
     `;
