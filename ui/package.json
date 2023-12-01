@@ -24,7 +24,7 @@
     "@material/mwc-circular-progress": "^0.25.3",
     "@msgpack/msgpack": "^2.7.2",
     "@neighbourhoods/client": "0.0.9",
-    "@neighbourhoods/nh-launcher-applet": "0.0.13",
+    "@neighbourhoods/nh-launcher-applet": "file:../../nh-launcher/ui/libs/nh-launcher-applet",
     "@open-wc/scoped-elements": "^2.1.1",
     "@scoped-elements/material-web": "^0.0.19",
     "@type-craft/content": "^0.0.7",

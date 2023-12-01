@@ -1,12 +1,41 @@
-import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { LitElement, css, html } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
 import { Assessment, DisplayDimensionWidget, RangeValueInteger } from '@neighbourhoods/client';
 import { variables } from '../../../styles/variables';
+import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+import { NHDelegateReceiver, OutputAssessmentWidgetDelegate } from '@neighbourhoods/nh-launcher-applet';
+import { EntryHash } from '@holochain/client';
 
 @customElement('average-heat-dimension-display')
-export class AverageHeatDimensionDisplay extends DisplayDimensionWidget {
+export class AverageHeatDimensionDisplay extends ScopedElementsMixin(LitElement) implements NHDelegateReceiver<OutputAssessmentWidgetDelegate> {
     @property()
+    @state()
     assessment!: Assessment | null
+
+    @property()
+    resourceEh!: EntryHash
+
+    @property()
+    dimensionEh!: EntryHash
+
+    private _delegate: OutputAssessmentWidgetDelegate | null = null
+
+    connectedCallback() {
+        this._setupComponent()
+    }
+    set nhDelegate(delegate: OutputAssessmentWidgetDelegate) {
+        this._delegate = delegate;
+        this._setupComponent()
+    }
+    async _setupComponent() {
+        if (this._delegate) {
+            this.assessment = this._delegate.getLatestAssessment(this.resourceEh, this.dimensionEh);
+            this._delegate.subscribe((assessment) => {
+                this.assessment = assessment;
+                this.requestUpdate();
+            }, this.resourceEh, this.dimensionEh);
+        }
+    }
 
     render() {
         const latestAssessmentValue = this.assessment ? (this.assessment.value as RangeValueInteger).Integer : 0
