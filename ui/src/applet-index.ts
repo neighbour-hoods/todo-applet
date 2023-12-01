@@ -1,66 +1,45 @@
 import {
-  AppAgentClient,
-  EntryHash,
-} from "@holochain/client";
-import {
   NeighbourhoodApplet,
-  AppletRenderers,
-  NeighbourhoodServices,
-  AppletInfo,
 } from "@neighbourhoods/nh-launcher-applet";
 import { TodoApplet } from "./applet/todo-applet";
-import { html, render } from "lit";
 import "./components/task-display-wrapper";
 import { appletConfig } from "./appletConfig";
-import { AverageHeatDimensionDisplay, HeatDimensionAssessment, ImportanceDimensionAssessment, TotalImportanceDimensionDisplay } from "./components/sensemaker/widgets";
+import { TaskDisplayWrapper } from "./components/task-display-wrapper";
+import { HeatDimensionAssessment } from "./components/sensemaker/widgets/heat-dimension-assessment";
+import { AverageHeatDimensionDisplay } from "./components/sensemaker/widgets/average-heat-dimension-display";
 
 const todoApplet: NeighbourhoodApplet = {
-  //@ts-ignore
   appletConfig: appletConfig,
-  widgetPairs: [
-    {
-    //@ts-ignore
-      assess: ImportanceDimensionAssessment,
-    //@ts-ignore
-      display: TotalImportanceDimensionDisplay,
-      compatibleDimensions: ["Vote", "Votes"],
-    },
-    {
-    //@ts-ignore
-      assess: HeatDimensionAssessment,
-    //@ts-ignore
-      display: AverageHeatDimensionDisplay,
-      compatibleDimensions: ["Priority", "Priority level"],
-    }
-  ],
-  //@ts-ignore
-  async appletRenderers(
-    appAgentWebsocket: AppAgentClient,
-    weStore: NeighbourhoodServices,
-    appletAppInfo: AppletInfo[],
-  ): Promise<AppletRenderers> {
-    return {
-      full(element: HTMLElement, registry: CustomElementRegistry) {
-        registry.define("todo-applet", TodoApplet);
-        element.innerHTML = `<todo-applet></todo-applet>`;
-        const appletElement = element.querySelector("todo-applet") as any;
-        appletElement.appAgentWebsocket = appAgentWebsocket;
-        appletElement.appletAppInfo = appletAppInfo;
-        appletElement.sensemakerStore = weStore.sensemakerStore;
-      },
-      resourceRenderers: {
-        "task_item": (element: HTMLElement, resourceHash: EntryHash) => {
-          console.log('trying to render task item', resourceHash) 
-          render(html`
-            <task-display-wrapper
-              .resourceHash=${resourceHash}
-              .appAgentWebsocket=${appAgentWebsocket}
-            ></task-display-wrapper>
-          `, element)
-        }
-      }
-    };
+  appletRenderers: {
+    'full': TodoApplet
   },
-};
+  resourceRenderers: {
+    'task_item': TaskDisplayWrapper
+  },
+  assessmentWidgets: { 
+    'Importance Ranker': {
+      name: 'Importance Ranker',
+      range: { 
+        Integer: {
+          min: 0,
+          max: 4
+        }
+      },
+      component: HeatDimensionAssessment,
+      kind: 'input'
+    },
+    'Average Importance': {
+      name: 'Average Importance',
+      range: { 
+        Integer: {
+          min: 0,
+          max: 4
+        }
+      },
+      component: AverageHeatDimensionDisplay,
+      kind: 'output'
+    }
+  }
+}
 
 export default todoApplet;

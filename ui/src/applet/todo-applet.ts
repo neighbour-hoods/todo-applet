@@ -2,18 +2,15 @@ import { property, state } from "lit/decorators.js";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { CircularProgress } from "@scoped-elements/material-web";
 import { LitElement, html, css } from "lit";
-import { AppletInfo } from "@neighbourhoods/nh-launcher-applet";
-import { TodoApp, TodoStore, appletConfig, ImportanceDimensionAssessment, TotalImportanceDimensionDisplay, HeatDimensionAssessment, AverageHeatDimensionDisplay, getCellId } from "../index";
+import { AppBlockDelegate, AppletInfo, NHDelegateReceiver } from "@neighbourhoods/nh-launcher-applet";
+import { TodoApp, TodoStore, appletConfig, ImportanceDimensionAssessment, TotalImportanceDimensionDisplay, getCellId } from "../index";
 import { AppAgentClient, AppWebsocket } from "@holochain/client";
 import { SensemakerStore } from "@neighbourhoods/client";
 import { get } from 'svelte/store';
 
-export class TodoApplet extends ScopedElementsMixin(LitElement) {
+export class TodoApplet extends ScopedElementsMixin(LitElement) implements NHDelegateReceiver<AppBlockDelegate> {
   @property()
   appletAppInfo!: AppletInfo[];
-
-  @property()
-  appWebsocket!: AppWebsocket;
 
   @property()
   appAgentWebsocket!: AppAgentClient;
@@ -27,7 +24,31 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
   @state()
   loaded = false;
 
-  async firstUpdated() {
+  private _delegate: AppBlockDelegate | null = null
+
+  constructor() {
+    super();
+    // start using the shadow DOM's shadowRoot
+    this.attachShadow({mode: 'open'})
+  }
+
+  connectedCallback() {
+    this._setupComponent()
+  }
+
+  set nhDelegate(delegate: AppBlockDelegate) {
+    this._delegate = delegate;
+    this._setupComponent()
+  }
+
+  async _setupComponent() {
+    if (this._delegate) {
+      const appAgentWebsocket = this._delegate.appAgentWebsocket;
+
+      this.appAgentWebsocket = appAgentWebsocket;
+      this.appletAppInfo = this._delegate.appletInfo;
+      this.sensemakerStore = this._delegate.sensemakerStore;
+
     try {
       console.log("applet app info", this.appletAppInfo)
       const appletRoleName = "todo_lists";
@@ -52,6 +73,10 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
     catch (e) {
       console.log("error in first update", e)
     }
+    }
+  }
+
+  async firstUpdated() {
   }
   static styles = css`
     .completed {
@@ -78,9 +103,7 @@ export class TodoApplet extends ScopedElementsMixin(LitElement) {
       "todo-app": TodoApp,
       'total-importance-dimension-display': TotalImportanceDimensionDisplay,
       'importance-dimension-assessment': ImportanceDimensionAssessment,
-      'average-heat-dimension-display': AverageHeatDimensionDisplay,
-      'heat-dimension-assessment': HeatDimensionAssessment,
-      // TODO: add any elements that you have in your applet
     };
   }
 }
+
