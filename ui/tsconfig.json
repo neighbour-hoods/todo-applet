@@ -1,22 +1,23 @@
 {
   "compilerOptions": {
-    "target": "es2018",
+    "composite": true,
+    "target": "es2017",
     "module": "esnext",
     "moduleResolution": "node",
     "noEmitOnError": true,
-    "lib": ["es2017", "dom"],
+    "lib": ["es2021", "DOM", "DOM.Iterable"],
     "strict": true,
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "outDir": "dist",
     "sourceMap": true,
     "inlineSources": true,
-    "rootDir": "./src",
     "declaration": true,
-    "incremental": true,
     "skipLibCheck": true,
+    "incremental": true,
+    "outDir": "dist",
+    "rootDir": "./src",
     "types": ["vite/client"]
   },
   "include": ["src/**/*.ts"]

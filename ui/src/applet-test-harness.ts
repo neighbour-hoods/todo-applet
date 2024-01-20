@@ -14,22 +14,25 @@ import {
   ClonedCell,
 } from '@holochain/client';
 import '@material/mwc-circular-progress';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
 import { TodoStore } from './todo-store';
-import { CreateOrJoinNh } from './create-or-join-nh';
-import { Dimension, SensemakerStore } from '@neighbourhoods/client';
+import { CreateOrJoinNH } from '@neighbourhoods/dev-util-components';
+import {
+  SensemakerStore,
+} from '@neighbourhoods/client';
 import { INSTALLED_APP_ID, appletConfig } from './appletConfig'
-import todoApplet from './applet-index'
-import { AppletInfo, AppletRenderers } from '@neighbourhoods/nh-launcher-applet';
-import { getCellId } from './utils';
+import TodoApplet from './applet-index'
 import './components/task-display-wrapper'
-import { ref } from "lit/directives/ref.js";
-import { get } from "svelte/store";
-import { getHashesFromNames } from './utils';
+import {
+  connectHolochainApp,
+  getAppAgentWebsocket,
+  createAppDelegate,
+  AppBlockRenderer
+} from "@neighbourhoods/app-loader"
 
 
 @customElement('applet-test-harness')
-export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
+export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
   @state() loading = true;
   @state() actionHash: ActionHash | undefined;
   @state() currentSelectedList: string | undefined;
@@ -40,7 +43,7 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   @property({ type: Object })
   adminWebsocket!: AdminWebsocket;
 
-  @property({ type: Object })
+  @property()
   appInfo!: AppInfo;
 
   @property()
@@ -55,36 +58,25 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   @property()
   agentPubkey!: string;
 
-  renderers!: AppletRenderers;
-  appletInfo!: AppletInfo[];
-  
   @state()
   taskHash?: ActionHash;
-  
+
   appAgentWebsocket!: AppAgentWebsocket;
 
 
   async firstUpdated() {
     // connect to holochain conductor and set up websocket connections
     try {
-      await this.connectHolochain()
-      const installedCells = this.appInfo.cell_info;
-      await Promise.all(
-        Object.keys(installedCells).map(roleName => {
-          installedCells[roleName].map(cellInfo => {
-            this.adminWebsocket.authorizeSigningCredentials(getCellId(cellInfo)!);
-          })
-        })
-      );
+      const {
+        adminWebsocket,
+        appWebsocket,
+        appInfo
+      } = await connectHolochainApp(INSTALLED_APP_ID);
+      const installedCells = appInfo.cell_info
 
-      // mocking what gets passed to the applet
-      this.appletInfo = [{
-        neighbourhoodInfo: {
-            logoSrc: "",
-            name: ""
-        },
-        appInfo: this.appInfo
-      }];
+      this.adminWebsocket = adminWebsocket
+      this.appWebsocket = appWebsocket
+      this.appInfo = appInfo
 
       // check if sensemaker has been cloned yet
       const sensemakerCellInfo: CellInfo[] = installedCells["sensemaker"];
@@ -110,22 +102,10 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   }
 
   async initializeSensemakerStore(clonedSensemakerRoleName: string) {
-    const hcPort = import.meta.env.VITE_AGENT === "2" ? import.meta.env.VITE_HC_PORT_2 : import.meta.env.VITE_HC_PORT;
-    const appAgentWebsocket: AppAgentWebsocket = await AppAgentWebsocket.connect(new URL(`ws://localhost:${hcPort}`), INSTALLED_APP_ID);
+    const appAgentWebsocket = await getAppAgentWebsocket(INSTALLED_APP_ID);
     this.appAgentWebsocket = appAgentWebsocket;
     this._sensemakerStore = new SensemakerStore(appAgentWebsocket, clonedSensemakerRoleName);
-    // @ts-ignore
-    this.renderers = await todoApplet.appletRenderers(appAgentWebsocket, { sensemakerStore: this._sensemakerStore }, this.appletInfo);
-    // @ts-ignore
-    await this._sensemakerStore.registerApplet(todoApplet.appletConfig)
-    todoApplet.widgetPairs.map((widgetPair) => {
-      this._sensemakerStore.registerWidget(
-        getHashesFromNames(widgetPair.compatibleDimensions, get(this._sensemakerStore.dimensions)),
-        // @ts-ignore
-        widgetPair.display,
-        widgetPair.assess,
-      ) 
-    });
+    await this._sensemakerStore.registerApplet(TodoApplet.appletConfig)
   }
   async cloneSensemakerCell(ca_pubkey: string) {
     const clonedSensemakerCell: ClonedCell = await this.appWebsocket.createCloneCell({
@@ -150,7 +130,7 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
   async createNeighbourhood(_e: CustomEvent) {
     await this.cloneSensemakerCell(this.agentPubkey)
     const _todoConfig = await this._sensemakerStore.registerApplet(appletConfig);
-    
+
     this.loading = false;
   }
 
@@ -172,32 +152,31 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
       return html`
         <create-or-join-nh @create-nh=${this.createNeighbourhood} @join-nh=${this.joinNeighbourhood}></create-or-join-nh>
       `;
+    const delegate = createAppDelegate(
+      this.appAgentWebsocket,
+      this.appInfo,
+      {
+        logoSrc: "",
+        name: ""
+      },
+      this._sensemakerStore
+    )
     return html`
       <main>
         <h3>My Pubkey: ${this.agentPubkey}</h3>
         <div class="home-page"
-          ${ref((e) => this.renderers.full(e as HTMLElement, customElements))}
           @task-hash-created=${(e: CustomEvent) => { console.log('task created with hash:', e.detail.hash); this.taskHash = e.detail.hash }}
         >
+        <app-renderer @component=${TodoApplet.appletRenderers['full']} @nhDelegate=${delegate}></app-renderer>
         </div>
       </main>
     `;
   }
 
-  async connectHolochain() {
-    const hcPort = import.meta.env.VITE_AGENT === "2" ? import.meta.env.VITE_HC_PORT_2 : import.meta.env.VITE_HC_PORT;
-    const adminPort = import.meta.env.VITE_AGENT === "2" ? import.meta.env.VITE_ADMIN_PORT_2 : import.meta.env.VITE_ADMIN_PORT;
-    this.adminWebsocket = await AdminWebsocket.connect(new URL(`ws://localhost:${adminPort}`));
-    this.appWebsocket = await AppWebsocket.connect(new URL(`ws://localhost:${hcPort}`));
-    this.appInfo = await this.appWebsocket.appInfo({
-      installed_app_id: INSTALLED_APP_ID,
-    });
-
-  }
-
-  static get scopedElements() {
+  static get elementDefinitions() {
     return {
-      'create-or-join-nh': CreateOrJoinNh,
+      'create-or-join-nh': CreateOrJoinNH,
+      'app-renderer': AppBlockRenderer
     };
   }
 
@@ -205,7 +184,7 @@ export class AppletTestHarness extends ScopedElementsMixin(LitElement) {
     .home-page {
       display: flex;
       flex-direction: row;
-    }  
+    }
 
     :host {
       min-height: 100vh;

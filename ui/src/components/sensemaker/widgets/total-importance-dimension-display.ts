@@ -1,18 +1,13 @@
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { DisplayDimensionWidget } from '@neighbourhoods/client';
-import { Assessment, RangeValueInteger } from '@neighbourhoods/client';
+import { OutputAssessmentControl } from '@neighbourhoods/client';
+import { RangeValueInteger } from '@neighbourhoods/client';
 import { variables } from '../../../styles/variables';
 
-@customElement('total-importance-dimension-display')
-export class TotalImportanceDimensionDisplay extends DisplayDimensionWidget {
-
-    @property()
-    assessment!: Assessment | null
+export class TotalImportanceDimensionDisplay extends OutputAssessmentControl {
 
     render() {
         return html`
-                    <div class="display-box-wrapper">            
+                    <div class="display-box-wrapper">
                         <div class="display-box">
                             (${this.assessment ? (this.assessment.value as RangeValueInteger).Integer : 0})
                         </div>

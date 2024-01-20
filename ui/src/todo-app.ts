@@ -1,30 +1,39 @@
-import { LitElement, css, html } from 'lit';
+import { css, html } from 'lit';
 import { property, state } from 'lit/decorators.js';
-import { contextProvider } from '@lit-labs/context';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
-
-import { todoStoreContext, sensemakerStoreContext } from './contexts';
+import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
+import { CircularProgress } from "@scoped-elements/material-web";
 import { TodoStore } from './todo-store';
-import { ComputeContextInput, SensemakerStore } from '@neighbourhoods/client';
-import { ListList, TaskList, getHashesFromNames, getHashesFromResourceDefNames } from './index'
+import {
+  AppBlock,
+  ComputeContextInput,
+  SensemakerStore
+} from '@neighbourhoods/client';
+import {
+  TaskItem,
+  TaskList,
+  getHashesFromNames,
+  getHashesFromResourceDefNames,
+  appletConfig,
+  getCellId
+} from './index'
 import { get } from 'svelte/store';
 import { ContextSelector } from './components/sensemaker/context-selector';
 import { ContextView } from './components/sensemaker/context-view';
-import { Checkbox } from '@scoped-elements/material-web'
+import { Checkbox, List } from '@scoped-elements/material-web'
 import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
 import { variables } from './styles/variables';
 import { AddItem } from './components/add-item';
-import { AppletInfo } from '@neighbourhoods/nh-launcher-applet';
+import { ListItem } from "./components/list-item";
+import { AppletInfo } from '@neighbourhoods/client';
+import { StoreSubscriber } from 'lit-svelte-stores';
 
-export class TodoApp extends ScopedElementsMixin(LitElement) {
-  @property()
-  appletAppInfo!: AppletInfo[];
-  
-  @contextProvider({ context: todoStoreContext })
+export class TodoApplet extends ScopedRegistryHost(AppBlock) {
+  @state()
+  loaded = false;
+
   @property()
   todoStore!: TodoStore;
 
-  @contextProvider({ context: sensemakerStoreContext })
   @property()
   sensemakerStore!: SensemakerStore;
 
@@ -37,20 +46,66 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
   @state()
   defaultUISettings = true
 
+  @property()
+  lists: StoreSubscriber<string[]> = new StoreSubscriber(this, () => this.todoStore.getLists());
+
   async firstUpdated() {
+    console.log("first updated")
+  }
+
+  loadData = async() => {
+    try {
+      this.sensemakerStore = this.nhDelegate.sensemakerStore;
+      console.log("Delegate", this.nhDelegate)
+      const appletRoleName = "todo_lists";
+      const cellInfo = this.nhDelegate.appInfo.cell_info[appletRoleName][0]
+      const cellId = getCellId(cellInfo);
+      const installAppId = this.nhDelegate.appInfo.installed_app_id;
+      appletConfig.name = installAppId;
+      this.todoStore = new TodoStore(
+        this.nhDelegate.appAgentWebsocket,
+        cellId!,
+        appletRoleName
+      );
+
+      const allTasks = await this.todoStore.fetchAllTasks()
+      console.log(allTasks)
+      const allTaskEntryHashes = get(this.todoStore.allTaskEntryHashes())
+      console.log(allTaskEntryHashes)
+      await this.nhDelegate.sensemakerStore.getAssessmentsForResources({
+        resource_ehs: allTaskEntryHashes
+      })
+      this.loaded = true;
+    }
+    catch (e) {
+      console.log("error in first update", e)
+    }
   }
 
   render() {
+    console.log("In the render")
+
+    console.log("Render", `loaded is ${this.loaded}`)
+    if (!this.loaded) {
+      console.log("Rendering loading screen")
+      return html`
+      <div style="display: flex; flex: 1; flex-direction: row; align-items: center; justify-content: center">
+        <mwc-circular-progress indeterminate></mwc-circular-progress>
+      </div>`;
+    }
+
+    console.log("Rendering todo-app")
+
     // the task list component is also used to display a cultural context, so we need to pass a flag to it
     // TODO: instead of having one task-list component, might be best to have separate ones - context view, empty list, etc. and just pass through the list itself
     const taskList = html`
       <div class="task-list-header">${this.activeList}</div>
-      <task-list listName=${this.activeList}></task-list>
+      <task-list .listName=${this.activeList} .todoStore=${this.todoStore} .sensemakerStore=${this.sensemakerStore}></task-list>
     `;
 
     const contextResult = html`
       <div class="task-list-header">${this.activeContext}</div>
-      <context-view contextName=${this.activeContext}></context-view>
+      <context-view contextName=${this.activeContext} .todoStore=${this.todoStore} .sensemakerStore=${this.sensemakerStore}></context-view>
     `;
 
     return html`
@@ -59,9 +114,15 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
           <div class="view-selectors">
             <div class="top-elements">
               <div class="view-selector-heading">Lists</div>
-              <list-list @list-selected=${this.updateActiveList}></list-list>
+              <div class="list-list-container">
+                <mwc-list @list-selected=${this.updateActiveList}>
+                    ${this.lists?.value?.map((listName) => html`
+                        <list-item class="todo-list-list-item" listName=${listName}></list-item>
+                    `)}
+                <mwc-list>
+              </div>
               <div class="view-selector-heading">Data Views</div>
-              <context-selector .appletAppInfo=${this.appletAppInfo} @list-selected=${this.computeContext}></context-selector>
+              <context-selector .appId=${this.nhDelegate.appInfo.installed_app_id} .sensemakerStore=${this.sensemakerStore} @list-selected=${this.computeContext}></context-selector>
             </div>
             <div class="bottom-elements">
               <add-item itemType="list" @new-item=${this.addNewList}></add-item>
@@ -107,7 +168,7 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
     const selectedContextName = e.detail.selectedList;
     const contextResultInput: ComputeContextInput = {
       resource_ehs: get(this.todoStore.allTaskEntryHashes()),
-      context_eh: decodeHashFromBase64(getHashesFromNames([selectedContextName], get(this.sensemakerStore.contexts).get(this.appletAppInfo[0].appInfo.installed_app_id)!)[0]),
+      context_eh: decodeHashFromBase64(getHashesFromNames([selectedContextName], get(this.sensemakerStore.contexts).get(this.nhDelegate.appInfo.installed_app_id)!)[0]),
       can_publish_result: false,
     }
     const contextResult = await this.sensemakerStore.computeContext(selectedContextName, contextResultInput)
@@ -131,14 +192,17 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
     this.defaultUISettings = !this.defaultUISettings;
   }
 
-  static get scopedElements() {
+  static get elementDefinitions() {
     return {
-      'list-list': ListList,
       'task-list': TaskList,
+      "mwc-circular-progress": CircularProgress,
       'context-selector': ContextSelector,
       'context-view': ContextView,
       'mwc-checkbox': Checkbox,
       'add-item': AddItem,
+      'task-item': TaskItem,
+      'mwc-list': List,
+      'list-item': ListItem,
     };
   }
 
@@ -153,8 +217,8 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
               color: var(--nh-theme-fg-default);
               width: 100%;
               height: 99%;
-            }  
-        
+            }
+
             :host {
               min-height: 100vh;
               display: flex;
@@ -171,23 +235,23 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
               --mdc-ripple-press-opacity: 0.5;
               --mdc-ripple-fg-opacity: var(--mdc-ripple-press-opacity, 0.12);
             }
-        
+
             main {
               flex-grow: 1;
               width: 100%;
               background-color: var(--nh-theme-bg-canvas);
               padding-bottom: 76px;
             }
-        
+
             .app-footer {
               font-size: calc(12px + 0.5vmin);
               align-items: center;
             }
-        
+
             .app-footer a {
               margin-left: 5px;
             }
-        
+
             .view-selectors {
                 display: flex;
                 flex-direction: column;
@@ -220,6 +284,16 @@ export class TodoApp extends ScopedElementsMixin(LitElement) {
                 display: flex;
                 font-size: 20px;
             }
+
+            .list-list-container {
+              display: flex;
+              flex-direction: column;
+              width: 100%;
+            }
+            .todo-list-list-item:hover {
+                background-color: var(--nh-theme-accent-muted);
+            }
+
             .view {
               width: 620px;
               justify-content: space-between;

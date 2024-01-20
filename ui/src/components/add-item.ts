@@ -1,10 +1,10 @@
 import { property, query, state } from "lit/decorators.js";
-import { ScopedElementsMixin } from "@open-wc/scoped-elements";
+import { ScopedRegistryHost } from "@lit-labs/scoped-registry-mixin";
 import { LitElement, css, html } from "lit";
 import { TextField, Button } from '@scoped-elements/material-web'
 import { variables } from "../styles/variables";
 
-export class AddItem extends ScopedElementsMixin(LitElement) {
+export class AddItem extends ScopedRegistryHost(LitElement) {
     @property()
     itemType!: string
 

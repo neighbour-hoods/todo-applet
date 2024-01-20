@@ -1,12 +1,10 @@
-import { contextProvided } from "@lit-labs/context";
+
 import { property, state } from "lit/decorators.js";
-import { ScopedElementsMixin } from "@open-wc/scoped-elements";
+import { ScopedRegistryHost } from "@lit-labs/scoped-registry-mixin";
 import { LitElement, css, html, unsafeCSS } from "lit";
 import { TaskItem } from "../task-item";
-import { sensemakerStoreContext, todoStoreContext } from "../../contexts";
 import { TodoStore } from "../../todo-store";
 import { get } from "svelte/store";
-import { AddItem } from "../add-item";
 import { List } from '@scoped-elements/material-web'
 import { SensemakerStore } from "@neighbourhoods/client";
 import { SensemakeResource } from "./sensemake-resource";
@@ -15,13 +13,11 @@ import { getHashesFromResourceDefNames } from "../../utils";
 import { decodeHashFromBase64 } from "@holochain/client";
 
 // add item at the bottom
-export class ContextView extends ScopedElementsMixin(LitElement) {
-    @contextProvided({ context: todoStoreContext, subscribe: true })
-    @state()
+export class ContextView extends ScopedRegistryHost(LitElement) {
+    @property()
     public todoStore!: TodoStore
 
-    @contextProvided({ context: sensemakerStoreContext, subscribe: true })
-    @state()
+    @property()
     public sensemakerStore!: SensemakerStore
 
     @property()
@@ -33,19 +29,19 @@ export class ContextView extends ScopedElementsMixin(LitElement) {
         return html`
             ${this.tasksInContext.value.map((task) => html`
                 <sensemake-resource class="sensemake-resource"
-                    .resourceEh=${task.entry_hash} 
+                    .resourceEh=${task.entry_hash}
                     .resourceDefEh=${decodeHashFromBase64(getHashesFromResourceDefNames(["task_item"], get(this.sensemakerStore.resourceDefinitions))[0])}
                 >
-                    <task-item 
-                        .task=${task} 
-                        .completed=${('Complete' in task.entry.status)} 
+                    <task-item
+                        .task=${task}
+                        .completed=${('Complete' in task.entry.status)}
                         @task-toggle=${() => this.todoStore.toggleTaskStatus(task)}
                     ></task-item>
                 </sensemake-resource>
             `)}
         `
     }
-    static get scopedElements() {
+    static get elementDefinitions() {
         return {
             'task-item': TaskItem,
             'mwc-list': List,

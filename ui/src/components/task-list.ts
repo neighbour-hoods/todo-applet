@@ -1,30 +1,26 @@
 import { property, state } from "lit/decorators.js";
-import { ScopedElementsMixin } from "@open-wc/scoped-elements";
+import { ScopedRegistryHost } from "@lit-labs/scoped-registry-mixin";
 import { LitElement, css, html } from "lit";
 import { TaskItem } from "./task-item";
-import { sensemakerStoreContext, todoStoreContext } from "../contexts";
 import { TodoStore } from "../todo-store";
 import { get } from "svelte/store";
-import { AddItem } from "./add-item";
 import { List } from '@scoped-elements/material-web'
 import { SensemakerStore } from "@neighbourhoods/client";
 import { SensemakeResource } from "./sensemaker/sensemake-resource";
 import { StoreSubscriber } from "lit-svelte-stores";
 import {repeat} from 'lit/directives/repeat.js';
-import { contextProvided } from "@lit-labs/context";
 import { variables } from "../styles/variables";
 import { getHashesFromResourceDefNames } from "../utils";
 import { decodeHashFromBase64 } from "@holochain/client";
 
 // add item at the bottom
-export class TaskList extends ScopedElementsMixin(LitElement) {
-    @contextProvided({ context: todoStoreContext, subscribe: true })
-    @state()
-    public  todoStore!: TodoStore
+export class TaskList extends ScopedRegistryHost(LitElement) {
 
-    @contextProvided({ context: sensemakerStoreContext, subscribe: true })
-    @state()
-    public  sensemakerStore!: SensemakerStore
+    @property()
+    public todoStore!: TodoStore
+
+    @property()
+    public sensemakerStore!: SensemakerStore
 
     @property()
     listName: string | undefined
@@ -35,10 +31,10 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
     /**
      * component subscribers
      */
-    listTasks = new StoreSubscriber(this, () => this.todoStore.listTasks(this.listName!));
+    listTasks = new StoreSubscriber(this, () => this.todoStore.getTasks(this.listName!));
     // not sure if I can use a reactive value in the subscriber callback
     // listTasksAssessments = new StoreSubscriber(this, () => this.sensemakerStore.resourceAssessments(this.listTasks.value.map((task) => encodeHashToBase64(task.entry_hash))));
-    
+
     render() {
         this.updateTaskList()
 
@@ -57,13 +53,6 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             `
         }
     }
-    async addNewTask(e: CustomEvent) {
-        console.log('adding new item', e.detail.newValue)
-       await this.todoStore.addTaskToList({
-        task_description: e.detail.newValue,
-        list: this.listName!,
-    })
-    }
     // TODO: update this function name to be more descriptive/accurate
     updateTaskList() {
         if (this.listName) {
@@ -72,16 +61,17 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
             this.tasks = html`
             ${tasks.length > 0 ? repeat(tasks, (task) => task.entry_hash, (task, index) => {
                 return html`
-                <sensemake-resource 
-                    .resourceEh=${task.entry_hash} 
+                <sensemake-resource
+                    .resourceEh=${task.entry_hash}
                     .resourceDefEh=${decodeHashFromBase64(getHashesFromResourceDefNames(["task_item"], get(this.sensemakerStore.resourceDefinitions))[0])}
                 >
-                    <task-item 
-                        .task=${task} 
-                        .completed=${('Complete' in task.entry.status)} 
+                    <task-item
+                        .task=${task}
+                        .todoStore=${this.todoStore}
+                        .completed=${('Complete' in task.entry.status)}
                         @task-toggle=${() => this.todoStore.toggleTaskStatus(task)}
                     ></task-item>
-                </sensemake-resource> 
+                </sensemake-resource>
             `}) : html``}
             `
         }
@@ -100,7 +90,7 @@ export class TaskList extends ScopedElementsMixin(LitElement) {
         }
     `]
     }
-    static get scopedElements() {
+    static get elementDefinitions() {
         return {
         'task-item': TaskItem,
         'mwc-list': List,

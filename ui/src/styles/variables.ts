@@ -1,4 +1,4 @@
-import { css } from 'lit-element';
+import { css } from 'lit';
 
 export const variables = css`
 :host {
@@ -17,7 +17,7 @@ export const variables = css`
     --nh-theme-bg-subtle: #312a36;
     --nh-theme-bg-subtle-50: rgba(61,52,67,0.3);
     --nh-theme-bg-muted: #645d69;
-    --nh-font-families-body: 'Work Sans', Manrope, sans-serif; 
+    --nh-font-families-body: 'Work Sans', Manrope, sans-serif;
     --nh-font-families-headlines: 'Open Sans', Manrope, sans-serif;
     --nh-font-size-xs: 11;
     --nh-spacing-md: 12;

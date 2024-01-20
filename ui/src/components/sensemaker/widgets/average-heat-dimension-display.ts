@@ -1,12 +1,8 @@
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { Assessment, DisplayDimensionWidget, RangeValueInteger } from '@neighbourhoods/client';
+import { OutputAssessmentControl, RangeValueInteger } from '@neighbourhoods/client';
 import { variables } from '../../../styles/variables';
 
-@customElement('average-heat-dimension-display')
-export class AverageHeatDimensionDisplay extends DisplayDimensionWidget {
-    @property()
-    assessment!: Assessment | null
+export class AverageHeatDimensionDisplay extends OutputAssessmentControl {
 
     render() {
         const latestAssessmentValue = this.assessment ? (this.assessment.value as RangeValueInteger).Integer : 0
@@ -27,7 +23,7 @@ export class AverageHeatDimensionDisplay extends DisplayDimensionWidget {
             emoji = "🧊";
         }
         return html`
-                <div class="display-box-wrapper">            
+                <div class="display-box-wrapper">
                     <div class="display-box">
                         ${emoji}
                     </div>
