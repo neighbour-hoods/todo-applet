@@ -14,10 +14,7 @@ export class TotalImportanceDimensionDisplay extends OutputAssessmentControl {
                     </div>
                 `
     }
-    static get scopedElements() {
-        return {
-        }
-    }
+
     static get styles() {
         return [
             variables,

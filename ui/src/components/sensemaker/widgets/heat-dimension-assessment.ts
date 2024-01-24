@@ -18,6 +18,11 @@ export class HeatDimensionAssessment extends InputAssessmentControl {
     this.assessment =  await this.nhDelegate.createAssessment(value)
   }
 
+  public async loadData(): Promise<void> {
+    await super.loadData()
+    this.loading = false
+  }
+
   render() {
     if (this.loading) {
       return html`<span>l o a d i n g</span>`
@@ -53,9 +58,6 @@ export class HeatDimensionAssessment extends InputAssessmentControl {
     `;
   }
 
-  static get scopedElements() {
-    return {};
-  }
   static get styles() {
     return [
       variables,

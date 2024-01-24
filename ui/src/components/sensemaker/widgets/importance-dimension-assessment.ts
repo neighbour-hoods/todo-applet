@@ -9,12 +9,14 @@ import { variables } from '../../../styles/variables';
 
 export class ImportanceDimensionAssessment extends InputAssessmentControl {
   @state()
-  loading: boolean = false
+  loading: boolean = true
 
   @state()
   assessed: boolean = false
 
-  public loadData = async () => {
+  public async loadData(this: ImportanceDimensionAssessment) {
+    await super.loadData()
+    this.loading = false
     console.log('this.subscriber :>> ', this.assessment, this.nhDelegate);
   }
 
@@ -57,7 +59,7 @@ export class ImportanceDimensionAssessment extends InputAssessmentControl {
       }
 
       .importance-toggle:hover .star {
-        background-color: var(--nh-theme-warning-default); 
+        background-color: var(--nh-theme-warning-default);
       }
 
       .star-checkbox {
