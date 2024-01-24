@@ -10,7 +10,7 @@ export class ListItem extends ScopedRegistryHost(LitElement) {
 
     render() {
         return html`
-            <mwc-list-item class="list-item" @click=${this.dispatchSelectedList}>${this.listName}</mwc-list-item>
+            <span class="list-item" @click=${this.dispatchSelectedList}>${this.listName}</span>
         `
     }
 
@@ -27,13 +27,6 @@ export class ListItem extends ScopedRegistryHost(LitElement) {
         }
     }
 
-    static get scopedElements() {
-        return {
-            'mwc-list-item': MWCListItem,
-        }
-    }
-
-    
     static get styles() {
         return [
             variables,

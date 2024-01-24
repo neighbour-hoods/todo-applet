@@ -68,13 +68,14 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) {
         appletRoleName
       );
 
-      const allTasks = await this.todoStore.fetchAllTasks()
-      console.log(allTasks)
+      this.todoStore.fetchAllTasks()
+      // console.log(allTasks)
       const allTaskEntryHashes = get(this.todoStore.allTaskEntryHashes())
-      console.log(allTaskEntryHashes)
+      // console.log(allTaskEntryHashes)
       await this.nhDelegate.sensemakerStore.getAssessmentsForResources({
         resource_ehs: allTaskEntryHashes
       })
+      console.log('got assessments');
       this.loaded = true;
     }
     catch (e) {
@@ -83,7 +84,7 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) {
   }
 
   render() {
-    console.log("In the render")
+    // console.log("In the render")
 
     console.log("Render", `loaded is ${this.loaded}`)
     if (!this.loaded) {
@@ -93,8 +94,6 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) {
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`;
     }
-
-    console.log("Rendering todo-app")
 
     // the task list component is also used to display a cultural context, so we need to pass a flag to it
     // TODO: instead of having one task-list component, might be best to have separate ones - context view, empty list, etc. and just pass through the list itself
@@ -119,7 +118,7 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) {
                     ${this.lists?.value?.map((listName) => html`
                         <list-item class="todo-list-list-item" listName=${listName}></list-item>
                     `)}
-                <mwc-list>
+                </mwc-list>
               </div>
               <div class="view-selector-heading">Data Views</div>
               <context-selector .appId=${this.nhDelegate.appInfo.installed_app_id} .sensemakerStore=${this.sensemakerStore} @list-selected=${this.computeContext}></context-selector>

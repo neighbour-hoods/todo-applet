@@ -24,7 +24,7 @@ export class ContextSelector extends ScopedRegistryHost(LitElement) {
     });
 
     render() {
-        console.log('rendering context selector', get(this.sensemakerStore.contexts), this.contexts?.value)
+        // console.log('rendering context selector', get(this.sensemakerStore.contexts), this.contexts?.value)
         return html`
             <div class="list-list-container">
                 <mwc-list>

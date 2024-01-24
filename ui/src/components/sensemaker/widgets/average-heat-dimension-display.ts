@@ -3,7 +3,6 @@ import { OutputAssessmentControl, RangeValueInteger } from '@neighbourhoods/clie
 import { variables } from '../../../styles/variables';
 
 export class AverageHeatDimensionDisplay extends OutputAssessmentControl {
-
     render() {
         const latestAssessmentValue = this.assessment ? (this.assessment.value as RangeValueInteger).Integer : 0
         let emoji = "🧊";
@@ -36,25 +35,26 @@ export class AverageHeatDimensionDisplay extends OutputAssessmentControl {
             css`
                 .display-box {
                     background-color: var(--nh-theme-accent-muted);
-                    padding: 2px;
                     border-radius: 50%;
-                    width: 32px;
-                    height: 32px;
-                    display: flex;
-                    margin: 2px;
                     border-color: var(--nh-theme-accent-muted);
                     border-style: solid;
-                    justify-content: center;
+                    box-sizing: border-box;
+                    display: flex;
                     align-items: center;
-                    position: relative;
-                    top: 50%;
-                    transform: translateY(-55%);
-                    font-size: 16px;
+                    justify-content: center;
+
+                    width: 36px;
+                    height: 36px;
+                    font-size: .75rem;
+                    line-height: 1.5rem;
                 }
+
                 .display-box-wrapper {
-                    position: relative;
-                    align-items: center;
-                    justify-content: center;
+                    display: grid;
+                    place-content: center;
+                    box-sizing: border-box;
+                    width: 48px;
+                    height: 48px;
                 }
             `
         ]

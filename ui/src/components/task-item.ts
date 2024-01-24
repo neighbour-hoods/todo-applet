@@ -39,16 +39,16 @@ export class TaskItem extends ScopedRegistryHost(LitElement) {
     }
 
     render() {
-        console.log(this.completed)
+        // console.log(this.completed)
         return html`
             <div class="task-item-container">
-                <mwc-check-list-item class="check-list-item"
-                    left
-                    ?selected=${this.completed}
+                <input type="checkbox" class="check-list-item"
+                    checked=${this.completed}
                     @click=${this.dispatchTaskToggle}
                 >
-                    ${this.task.entry.description}
-                </mwc-check-list-item>
+                </input>
+
+                <label>${this.task.entry.description}</label>
             </div>
         `
     }
@@ -64,7 +64,7 @@ export class TaskItem extends ScopedRegistryHost(LitElement) {
         return {
             'mwc-checkbox': Checkbox,
             'mwc-list-item': ListItem,
-            'mwc-check-list-item': CheckListItem,
+            // 'nh-checkbox': NHCheckbox,
         }
     }
 }
