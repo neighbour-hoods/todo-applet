@@ -48,10 +48,8 @@ const averageHeatDimension = {
 const taskItemResourceDef: ConfigResourceDef = {
     "resource_name": "task_item",
     "base_types": [{ "entry_index": 0, "zome_index": 0, "visibility": { "Public": null } }],
-    "dimensions": [importanceDimension, totalImportanceDimension, perceivedHeatDimension, averageHeatDimension],
     "role_name": "todo_lists",
-    "zome_name": "todo",
-    "installed_app_id": INSTALLED_APP_ID
+    "zome_name": "todo"
 }
 
 // ==========METHODS==========
@@ -101,9 +99,9 @@ const hottestTasksContext: ConfigCulturalContext = {
 // ==========APPLET CONFIG==========
 const appletConfig: AppletConfigInput = {
     "name": INSTALLED_APP_ID,
+    "resource_defs": [taskItemResourceDef],
     "ranges": [importanceRange, totalImportanceRange, perceivedHeatRange],
     "dimensions": [importanceDimension, totalImportanceDimension, perceivedHeatDimension, averageHeatDimension],
-    "resource_defs": [taskItemResourceDef],
     "methods": [totalImportanceMethod, totalHeatMethod],
     "cultural_contexts": [mostImportantTasksContext, hottestTasksContext]
 }
