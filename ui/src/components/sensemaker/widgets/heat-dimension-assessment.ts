@@ -31,16 +31,32 @@ export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentC
     this.loading = false
   }
 
-  public logEvent = (e: Event)=>{
-    console.log(e)
-    this.childNodes.forEach((elem) => console.log(elem))
+  public logEvent = (e: Event) => {
+    const targetItem = (e.target as HTMLElement).dataset.item
+    const children = this.shadowRoot?.querySelectorAll('nh-icon')
+    if (e.type === 'select-start') {
+      children?.forEach((child) => {
+        const match = (child as HTMLElement).dataset.item === targetItem
+        if(!match) {
+          (child as NHIconContainer).frozen = true;
+        }
+      })
+    }
+    if (e.type === 'select-cancel') {
+      children?.forEach((child) => {
+        const match = (child as HTMLElement).dataset.item === targetItem
+        if(!match) {
+          (child as NHIconContainer).frozen = false;
+        }
+      })
+    }
   }
 
   renderIcons() {
     return this.icons.map((icon, value) => {
       const intValue = this.assessment?.value as RangeValueInteger
       return html`<nh-icon
-          data-value=${value}
+          data-item=${value}
           .selected=${intValue && intValue.Integer == value}
           .frozen=${intValue && intValue.Integer == value}
           @select=${this.assessor({ Integer: value })}
