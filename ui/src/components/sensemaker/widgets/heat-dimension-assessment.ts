@@ -1,12 +1,15 @@
 import { css, html } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { property, queryAll, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { EntryHash } from '@holochain/client';
 import {
-  InputAssessmentControl, RangeValue,
+  InputAssessmentControl, RangeValueInteger,
 } from '@neighbourhoods/client';
 import { variables } from '../../../styles/variables';
+import { NHIconContainer } from '@neighbourhoods/design-system-components';
+import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
 
-export class HeatDimensionAssessment extends InputAssessmentControl {
+export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentControl) {
 
   @property()
   methodEh!: EntryHash;
@@ -14,13 +17,38 @@ export class HeatDimensionAssessment extends InputAssessmentControl {
   @state()
   loading = true;
 
-  async assess(value: RangeValue) {
-    this.assessment =  await this.nhDelegate.createAssessment(value)
+  /**
+   * There is a 1:1 mapping between the index of this array and the value used for the assessment
+   */
+  icons = ['🧊', '❄️', '💧', '🌶️', '🔥']
+
+  assessor(value: RangeValueInteger): () => {} {
+    return async () => this.assessment =  await this.nhDelegate.createAssessment(value)
   }
 
   public async loadData(): Promise<void> {
     await super.loadData()
     this.loading = false
+  }
+
+  public logEvent = (e: Event)=>{
+    console.log(e)
+    this.childNodes.forEach((elem) => console.log(elem))
+  }
+
+  renderIcons() {
+    return this.icons.map((icon, value) => {
+      const intValue = this.assessment?.value as RangeValueInteger
+      return html`<nh-icon
+          data-value=${value}
+          .selected=${intValue && intValue.Integer == value}
+          .frozen=${intValue && intValue.Integer == value}
+          @select=${this.assessor({ Integer: value })}
+          @select-start=${this.logEvent}
+          @select-cancel=${this.logEvent}
+        >${icon}</nh-icon>`
+      }
+    )
   }
 
   render() {
@@ -29,33 +57,15 @@ export class HeatDimensionAssessment extends InputAssessmentControl {
     }
     return html`
       <div class="heat-scale">
-        <span
-          class="emoji-option"
-          @click=${() => this.assess({ Integer: 0 })}
-          >🧊</span
-        >
-        <span
-          class="emoji-option"
-          @click=${() => this.assess({ Integer: 1 })}
-          >❄️</span
-        >
-        <span
-          class="emoji-option"
-          @click=${() => this.assess({ Integer: 2 })}
-          >💧</span
-        >
-        <span
-          class="emoji-option"
-          @click=${() => this.assess({ Integer: 3 })}
-          >🌶️</span
-        >
-        <span
-          class="emoji-option"
-          @click=${() => this.assess({ Integer: 4 })}
-          >🔥</span
-        >
+        ${this.renderIcons()}
       </div>
     `;
+  }
+
+  static get elementDefinitions() {
+    return {
+      'nh-icon': NHIconContainer
+    };
   }
 
   static get styles() {
@@ -65,24 +75,7 @@ export class HeatDimensionAssessment extends InputAssessmentControl {
         .heat-scale {
           display: flex;
           flex-direction: row;
-          background-color: var(--nh-theme-bg-muted);
-          padding: 2px;
-          border-radius: var(--border-r-tiny);
-          border-color: var(--nh-theme-accent-muted);
-          border-style: solid;
-          border-width: 1px;
-          margin: 4px;
-          font-size: 16px;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
           flex-wrap: nowrap;
-        }
-        .emoji-option {
-          display: flex;
-        }
-        .emoji-option:hover {
-          cursor: pointer;
         }
       `,
     ];
