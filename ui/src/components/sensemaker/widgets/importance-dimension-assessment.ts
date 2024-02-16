@@ -1,121 +1,56 @@
 import { css, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import { EntryHash } from '@holochain/client';
-import { Checkbox } from '@scoped-elements/material-web'
-import { AssessDimensionWidget, RangeValue, SensemakerStore, sensemakerStoreContext } from '@neighbourhoods/client';
-import { contextProvided } from '@lit-labs/context';
+import { state } from 'lit/decorators.js';
+import {
+  InputAssessmentControl
+} from '@neighbourhoods/client';
 import { variables } from '../../../styles/variables';
+import { NHIconContainer } from '@neighbourhoods/design-system-components';
+import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
 
-@customElement('importance-dimension-assessment')
-export class ImportanceDimensionAssessment extends AssessDimensionWidget {
-    @contextProvided({ context: sensemakerStoreContext, subscribe: true })
-    @state()
-    sensemakerStore!: SensemakerStore;
+export class ImportanceDimensionAssessment extends ScopedRegistryHost(InputAssessmentControl) {
+  @state()
+  loading: boolean = true
 
-    @property()
-    resourceEh!: EntryHash
+  @state()
+  assessed: boolean = false
 
-    @property()
-    resourceDefEh!: EntryHash
+  public async loadData(this: ImportanceDimensionAssessment) {
+    await super.loadData()
+    this.loading = false
+    console.log('this.subscriber :>> ', this.assessment, this.nhDelegate);
+  }
 
-    @property()
-    dimensionEh!: EntryHash
-
-    @property()
-    methodEh!: EntryHash
-
-    @property()
-    latestAssessment = null;
-
-    render() {
-        // return html`
-        //     <div class="importance-toggle">
-        //         <mwc-checkbox 
-        //             ?disabled=${this.isAssessedByMe} 
-        //             ?checked=${this.isAssessedByMe} 
-        //             @click=${() => {console.log('resourceEh from widget implementation', this.resourceEh); !this.isAssessedByMe ? this.assessResource({
-        //         Integer: 1
-        //     }) : null}}
-        //         ></mwc-checkbox>
-        return html`
-            <div class="importance-toggle">
-            <label class="star-checkbox">
-                <input 
-                    type="checkbox"
-                    name="myCheckbox" 
-                    value="important" 
-                    ?checked=${this.latestAssessment}
-                    ?disabled=${this.latestAssessment} 
-                    @click=${() => {
-                console.log('resourceEh from widget implementation', this.resourceEh); !this.latestAssessment ? this.assessResource({
-                    Integer: 1
-                }) : null
-            }}
-                >
-                <span class="star"></span>
-            </label>
-            </div>
-          
-        `
+  createAssessment = async () => {
+    if (!this.assessed) {
+      this.assessment = await this.nhDelegate.createAssessment({ Integer: 1 })
+      this.assessed = true
     }
+  }
 
-    static get scopedElements() {
-        return {
-            'mwc-checkbox': Checkbox,
-        }
+  render() {
+    if (this.loading) {
+      return html`<sl-spinner class="icon-spinner"></sl-spinner>`
     }
-    static get styles() {
-        return [
-            variables,
-            css`
-            .importance-toggle {
-                display: flex;
-                flex-direction: row;
-                background-color: var(--nh-theme-bg-muted);
-                padding: 2px;
-                border-radius: var(--border-r-tiny);
-                border-color: var(--nh-theme-accent-muted);
-                border-style: solid;
-                border-width: 1px;
-                margin: 4px;
-                font-size: 16px;
-                align-items: center;
-                justify-content: center;
-                gap: 6px;
-                flex-wrap: nowrap;
-            }
-            .star-checkbox {
-                display: flex;
-                padding-left: 10px;
-                padding-right: 10px;
-              }
-              
-              .star-checkbox input[type="checkbox"] {
-                display: none;
-              }
-              
-              .star-checkbox .star {
-                display: inline-block;
-                width: 20px;
-                height: 20px;
-                background-color: #ccc;
-                clip-path: polygon(
-                  50% 0%,
-                  63% 38%,
-                  100% 38%,
-                  69% 59%,
-                  82% 100%,
-                  50% 75%,
-                  18% 100%,
-                  31% 59%,
-                  0% 38%,
-                  37% 38%
-                );
-              }
-              
-              .star-checkbox input[type="checkbox"]:checked + .star {
-                background-color: #ffdd00; /* Replace with your desired color */
-              }
-        `]
-    }
+    return html`<nh-icon @select=${this.createAssessment}>⭐️<nh-icon>`
+  }
+
+  static get elementDefinitions() {
+    return {
+      'nh-icon': NHIconContainer
+    };
+  }
+
+  static get styles() {
+    return [
+      variables,
+      css`
+      .icon-spinner {
+        font-size: 2.15rem;
+        --speed: 10000ms;
+        --track-width: 4px;
+        --indicator-color: var(--nh-theme-bg-muted);
+        margin: 3px
+      }
+    `]
+  }
 }

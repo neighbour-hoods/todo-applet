@@ -1,5 +1,13 @@
 import { derived, get, Writable, writable } from 'svelte/store';
-import { AgentPubKey, AgentPubKeyB64, AppAgentClient, AppSignal, AppWebsocket, CellId, encodeHashToBase64, EntryHash, RoleName } from '@holochain/client';
+import {
+  AgentPubKeyB64,
+  AppAgentClient,
+  AppSignal,
+  CellId,
+  encodeHashToBase64,
+  EntryHash,
+  RoleName
+} from '@holochain/client';
 import { TodoService } from './todo-service';
 import { SignalPayload, Task, TaskToListInput, WrappedEntry } from './types';
 
@@ -50,12 +58,12 @@ export class TodoStore {
   }
 
   // return all tasks in a list
-  listTasks(listName: string) {
+  getTasks(listName: string) {
     return derived(this.#tasksInLists, lists => lists[listName]);
   }
 
   // return all lists
-  listLists() {
+  getLists() {
     return derived(this.#tasksInLists, lists => Object.keys(lists));
   }
 
@@ -81,7 +89,7 @@ export class TodoStore {
     return derived(this.#tasksInLists, lists => {
       let tasks: WrappedEntry<Task>[] = [];
       Object.values(lists).map(list => {
-        tasks = [...tasks, ...list] 
+        tasks = [...tasks, ...list]
       })
       return tasks.filter(task => serializedEntryHashes.includes(encodeHashToBase64(task.entry_hash)))
     })
@@ -135,7 +143,7 @@ export class TodoStore {
             updatedTaskInList.push(updatedTask);
             lists[list] = updatedTaskInList;
           }
-      })}); 
+      })});
       return lists;
     });
   }

@@ -1,75 +1,99 @@
 import { css, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, queryAll, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { EntryHash } from '@holochain/client';
-import { AssessDimensionWidget, RangeValue, SensemakerStore, sensemakerStoreContext } from '@neighbourhoods/client';
-import { contextProvided } from '@lit-labs/context';
+import {
+  InputAssessmentControl, RangeValueInteger,
+} from '@neighbourhoods/client';
 import { variables } from '../../../styles/variables';
+import { NHIconContainer } from '@neighbourhoods/design-system-components';
+import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
 
-@customElement('heat-dimension-assessment')
-export class HeatDimensionAssessment extends AssessDimensionWidget {
-    @contextProvided({ context: sensemakerStoreContext, subscribe: true })
-    @state()
-    sensemakerStore!: SensemakerStore;
-    
-    @property()
-    resourceEh!: EntryHash
+export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentControl) {
 
-    @property()
-    resourceDefEh!: EntryHash
+  @property()
+  methodEh!: EntryHash;
 
-    @property()
-    dimensionEh!: EntryHash
+  @state()
+  loading = true;
 
-    @property()
-    methodEh!: EntryHash
+  /**
+   * There is a 1:1 mapping between the index of this array and the value used for the assessment
+   */
+  icons = ['🧊', '❄️', '💧', '🌶️', '🔥']
 
-    @property()
-    latestAssessment = null;
-    
-    render() {
-        
-        return html`
-                    <div class="heat-scale">
-                        <span class="emoji-option" @click=${() => this.assessResource({ Integer: 0 })}>🧊</span>
-                        <span class="emoji-option" @click=${() => this.assessResource({ Integer: 1 })}>❄️</span>
-                        <span class="emoji-option" @click=${() => this.assessResource({ Integer: 2 })}>💧</span>
-                        <span class="emoji-option" @click=${() => this.assessResource({ Integer: 3 })}>🌶️</span>
-                        <span class="emoji-option" @click=${() => this.assessResource({ Integer: 4 })}>🔥</span>
-                    </div>
-                `
-    }
+  assessor(value: RangeValueInteger): () => {} {
+    return async () => this.assessment =  await this.nhDelegate.createAssessment(value)
+  }
 
-    static get scopedElements() {
-        return {
+  public async loadData(): Promise<void> {
+    await super.loadData()
+    this.loading = false
+  }
+
+  public logEvent = (e: Event) => {
+    const targetItem = (e.target as HTMLElement).dataset.item
+    const children = this.shadowRoot?.querySelectorAll('nh-icon')
+    if (e.type === 'select-start') {
+      children?.forEach((child) => {
+        const match = (child as HTMLElement).dataset.item === targetItem
+        if(!match) {
+          (child as NHIconContainer).frozen = true;
         }
+      })
     }
-    static get styles() {
-        return [
-        variables,
-        css`
+    if (e.type === 'select-cancel') {
+      children?.forEach((child) => {
+        const match = (child as HTMLElement).dataset.item === targetItem
+        if(!match) {
+          (child as NHIconContainer).frozen = false;
+        }
+      })
+    }
+  }
+
+  renderIcons() {
+    return this.icons.map((icon, value) => {
+      const intValue = this.assessment?.value as RangeValueInteger
+      return html`<nh-icon
+          data-item=${value}
+          .selected=${intValue && intValue.Integer == value}
+          .frozen=${intValue && intValue.Integer == value}
+          @select=${this.assessor({ Integer: value })}
+          @select-start=${this.logEvent}
+          @select-cancel=${this.logEvent}
+        >${icon}</nh-icon>`
+      }
+    )
+  }
+
+  render() {
+    if (this.loading) {
+      return html`<span>l o a d i n g</span>`
+    }
+    return html`
+      <div class="heat-scale">
+        ${this.renderIcons()}
+      </div>
+    `;
+  }
+
+  static get elementDefinitions() {
+    return {
+      'nh-icon': NHIconContainer
+    };
+  }
+
+  static get styles() {
+    return [
+      variables,
+      css`
         .heat-scale {
-            display: flex;
-            flex-direction: row;
-            background-color: var(--nh-theme-bg-muted);
-            padding: 2px;
-            border-radius: var(--border-r-tiny);
-            border-color: var(--nh-theme-accent-muted);
-            border-style: solid;
-            border-width: 1px;
-            margin: 4px;
-            font-size: 16px;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            flex-wrap: nowrap;
+          display: flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
         }
-        .emoji-option {
-            display: flex;
-        }
-        .emoji-option:hover {
-            cursor: pointer;
-        }
-    `]
-    }
+      `,
+    ];
+  }
 }
-

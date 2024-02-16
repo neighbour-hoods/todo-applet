@@ -20,7 +20,7 @@ pub fn get_all_agents(_: ()) -> ExternResult<Vec<AgentPubKey>> {
     )?;
     let all_agents: Vec<AgentPubKey> = all_agents_links
         .into_iter()
-        .map(|link| EntryHash::from(link.target).into())
+        .filter_map(|link| link.target.into_agent_pub_key())
         .collect();
     let all_other_agents = all_agents
         .iter()

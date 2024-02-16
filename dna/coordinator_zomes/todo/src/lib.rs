@@ -212,7 +212,6 @@ pub fn get_lists(_: ()) -> ExternResult<Vec<String>> {
 }
 
 #[hdk_extern]
-// pub fn get_tasks_in_list(list: String) -> ExternResult<Vec<(ActionHash, Task)>> {
 pub fn get_tasks_in_list(list: String) -> ExternResult<Vec<WrappedEntry<Task>>> {
     let mut tasks = Vec::<WrappedEntry<Task>>::new();
     let links = get_links(
@@ -221,12 +220,14 @@ pub fn get_tasks_in_list(list: String) -> ExternResult<Vec<WrappedEntry<Task>>> 
         None,
     )?;
     for list in links {
-        let task = get_latest_task(list.target.clone().into())?.ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+        let task = get_latest_task(list.target.clone().into_action_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Invalid link target"))))?)?.ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
             "Malformed task"
         ))))?;
         // tasks.push((list.target.into(),task))
         tasks.push(WrappedEntry {
-            action_hash: list.target.into(),
+            action_hash: list.target.into_action_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+                "Invalid link target"
+            ))))?,
             entry_hash: hash_entry(task.clone())?,
             entry: task,
         })

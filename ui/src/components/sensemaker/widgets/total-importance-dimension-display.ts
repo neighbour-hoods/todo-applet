@@ -1,28 +1,20 @@
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { DisplayDimensionWidget } from '@neighbourhoods/client';
-import { Assessment, RangeValueInteger } from '@neighbourhoods/client';
+import { OutputAssessmentControl } from '@neighbourhoods/client';
+import { RangeValueInteger } from '@neighbourhoods/client';
 import { variables } from '../../../styles/variables';
 
-@customElement('total-importance-dimension-display')
-export class TotalImportanceDimensionDisplay extends DisplayDimensionWidget {
-
-    @property()
-    assessment!: Assessment | null
+export class TotalImportanceDimensionDisplay extends OutputAssessmentControl {
 
     render() {
         return html`
-                    <div class="display-box-wrapper">            
+                    <div class="display-box-wrapper">
                         <div class="display-box">
                             (${this.assessment ? (this.assessment.value as RangeValueInteger).Integer : 0})
                         </div>
                     </div>
                 `
     }
-    static get scopedElements() {
-        return {
-        }
-    }
+
     static get styles() {
         return [
             variables,
@@ -33,26 +25,26 @@ export class TotalImportanceDimensionDisplay extends DisplayDimensionWidget {
             }
             .display-box {
                 background-color: var(--nh-theme-accent-muted);
-                padding: 2px;
                 border-radius: 50%;
-                width: 32px;
-                height: 32px;
-                display: flex;
-                margin: 2px;
                 border-color: var(--nh-theme-accent-muted);
                 border-style: solid;
-                justify-content: center;
+                box-sizing: border-box;
+                display: flex;
                 align-items: center;
-                position: relative;
-                top: 50%;
-                transform: translateY(-55%);
-                font-size: 16px;
-                color: var(--nh-theme-fg-default);
+                justify-content: center;
+
+                width: 36px;
+                height: 36px;
+                font-size: .75rem;
+                line-height: 1.5rem;
             }
+
             .display-box-wrapper {
-                position: relative;
-                align-items: center;
-                justify-content: center;
+                display: grid;
+                place-content: center;
+                box-sizing: border-box;
+                width: 48px;
+                height: 48px;
             }
             `
             ]
