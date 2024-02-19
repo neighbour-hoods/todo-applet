@@ -2,15 +2,18 @@ import { property } from "lit/decorators.js";
 import { html } from "lit";
 import { TaskItem } from "./task-item";
 import { TodoStore } from "../todo-store";
-import { SensemakerStore } from "@neighbourhoods/client";
+import { AppletConfig, SensemakerStore } from "@neighbourhoods/client";
 import { StoreSubscriber } from "lit-svelte-stores";
 import {repeat} from 'lit/directives/repeat.js';
 import { NHComponent } from "@neighbourhoods/design-system-components";
+import { createInputAssessmentWidgetDelegate, createOutputAssessmentWidgetDelegate } from "@neighbourhoods/app-loader";
+import { EntryHash } from "@holochain/client";
 
 export class TaskList extends NHComponent {
     @property() todoStore!: TodoStore
     @property() sensemakerStore!: SensemakerStore
     @property() listName: string | undefined
+    @property() config!: AppletConfig;
 
     listTasks = new StoreSubscriber(this as any, () => this.todoStore.getTasks(this.listName!));
 
@@ -24,6 +27,27 @@ export class TaskList extends NHComponent {
         }
     }
 
+    createOutputAssessmentDelegate(resourceEh: EntryHash) {
+        if(!this?.config) return
+        const d = createOutputAssessmentWidgetDelegate(
+            this.sensemakerStore,
+            this.config.dimensions['Priority'],
+            resourceEh
+        )
+        return d
+    }
+
+    createInputAssessmentDelegate(resourceEh: EntryHash) {
+        if(!this?.config) return
+        const d = createInputAssessmentWidgetDelegate(
+            this.sensemakerStore,
+            this.config.dimensions['Priority'],
+            this.config.resource_defs['task_item'],
+            resourceEh
+        )
+        return d
+    }
+
     renderTaskList() {
         if (this.listName) {
             const tasks = this.listTasks.value;
@@ -35,6 +59,8 @@ export class TaskList extends NHComponent {
                             .task=${task}
                             .todoStore=${this.todoStore}
                             .completed=${('Complete' in task.entry.status)}
+                            .inputDelegate=${this.createInputAssessmentDelegate(task.entry_hash)}
+                            .outputDelegate=${this.createOutputAssessmentDelegate(task.entry_hash)}
                             @task-toggle=${() => this.todoStore.toggleTaskStatus(task)}
                         ></task-item>
                     `

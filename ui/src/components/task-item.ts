@@ -3,25 +3,42 @@ import { html, css, CSSResult } from "lit";
 import { Task, WrappedEntry } from "../types";
 import { TodoStore } from "../todo-store";
 import { NHCheckbox, NHComponent } from "@neighbourhoods/design-system-components";
+import { InputAssessmentWidgetDelegate, OutputAssessmentWidgetDelegate } from "@neighbourhoods/client";
+import applet from "../applet-index";
+import { InputAssessmentRenderer, OutputAssessmentRenderer } from "@neighbourhoods/app-loader";
 
 export class TaskItem extends NHComponent {
     @property() todoStore!: TodoStore
+    @property() inputDelegate!: InputAssessmentWidgetDelegate
+    @property() outputDelegate!: OutputAssessmentWidgetDelegate
 
     @state() task!: WrappedEntry<Task>
 
     render() {
+        // TODO: slotify this or else add the component as a prop so that we can use different dimensions for the same list item formats
         return html`
             <div class="task-item-container">
-                <nh-checkbox
-                    .size=${"auto"}
-                    .label=${""}
-                    name=${"task-item"}
-                    class="check-list-item"
-                    @click=${this.dispatchTaskToggle}
-                >
-                </nh-checkbox>
+                <output-assessment-renderer
+                    .component=${applet.assessmentWidgets.heatOutput.component}
+                    .nhDelegate=${this.outputDelegate}
+                ></output-assessment-renderer>
+                
+                <div class="task-details">
+                    <nh-checkbox
+                        .size=${"auto"}
+                        .label=${""}
+                        name=${"task-item"}
+                        class="check-list-item"
+                        @click=${this.dispatchTaskToggle}
+                    >
+                    </nh-checkbox>
 
-                <label for="task-item">${this.task.entry.description}</label>
+                    <label for="task-item">${this.task.entry.description}</label>
+                </div>
+                <input-assessment-renderer
+                    .component=${applet.assessmentWidgets.heatAssessment.component}
+                    .nhDelegate=${this.inputDelegate}
+                ></input-assessment-renderer>
             </div>
         `
     }
@@ -31,11 +48,13 @@ export class TaskItem extends NHComponent {
     }
 
     async toggleTaskStatus() {
-        await this.todoStore.toggleTaskStatus(this.task)
+        await this?.todoStore.toggleTaskStatus(this.task)
     }
 
     static elementDefinitions = {
         'nh-checkbox': NHCheckbox,
+        'input-assessment-renderer': InputAssessmentRenderer,
+        'output-assessment-renderer': OutputAssessmentRenderer,
     }
 
     static styles: CSSResult[] = [
@@ -60,15 +79,28 @@ export class TaskItem extends NHComponent {
                 box-sizing: border-box;
                 justify-content: flex-start;
                 display: flex;
+                line-height: 2rem;
             }
+
+            .task-details {
+                display: flex;
+                flex: 1;
+                flex-basis: 50%;
+                background-color: var(--nh-theme-bg-canvas);
+                align-items: center;
+                border-radius: 8px;
+                margin: 0px 8px 0 4px;
+            }
+            
             .check-list-item, nh-checkbox {
                 display: flex;
                 flex: 1 1 0%;
                 flex: initial;
             }
+                
             nh-checkbox {
-                width: 3rem;
-                margin-right: 8px;
+                width: 2rem;
+                margin-right: 24px;
             }
         `
     ]
