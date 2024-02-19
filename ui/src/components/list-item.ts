@@ -1,20 +1,23 @@
 import { property } from "lit/decorators.js";
-import { ScopedRegistryHost } from "@lit-labs/scoped-registry-mixin";
-import { LitElement, css, html } from "lit";
-import { ListItem as MWCListItem } from '@scoped-elements/material-web'
-import { variables } from "../styles/variables";
+import { CSSResult, css, html } from "lit";
+import { NHComponent } from "@neighbourhoods/design-system-components";
+import { classMap } from 'lit/directives/class-map.js';
 
-export class ListItem extends ScopedRegistryHost(LitElement) {
-    @property()
-    listName!: string
+export class ListItem extends NHComponent {
+    @property() listName!: string
+    @property() selected: boolean = false;
 
     render() {
         return html`
-            <span class="list-item" @click=${this.dispatchSelectedList}>${this.listName}</span>
+            <span
+                class="list-item${classMap({
+                    'selected': !!this.selected})}"
+                @click=${this.dispatchSelectedList}>
+                ${this.listName}
+            </span>
         `
     }
 
-    // dispatch an event to update the currently selected list
     dispatchSelectedList() {
         const selectedList = this.listName;
         if (selectedList) {
@@ -27,17 +30,26 @@ export class ListItem extends ScopedRegistryHost(LitElement) {
         }
     }
 
-    static get styles() {
-        return [
-            variables,
-            css`
-                .list-item {
-                    background-color: var(--nh-theme-bg-surface);
-                    color: var(--nh-theme-fg-default);
-                    border-radius: var(--border-r-small);
-                    margin: 4px;
-                }
-            `
-        ]
-    }
+    static styles: CSSResult[] = [
+        super.styles as CSSResult,
+        css`
+            .list-item.selected {
+                background: rgb(110, 70, 204);
+            }
+            .list-item:hover {
+                background: rgba(110, 70, 204, 0.5);
+            }
+            .list-item {
+                cursor: pointer;
+                font-family: 'Manrope';
+                font-weight: 400;
+                margin: 0;
+                border-radius: 8px;
+                height: 2.5rem;  
+                padding: 8px 16px;
+                box-sizing: border-box;
+                align-items: center;
+            }
+        `,
+    ];
 }

@@ -5,7 +5,7 @@ import { CSSResult, css, html } from "lit";
 export class AddItem extends NHComponent {
     @property() itemType!: string
 
-    @query('#new-item-input') private _input!: NHTextInput;
+    @query('.new-item-input') private _input!: NHTextInput;
 
     render() {
         return html`
@@ -30,6 +30,7 @@ export class AddItem extends NHComponent {
     }
 
     static styles: CSSResult[] = [
+        super.styles,
         css`
             .add-item-container {
                 display: flex;
@@ -39,8 +40,6 @@ export class AddItem extends NHComponent {
             .add-item-container > * {
                 display: flex;
                 align-items: center;
-                border-radius: 12px;
-                background: #18151B;
             }
             nh-text-input {
                 flex: 2;

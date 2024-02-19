@@ -64,6 +64,7 @@ export class TodoStore {
 
   // return all lists
   getLists() {
+    console.log('this.#tasksInLists :>> ', get(this.#tasksInLists));
     return derived(this.#tasksInLists, lists => Object.keys(lists));
   }
 
