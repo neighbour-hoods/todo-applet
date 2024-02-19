@@ -34,6 +34,9 @@
     "dotenv-cli": "^7.2.1",
     "run-singleton-cli": "^0.0.5"
   },
+  "dependencies": {
+    "@neighbourhoods/design-system-components": "workspace:*"
+  },
   "engines": {
     "npm": ">=7.0.0"
   }

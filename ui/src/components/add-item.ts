@@ -1,98 +1,53 @@
-import { property, query, state } from "lit/decorators.js";
-import { ScopedRegistryHost } from "@lit-labs/scoped-registry-mixin";
-import { LitElement, css, html } from "lit";
-import { TextField, Button } from '@scoped-elements/material-web'
-import { variables } from "../styles/variables";
+import { NHComponent, NHButton, NHTextInput } from "@neighbourhoods/design-system-components";
+import { property, query } from "lit/decorators.js";
+import { CSSResult, css, html } from "lit";
 
-export class AddItem extends ScopedRegistryHost(LitElement) {
-    @property()
-    itemType!: string
+export class AddItem extends NHComponent {
+    @property() itemType!: string
 
-    @property()
-    @state()
-    inputValue: string = ''
-
-    @query('#new-item-input')
-    input!: HTMLInputElement;
+    @query('#new-item-input') private _input!: NHTextInput;
 
     render() {
         return html`
             <div class="add-item-container">
-                <input id="new-item-input" type="text" .value="${this.inputValue}" @input="${this.handleInput}">
-                <button @click="${this.dispatchNewItem}">Add</button>
+                <nh-text-input class="new-item-input" .size=${"auto"} .name=${"add-" + this.itemType} .label=${""} .placeholder=${"Add a " + this.itemType}></nh-text-input>
+                <nh-button .size=${"auto"} @click=${() => {this.dispatchNewItem(); this._input.reset()}}>Add</nh-button>
             </div>
         `
     }
-    handleInput(event: Event) {
-        this.inputValue = (event.target as HTMLInputElement).value;
-    }
-    updateInput(event: Event) {
-        const input = event.target as HTMLInputElement;
-        this.inputValue = input.value;
-    }
     
     dispatchNewItem() {
-        // const newValue = this.input.value;
-        const newValue = this.inputValue;
-        if (newValue) {
-            const options = {
-                detail: {newValue},
-                bubbles: true,
-                composed: true
-            };
+        const newValue = this._input.value;
+        if (newValue && newValue !== '') {
+            const options = { detail: {newValue}, bubbles: true, composed: true };
             this.dispatchEvent(new CustomEvent('new-item', options))
-            this.input.value = ''
         }
-        this.inputValue = ''
     }
 
-    static get styles() {
-        return [
-            variables,
-            css`
-                .add-item-container {
-                    display: flex;
-                    flex-basis: 100%;
-                    gap: 8px;
-                }
-                input {
-                    background-color: var(--nh-theme-bg-subtle);
-                    color: var(--nh-theme-fg-default);
-                    height: 36px;
-                    border-radius: var(--border-r-tiny);
-                    font-size: 16px;
-                    border: none;
-                    display: flex;
-                    flex: 1;
-                }
-                button {
-                    display: flex;
-                    border-radius: var(--border-r-tiny);
-                    height: 36px;
-                    background-color: var(--nh-theme-accent);
-                    color: var(--nh-theme-fg-default);
-                    font-size: 16px;
-                    flex-basis: 54px;
-                    border: 0px solid transparent;
-                    text-align: center;
-                    align-items: center;
-                    justify-content: center;
-                    cursor: pointer;
-                    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-                }
-                button:hover {
-                    background-color: var(--nh-theme-accent-muted);
-                }
-                button:active {
-                    box-shadow: 0px 0px 8px var(--nh-theme-accent);
-                }
-            `
-        ]
+    static elementDefinitions = {
+        'nh-button': NHButton,
+        "nh-text-input": NHTextInput,
     }
-    static get scopedElements() {
-        return {
-            'mwc-textfield': TextField,
-            'mwc-button': Button,
-        }
-    }
+
+    static styles: CSSResult[] = [
+        css`
+            .add-item-container {
+                display: flex;
+                gap: calc(1px * var(--nh-spacing-lg));
+                align-items: center;
+            }
+            .add-item-container > * {
+                display: flex;
+                align-items: center;
+                border-radius: 12px;
+                background: #18151B;
+            }
+            nh-text-input {
+                flex: 2;
+            }
+            nh-button {
+                flex: 1;
+            }
+        `
+    ]
 }
