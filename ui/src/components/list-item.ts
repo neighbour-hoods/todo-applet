@@ -21,12 +21,8 @@ export class ListItem extends NHComponent {
     dispatchSelectedList() {
         const selectedList = this.listName;
         if (selectedList) {
-            const options = {
-                detail: {selectedList},
-                bubbles: true,
-                composed: true
-            };
-            this.dispatchEvent(new CustomEvent('list-selected', options))
+            const options = { detail: {selectedList}, bubbles: true, composed: true };
+            (this as any).dispatchEvent(new CustomEvent('list-selected', options))
         }
     }
 

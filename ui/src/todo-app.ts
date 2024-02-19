@@ -4,7 +4,7 @@ import { CSSResult, css, html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
 import { TodoStore } from './todo-store';
-import { AppBlock, NHDelegateReceiver, AppBlockDelegate, SensemakerStore } from '@neighbourhoods/client';
+import { AppBlock, NHDelegateReceiver, AppBlockDelegate, SensemakerStore, sensemakerStoreContext, AppletConfig } from '@neighbourhoods/client';
 import { TaskItem, TaskList, appletConfig, getCellId } from './index';
 import { get } from 'svelte/store';
 // import { ContextSelector } from './components/sensemaker/context-selector';
@@ -15,18 +15,18 @@ import { StoreSubscriber } from 'lit-svelte-stores';
 import { repeat } from 'lit/directives/repeat.js';
 
 export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelegateReceiver<AppBlockDelegate> {
-  nhDelegate : AppBlockDelegate;
   @state() loaded = false;
 
   @property() todoStore!: TodoStore;
+
   @property() sensemakerStore!: SensemakerStore;
 
-  
   @state() activeList: string | undefined;
   @state() activeContext: string | undefined;
+  @state() config!: AppletConfig;
 
   lists: StoreSubscriber<string[]> = new StoreSubscriber(this as any, () =>
-    this.todoStore.getLists(), () => [this.activeList]
+    this.todoStore.getLists(), () => [this.config]
   );
 
   loadData = async () => {
@@ -43,13 +43,18 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
         appletRoleName
       );
 
-      this.todoStore.fetchAllTasks();
+      this.todoStore?.fetchAllTasks();
       const allTaskEntryHashes = get(this.todoStore.allTaskEntryHashes());
 
       await this.nhDelegate.sensemakerStore.getAssessmentsForResources({
         resource_ehs: allTaskEntryHashes,
       });
 
+      const config = await this.sensemakerStore.checkIfAppletConfigExists(installAppId)
+      if(config) {
+        this.config = config
+      }
+      
       this.loaded = true;
     } catch (e) {
       console.log('error in first update', e);
@@ -109,6 +114,7 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
         <task-list
           .listName=${this.activeList}
           .todoStore=${this.todoStore}
+          .config=${this.config}
           .sensemakerStore=${this.sensemakerStore}
         ></task-list>
       </div>
@@ -136,7 +142,7 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
   }
 
   async addNewList(e: CustomEvent) {
-    await this.todoStore.createNewList(e.detail.newValue);
+    await this.todoStore?.createNewList(e.detail.newValue);
     this.activeList = e.detail.newValue;
     this.activeContext = undefined;
   }

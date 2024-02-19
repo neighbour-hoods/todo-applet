@@ -38,12 +38,12 @@ const applet: NeighbourhoodApplet = {
       rangeKind: { Integer: { min: 0, max: 4 }},
       kind: 'input'
     },
-    // heatOutput: {
-    //   name: "Heat Display",
-    //   component: AverageHeatDimensionDisplay,
-    //   rangeKind: { Integer: { min: 0, max: 4 }},
-    //   kind: 'output'
-    // }
+    heatOutput: {
+      name: "Heat Display",
+      component: AverageHeatDimensionDisplay,
+      rangeKind: { Integer: { min: 0, max: 4 }},
+      kind: 'output'
+    }
   }
 };
 

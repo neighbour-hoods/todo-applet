@@ -20,7 +20,7 @@ export class AddItem extends NHComponent {
         const newValue = this._input.value;
         if (newValue && newValue !== '') {
             const options = { detail: {newValue}, bubbles: true, composed: true };
-            this.dispatchEvent(new CustomEvent('new-item', options))
+            (this as any).dispatchEvent(new CustomEvent('new-item', options))
         }
     }
 
@@ -30,7 +30,7 @@ export class AddItem extends NHComponent {
     }
 
     static styles: CSSResult[] = [
-        super.styles,
+        super.styles as CSSResult,
         css`
             .add-item-container {
                 display: flex;
