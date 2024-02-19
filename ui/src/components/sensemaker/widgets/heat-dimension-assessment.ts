@@ -1,6 +1,5 @@
 import { css, html } from 'lit';
 import { property, queryAll, state } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 import { EntryHash } from '@holochain/client';
 import {
   InputAssessmentControl, RangeValueInteger,
@@ -8,14 +7,10 @@ import {
 import { variables } from '../../../styles/variables';
 import { NHIconContainer } from '@neighbourhoods/design-system-components';
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
+import { NHDelegateReceiver, InputAssessmentWidgetDelegate } from '@neighbourhoods/client';
 
-export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentControl) {
-
-  @property()
-  methodEh!: EntryHash;
-
-  @state()
-  loading = true;
+export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentControl) implements NHDelegateReceiver<InputAssessmentWidgetDelegate> {
+  @state() loading = true;
 
   /**
    * There is a 1:1 mapping between the index of this array and the value used for the assessment
@@ -35,7 +30,7 @@ export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentC
     const targetItem = (e.target as HTMLElement).dataset.item
     const children = this.shadowRoot?.querySelectorAll('nh-icon')
     if (e.type === 'select-start') {
-      children?.forEach((child) => {
+      children?.forEach((child: any) => {
         const match = (child as HTMLElement).dataset.item === targetItem
         if(!match) {
           (child as NHIconContainer).frozen = true;
@@ -43,7 +38,7 @@ export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentC
       })
     }
     if (e.type === 'select-cancel') {
-      children?.forEach((child) => {
+      children?.forEach((child: any) => {
         const match = (child as HTMLElement).dataset.item === targetItem
         if(!match) {
           (child as NHIconContainer).frozen = false;
@@ -88,6 +83,9 @@ export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentC
     return [
       variables,
       css`
+        :host {
+            line-height: 32px;
+        }
         .heat-scale {
           display: flex;
           flex-direction: row;

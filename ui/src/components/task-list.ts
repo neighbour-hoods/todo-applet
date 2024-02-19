@@ -4,7 +4,7 @@ import { TaskItem } from "./task-item";
 import { TodoStore } from "../todo-store";
 import { AppletConfig, SensemakerStore } from "@neighbourhoods/client";
 import { StoreSubscriber } from "lit-svelte-stores";
-import {repeat} from 'lit/directives/repeat.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { NHComponent } from "@neighbourhoods/design-system-components";
 import { createInputAssessmentWidgetDelegate, createOutputAssessmentWidgetDelegate } from "@neighbourhoods/app-loader";
 import { EntryHash } from "@holochain/client";

@@ -4,7 +4,7 @@ import { CSSResult, css, html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
 import { TodoStore } from './todo-store';
-import { AppBlock, NHDelegateReceiver, AppBlockDelegate, SensemakerStore, sensemakerStoreContext, AppletConfig } from '@neighbourhoods/client';
+import { AppBlock, NHDelegateReceiver, AppBlockDelegate, SensemakerStore, AppletConfig } from '@neighbourhoods/client';
 import { TaskItem, TaskList, appletConfig, getCellId } from './index';
 import { get } from 'svelte/store';
 // import { ContextSelector } from './components/sensemaker/context-selector';
@@ -15,6 +15,7 @@ import { StoreSubscriber } from 'lit-svelte-stores';
 import { repeat } from 'lit/directives/repeat.js';
 
 export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelegateReceiver<AppBlockDelegate> {
+  nhDelegate : AppBlockDelegate;
   @state() loaded = false;
 
   @property() todoStore!: TodoStore;
