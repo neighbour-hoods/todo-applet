@@ -25,7 +25,7 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
   @state() activeList: string | undefined;
   @state() activeContext: string | undefined;
 
-  lists: StoreSubscriber<string[]> = new StoreSubscriber(this, () =>
+  lists: StoreSubscriber<string[]> = new StoreSubscriber(this as any, () =>
     this.todoStore.getLists(), () => [this.activeList]
   );
 
@@ -56,16 +56,8 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
     }
   };
 
-  render() {
-    const taskList = html`
-      <div class="task-list-header">${this.activeList || 'Create/select a list!'}</div>
-      <task-list
-        .listName=${this.activeList}
-        .todoStore=${this.todoStore}
-        .sensemakerStore=${this.sensemakerStore}
-      ></task-list>
-    `;
-
+  renderContextResults() {
+    
     // const contextResult = html`
     //   <div class="task-list-header">${this.activeContext}</div>
     //   <context-view
@@ -75,41 +67,68 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
     //   ></context-view>
     // `;
 
+  }
+
+  renderContextsList() {
+    return html`
+      <h2>Contexts</h2>
+      <nh-context-selector
+        id="select-context"
+        .sensemakerStore=${this.sensemakerStore}
+        .selectedAppletInstanceId=${this.nhDelegate.appInfo.installed_app_id}
+        .selectedContextEhB64=${'this.selectedContextEhB64'}
+      >
+      </nh-context-selector>
+    `
+  }
+
+  renderListsList() {
+    return html`
+      <h1>Lists</h1>
+      <ul class="list-list-container" @list-selected=${this.updateActiveList}>
+        ${this.lists?.value 
+          ? repeat(this.lists.value, (_) => +(new Date()), (list, _idx) => {
+              return html`
+                <list-item
+                  class="todo-list-list-item"
+                  .selected=${this.activeList == list}
+                  listName=${list}
+                ></list-item>
+            `
+          })
+          : null
+        }
+      </ul>
+    `
+  }
+
+  renderTaskList() {
+    return html`
+      <div>
+        <div class="task-list-header">${this.activeList || 'Create/select a list!'}</div>
+        <task-list
+          .listName=${this.activeList}
+          .todoStore=${this.todoStore}
+          .sensemakerStore=${this.sensemakerStore}
+        ></task-list>
+      </div>
+    `
+  }
+
+  render() {
     return html`
       <main class="layout">
         <div class="left-col">
           <div class="container">
-            <h1>Lists</h1>
-            <ul class="list-list-container" @list-selected=${this.updateActiveList}>
-              ${this.lists?.value 
-                ? repeat(this.lists.value, (_) => +(new Date()), (list, index) => {
-                    return html`
-                      <list-item
-                        class="todo-list-list-item"
-                        .selected=${this.activeList == list}
-                        listName=${list}
-                      ></list-item>
-                  `
-                })
-                : null
-              }
-            </ul>
-
-            <h2>Contexts</h2>
-            <nh-context-selector
-              id="select-context"
-              .sensemakerStore=${this.sensemakerStore}
-              .selectedAppletInstanceId=${this.nhDelegate.appInfo.installed_app_id}
-              .selectedContextEhB64=${'this.selectedContextEhB64'}
-            >
-            </nh-context-selector>
+            ${this.renderListsList()}
+            ${this.renderContextsList()}
           </div>
           <div>
             <add-item itemType="list" @new-item=${this.addNewList}></add-item>
           </div>
         </div>
         <div class="right-col">
-          ${this.activeContext ? null : taskList}
+          ${this.activeContext ? this.renderContextResults() : this.renderTaskList()}
           <add-item itemType="task" @new-item=${this.addNewTask}></add-item>
         </div>
       </main>
@@ -122,18 +141,14 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
     this.activeContext = undefined;
   }
   async addNewTask(e: CustomEvent) {
-    console.log('adding new item', e.detail.newValue);
     const createdTask = await this.todoStore.addTaskToList({
       task_description: e.detail.newValue,
       list: this.activeList!,
     });
-    const options = {
-      detail: { hash: createdTask.entry_hash },
-      bubbles: true,
-      composed: true,
-    };
-    this.dispatchEvent(new CustomEvent('task-hash-created', options));
+    const options = { detail: { hash: createdTask.entry_hash }, bubbles: true, composed: true, };
+    (this as any).dispatchEvent(new CustomEvent('task-hash-created', options));
   }
+
   // handle the @list-selected event from the list-list component
   updateActiveList(e: CustomEvent) {
     this.activeList = e.detail.selectedList;
@@ -191,6 +206,11 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
       .right-col {
         grid-column: 2/-1;
       }
+      .right-col > div {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+      }
 
       .container {
         display: flex;
@@ -207,6 +227,7 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
         flex-direction: column;
         justify-content: flex-start;
         align-items: flex-start;
+        gap: 8px;
       }
 
       .task-list-header {

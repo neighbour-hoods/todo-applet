@@ -36,7 +36,10 @@ export class ListItem extends NHComponent {
             .list-item.selected {
                 background: rgb(110, 70, 204);
             }
-            .list-item:hover {
+            .list-item.selected:hover {
+                cursor: initial;
+            }
+            .list-item:not(.selected):hover {
                 background: rgba(110, 70, 204, 0.5);
             }
             .list-item {
@@ -49,6 +52,8 @@ export class ListItem extends NHComponent {
                 padding: 8px 16px;
                 box-sizing: border-box;
                 align-items: center;
+                display: flex;
+                flex: 1;
             }
         `,
     ];

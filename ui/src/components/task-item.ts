@@ -1,57 +1,31 @@
 import { property, state } from "lit/decorators.js";
-import { ScopedRegistryHost } from "@lit-labs/scoped-registry-mixin";
-import { LitElement, html, css } from "lit";
+import { html, css, CSSResult } from "lit";
 import { Task, WrappedEntry } from "../types";
-import { Checkbox, ListItem, CheckListItem } from '@scoped-elements/material-web'
 import { TodoStore } from "../todo-store";
-import { variables } from "../styles/variables";
+import { NHCheckbox, NHComponent } from "@neighbourhoods/design-system-components";
 
-export class TaskItem extends ScopedRegistryHost(LitElement) {
-    @property()
-    public todoStore!: TodoStore
+export class TaskItem extends NHComponent {
+    @property() todoStore!: TodoStore
 
-    @property()
-    completed: boolean = false
-
-    @property()
-    @state()
-    task!: WrappedEntry<Task>
-
-    static get styles() {
-        return [
-            variables,
-            css`
-              .task-item-container {
-                display: flex;
-                flex-direction: row;
-                color: var(--nh-theme-fg-default);
-                flex: 1;
-                background-color: var(--nh-theme-bg-surface);
-                border-radius: var(--border-r-tiny);
-                margin: 4px;
-                font-size: 16px;
-              }
-              .check-list-item {
-                color: var(--nh-theme-fg-default);
-                width: 100%;
-              }`
-        ]
-    }
+    @state() task!: WrappedEntry<Task>
 
     render() {
-        // console.log(this.completed)
         return html`
             <div class="task-item-container">
-                <input type="checkbox" class="check-list-item"
-                    checked=${this.completed}
+                <nh-checkbox
+                    .size=${"auto"}
+                    .label=${""}
+                    name=${"task-item"}
+                    class="check-list-item"
                     @click=${this.dispatchTaskToggle}
                 >
-                </input>
+                </nh-checkbox>
 
-                <label>${this.task.entry.description}</label>
+                <label for="task-item">${this.task.entry.description}</label>
             </div>
         `
     }
+
     dispatchTaskToggle() {
         this.dispatchEvent(new CustomEvent('task-toggle'))
     }
@@ -60,11 +34,42 @@ export class TaskItem extends ScopedRegistryHost(LitElement) {
         await this.todoStore.toggleTaskStatus(this.task)
     }
 
-    static get elementDefinitions() {
-        return {
-            'mwc-checkbox': Checkbox,
-            'mwc-list-item': ListItem,
-            // 'nh-checkbox': NHCheckbox,
-        }
+    static elementDefinitions = {
+        'nh-checkbox': NHCheckbox,
     }
+
+    static styles: CSSResult[] = [
+        super.styles as CSSResult,
+        css`
+            :host {
+                display: flex;
+                height: 2rem;
+            }
+
+            .task-item-container {
+                display: flex;
+                flex: 1;
+                font-size: 16px;
+                color: #fff;
+                background-color: var(--nh-theme-bg-surface);
+                border-radius: 8px;
+                margin: 0;
+                align-items: center;
+                height: 100%;
+                padding: 8px;
+                box-sizing: border-box;
+                justify-content: flex-start;
+                display: flex;
+            }
+            .check-list-item, nh-checkbox {
+                display: flex;
+                flex: 1 1 0%;
+                flex: initial;
+            }
+            nh-checkbox {
+                width: 3rem;
+                margin-right: 8px;
+            }
+        `
+    ]
 }
