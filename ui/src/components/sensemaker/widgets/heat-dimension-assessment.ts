@@ -53,7 +53,7 @@ export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentC
       return html`<nh-icon
           data-item=${value}
           .selected=${intValue && intValue.Integer == value}
-          .frozen=${intValue && intValue.Integer == value}
+          .frozen=${intValue && intValue.Integer}
           @select=${this.assessor({ Integer: value })}
           @select-start=${this.logEvent}
           @select-cancel=${this.logEvent}
