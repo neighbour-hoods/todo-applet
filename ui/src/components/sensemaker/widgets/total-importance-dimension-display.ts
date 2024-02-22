@@ -40,6 +40,7 @@ export class TotalImportanceDimensionDisplay extends OutputAssessmentControl {
             }
 
             .display-box-wrapper {
+                margin: 0 auto;
                 display: grid;
                 place-content: center;
                 box-sizing: border-box;
