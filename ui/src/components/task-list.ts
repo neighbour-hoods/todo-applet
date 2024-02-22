@@ -15,7 +15,11 @@ export class TaskList extends NHComponent {
     @property() listName: string | undefined
     @property() config!: AppletConfig;
 
-    listTasks = new StoreSubscriber(this as any, () => this.todoStore.getTasks(this.listName!));
+    listTasks = new StoreSubscriber(
+        this as any,
+        () => this?.todoStore?.getTasks(this.listName!),
+        () => [this.listName, this.todoStore]
+    );
 
     render() {
         if (this.listName) {
@@ -50,8 +54,9 @@ export class TaskList extends NHComponent {
 
     renderTaskList() {
         if (this.listName) {
-            const tasks = this.listTasks.value;
-            
+            console.log('this.listTasks?.value :>> ', this.listTasks?.value);
+            const tasks = this.listTasks?.value;
+            if(!tasks) return;
             return html`
                 ${tasks.length > 0 ? repeat(tasks, (task) => task.entry_hash, (task, _idx) => {
                     return html`

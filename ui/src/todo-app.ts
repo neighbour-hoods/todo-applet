@@ -27,7 +27,8 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
   @state() config!: AppletConfig;
 
   lists: StoreSubscriber<string[]> = new StoreSubscriber(this as any, () =>
-    this.todoStore.getLists(), () => [this.config]
+    this?.todoStore?.getLists(),
+    () => [this.config, this.todoStore]
   );
 
   loadData = async () => {
@@ -45,7 +46,7 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
       );
 
       this.todoStore?.fetchAllTasks();
-      const allTaskEntryHashes = get(this.todoStore.allTaskEntryHashes());
+      const allTaskEntryHashes = get(this.todoStore?.allTaskEntryHashes());
 
       await this.nhDelegate.sensemakerStore.getAssessmentsForResources({
         resource_ehs: allTaskEntryHashes,
@@ -148,7 +149,7 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
     this.activeContext = undefined;
   }
   async addNewTask(e: CustomEvent) {
-    const createdTask = await this.todoStore.addTaskToList({
+    const createdTask = await this.todoStore?.addTaskToList({
       task_description: e.detail.newValue,
       list: this.activeList!,
     });

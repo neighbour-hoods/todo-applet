@@ -24,6 +24,7 @@ export class ContextView extends ScopedRegistryHost(LitElement) {
     contextName!: string;
 
     tasksInContext = new StoreSubscriber(this, () => this.todoStore.tasksFromEntryHashes(get(this.sensemakerStore.contextResults())[this.contextName]));
+    
     render() {
         // consider using `repeat()` instead of `map()`
         return html`
