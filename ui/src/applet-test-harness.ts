@@ -13,7 +13,6 @@ import {
   CellId,
   ClonedCell,
 } from '@holochain/client';
-import '@material/mwc-circular-progress';
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
 import { TodoStore } from './todo-store';
 import { CreateOrJoinNH } from '@neighbourhoods/dev-util-components';
@@ -29,7 +28,7 @@ import {
   createAppDelegate,
   AppBlockRenderer
 } from "@neighbourhoods/app-loader"
-
+import { CircularProgress } from '@scoped-elements/material-web';
 
 @customElement('applet-test-harness')
 export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
@@ -77,7 +76,6 @@ export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
       this.adminWebsocket = adminWebsocket
       this.appWebsocket = appWebsocket
       this.appInfo = appInfo
-
       // check if sensemaker has been cloned yet
       const sensemakerCellInfo: CellInfo[] = installedCells["sensemaker"];
       if (sensemakerCellInfo.length > 1) {
@@ -130,7 +128,7 @@ export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
   async createNeighbourhood(_e: CustomEvent) {
     await this.cloneSensemakerCell(this.agentPubkey)
     const _todoConfig = await this._sensemakerStore.registerApplet(appletConfig);
-
+console.log('_todoConfig :>> ', _todoConfig);
     this.loading = false;
   }
 
@@ -167,7 +165,7 @@ export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
         <div class="home-page"
           @task-hash-created=${(e: CustomEvent) => { console.log('task created with hash:', e.detail.hash); this.taskHash = e.detail.hash }}
         >
-        <app-renderer @component=${TodoApplet.appletRenderers['full']} @nhDelegate=${delegate}></app-renderer>
+        <app-renderer .component=${TodoApplet.appletRenderers['full']} .nhDelegate=${delegate}></app-renderer>
         </div>
       </main>
     `;
@@ -176,7 +174,8 @@ export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
   static get elementDefinitions() {
     return {
       'create-or-join-nh': CreateOrJoinNH,
-      'app-renderer': AppBlockRenderer
+      'app-renderer': AppBlockRenderer,
+      'mwc-circular-progress': CircularProgress,
     };
   }
 

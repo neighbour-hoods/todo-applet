@@ -25,7 +25,7 @@ export class TaskDisplayWrapper extends ScopedRegistryHost(RenderBlock) {
             zome_name: "todo",
             fn_name: "get_latest_task_with_eh",
             payload: this.resourceHash,
-          }
+        }
         const task = await this.nhDelegate.appAgentWebsocket.callZome(req);
         this.task = {
             entry: task,
@@ -35,7 +35,7 @@ export class TaskDisplayWrapper extends ScopedRegistryHost(RenderBlock) {
         this.fetchingResource = false;
     }
     render() {
-        if(this.fetchingResource) return html`<mwc-circular-progress></mwc-circular-progress>`
+        if(this.fetchingResource) return html`loading!`
         else {
             return html`
                 <task-item .task=${this.task}></task-item>

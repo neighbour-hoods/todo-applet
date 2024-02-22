@@ -16,10 +16,9 @@
     "test": "npm run build:happ && npm t -w tests",
     "package": "npm run build:happ && npm run package:ui -w ui && hc web-app pack workdir",
     "build:happ": "npm run build:dnas && hc app pack ./workdir",
-    "build:test-happ": "npm run download-sensemaker && npm run build:dnas && hc app pack ./workdir/sensemaker-enabled",
+    "build:test-happ": "npm run build:dnas && hc app pack ./workdir/sensemaker-enabled",
     "build:dnas": "npm run build:zomes && hc dna pack ./dna/workdir",
     "build:zomes": "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown",
-    "download-sensemaker": "rimraf workdir/sensemaker.dna && curl -L --output workdir/sensemaker.dna https://github.com/neighbour-hoods/sensemaker-lite/releases/download/v0.0.13-alpha/sensemaker.dna; exit 0",
     "clean": "rimraf workdir/sensemaker.dna; rimraf ui/node_modules; rimraf node_modules",
     "postinstall": "test -f .env || cp .env.example .env"
   },
@@ -32,6 +31,7 @@
     "open-cli": "^7.2.0",
     "rimraf": "^3.0.2",
     "dotenv-cli": "^7.2.1",
+    "@webcomponents/scoped-custom-element-registry": "^0.0.9",
     "run-singleton-cli": "^0.0.5"
   },
   "dependencies": {
