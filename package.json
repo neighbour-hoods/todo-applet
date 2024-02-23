@@ -10,16 +10,21 @@
     "dev": "dotenv -- npm run network:dev",
     "dev2": "dotenv -- npm run network:dev2",
     "network:dev": "hc s clean && npm run build:test-happ && dotenv -- concurrently \"open-cli http://localhost:${UI_PORT} && cd ui && npm run dev\" \"dotenv -- npm run start:dev\"",
+    
+    "start:local-services": "hc run-local-services --bootstrap-address-path .bootstrap-path --signal-address-path .signal-path & echo $! > .local-services-pid && sleep 5",
+    "start:check-local-services": "test ! -f .local-services-pid && pnpm start:local-services",
+    "stop:local-services": "kill `cat .local-services-pid`; rm .local-services-pid; rm .bootstrap-path; rm .signal-path",
+
     "start:dev": "RUST_LOG=warn WASM_LOG=debug echo \"pass\" | hc s --piped -f=$VITE_ADMIN_PORT generate ./workdir/sensemaker-enabled/todo-sensemaker.happ -d=agent1 --run $VITE_HC_PORT -a todo-sensemaker network mem",
-    "network:dev2": "hc s clean && npm run build:test-happ && dotenv -- concurrently \"open-cli http://localhost:${UI_PORT} && open-cli http://localhost:${UI_PORT_2} && cd ui && npm run dev2\" \"dotenv -- npm run start:dev2\"",
-    "start:dev2": "RUST_LOG=warn WASM_LOG=debug echo \"pass\" | hc s --piped -f=$VITE_ADMIN_PORT,$VITE_ADMIN_PORT_2 generate ./workdir/sensemaker-enabled/todo-sensemaker.happ -n 2 --run=$VITE_HC_PORT,$VITE_HC_PORT_2 -a todo-sensemaker network mem",
+    "network:dev2": "pnpm start:check-local-services; hc s clean && npm run build:test-happ && dotenv -- concurrently \"open-cli http://localhost:${UI_PORT} && open-cli http://localhost:${UI_PORT_2} && cd ui && npm run dev2\" \"dotenv -- npm run start:dev2\"",
+    "start:dev2": "RUST_LOG=warn WASM_LOG=debug echo \"pass\" | hc s --piped -f=$VITE_ADMIN_PORT,$VITE_ADMIN_PORT_2 generate ./workdir/sensemaker-enabled/todo-sensemaker.happ -n 2 --run=$VITE_HC_PORT,$VITE_HC_PORT_2 -a todo-sensemaker network --bootstrap `cat .bootstrap-path` webrtc `cat .signal-path`",
     "test": "npm run build:happ && npm t -w tests",
     "package": "npm run build:happ && npm run package:ui -w ui && hc web-app pack workdir",
     "build:happ": "npm run build:dnas && hc app pack ./workdir",
     "build:test-happ": "npm run build:dnas && hc app pack ./workdir/sensemaker-enabled",
     "build:dnas": "npm run build:zomes && hc dna pack ./dna/workdir",
     "build:zomes": "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown",
-    "clean": "rimraf workdir/sensemaker.dna; rimraf ui/node_modules; rimraf node_modules",
+    "clean": "rimraf ui/node_modules; rimraf node_modules",
     "postinstall": "test -f .env || cp .env.example .env"
   },
   "devDependencies": {

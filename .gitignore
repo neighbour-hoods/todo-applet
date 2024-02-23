@@ -11,3 +11,6 @@ node_modules/
 .running
 .DS_Store
 .env
+.bootstrap-path
+.local-services-pid
+.signal-path

@@ -1,16 +1,15 @@
 import { LitElement, css, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
 
 import { AppWebsocket, AppInfo, AdminWebsocket, encodeHashToBase64, CellInfo, AppAgentWebsocket, ProvisionedCell, CellType, CellId, ClonedCell, } from '@holochain/client';
 
 import { connectHolochainApp, getAppAgentWebsocket, createAppDelegate, AppBlockRenderer } from "@neighbourhoods/app-loader"
 import { CreateOrJoinNH } from '@neighbourhoods/dev-util-components';
-import { SensemakerStore, } from '@neighbourhoods/client';
+import { SensemakerStore } from '@neighbourhoods/client';
 
 import { CircularProgress } from '@scoped-elements/material-web';
 
-import { TodoStore } from './todo-store';
 import { INSTALLED_APP_ID, appletConfig } from './appletConfig'
 import TodoApplet from './applet-index'
 
@@ -64,7 +63,7 @@ export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
   }
 
   async initializeSensemakerStore(clonedSensemakerRoleName: string) {
-    this._appAgentWebsocket = await getAppAgentWebsocket(INSTALLED_APP_ID);;
+    this._appAgentWebsocket = await getAppAgentWebsocket(INSTALLED_APP_ID);
     this._sensemakerStore = new SensemakerStore(this._appAgentWebsocket, clonedSensemakerRoleName);
   }
 
@@ -73,7 +72,7 @@ export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
       app_id: INSTALLED_APP_ID,
       role_name: "sensemaker",
       modifiers: {
-        network_seed: '',
+        network_seed: 'test',
         properties: {
           sensemaker_config: {
             neighbourhood: "todo test",
@@ -89,20 +88,16 @@ export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
   }
 
   async createNeighbourhood(_e: CustomEvent) {
+    console.log('this._agentPubkey :>> ', this._agentPubkey);
     await this.cloneSensemakerCell(this._agentPubkey)
-    const _todoConfig = await this._sensemakerStore.registerApplet(appletConfig);
-    console.log('App config :>> ', _todoConfig);
+    const config = await this._sensemakerStore.registerApplet(appletConfig);
+    console.log('App config :>> ', config);
     this.loading = false;
   }
 
   async joinNeighbourhood(e: CustomEvent) {
     await this.cloneSensemakerCell(e.detail.newValue)
-    // wait some time for the dht to sync, otherwise checkIfAppletConfigExists returns null
-    setTimeout(async () => {
-      console.log('attempt to install/join from agent 2:>> ');
-      const _todoConfig = await this._sensemakerStore.registerApplet(appletConfig);
-      this.loading = false;
-    }, 2000)
+    this.loading = false;
   }
 
   render() {
@@ -135,12 +130,10 @@ export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
     `;
   }
 
-  static get elementDefinitions() {
-    return {
-      'create-or-join-nh': CreateOrJoinNH,
-      'app-renderer': AppBlockRenderer,
-      'mwc-circular-progress': CircularProgress,
-    };
+  static elementDefinitions = {
+    'create-or-join-nh': CreateOrJoinNH,
+    'app-renderer': AppBlockRenderer,
+    'mwc-circular-progress': CircularProgress,
   }
 
   static styles = css`

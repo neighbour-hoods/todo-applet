@@ -1,5 +1,3 @@
-import NHContextSelector from './../../../../ui/app/src/nh-config/nh-context-selector';
-// TODO: export this component from nh-design-system-components
 import { CSSResult, css, html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
@@ -76,18 +74,18 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
 
   }
 
-  renderContextsList() {
-    return html`
-      <h2>Contexts</h2>
-      <nh-context-selector
-        id="select-context"
-        .sensemakerStore=${this.sensemakerStore}
-        .selectedAppletInstanceId=${this.nhDelegate.appInfo.installed_app_id}
-        .selectedContextEhB64=${'this.selectedContextEhB64'}
-      >
-      </nh-context-selector>
-    `
-  }
+  // renderContextsList() {
+  //   return html`
+  //     <h2>Contexts</h2>
+  //     <nh-context-selector
+  //       id="select-context"
+  //       .sensemakerStore=${this.sensemakerStore}
+  //       .selectedAppletInstanceId=${this.nhDelegate.appInfo.installed_app_id}
+  //       .selectedContextEhB64=${'this.selectedContextEhB64'}
+  //     >
+  //     </nh-context-selector>
+  //   `
+  // }
 
   renderListsList() {
     return html`
@@ -129,7 +127,7 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
         <div class="left-col">
           <div class="container">
             ${this.renderListsList()}
-            ${this.renderContextsList()}
+            
           </div>
           <div>
             <add-item itemType="list" @new-item=${this.addNewList}></add-item>
@@ -179,7 +177,7 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
 
   static elementDefinitions = {
     'task-list': TaskList,
-    'nh-context-selector': NHContextSelector,
+    // 'nh-context-selector': NHContextSelector,
     'context-view': ContextView,
     'add-item': AddItem,
     'task-item': TaskItem,

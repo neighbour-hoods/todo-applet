@@ -1,5 +1,5 @@
 
-import { property, state } from "lit/decorators.js";
+import { property } from "lit/decorators.js";
 import { ScopedRegistryHost } from "@lit-labs/scoped-registry-mixin";
 import { LitElement, css, html, unsafeCSS } from "lit";
 import { TaskItem } from "../task-item";
@@ -29,16 +29,11 @@ export class ContextView extends ScopedRegistryHost(LitElement) {
         // consider using `repeat()` instead of `map()`
         return html`
             ${this.tasksInContext.value.map((task) => html`
-                <sensemake-resource class="sensemake-resource"
-                    .resourceEh=${task.entry_hash}
-                    .resourceDefEh=${decodeHashFromBase64(getHashesFromResourceDefNames(["task_item"], get(this.sensemakerStore.resourceDefinitions))[0])}
-                >
                     <task-item
                         .task=${task}
                         .completed=${('Complete' in task.entry.status)}
                         @task-toggle=${() => this.todoStore.toggleTaskStatus(task)}
                     ></task-item>
-                </sensemake-resource>
             `)}
         `
     }
