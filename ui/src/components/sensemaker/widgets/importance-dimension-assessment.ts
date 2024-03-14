@@ -6,6 +6,7 @@ import {
 import { variables } from '../../../styles/variables';
 import { NHIconContainer } from '@neighbourhoods/design-system-components';
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
+import { CircularProgress } from '@scoped-elements/material-web';
 
 export class ImportanceDimensionAssessment extends ScopedRegistryHost(InputAssessmentControl) {
   @state()
@@ -17,7 +18,6 @@ export class ImportanceDimensionAssessment extends ScopedRegistryHost(InputAsses
   public async loadData(this: ImportanceDimensionAssessment) {
     await super.loadData()
     this.loading = false
-    console.log('this.subscriber :>> ', this.assessment, this.nhDelegate);
   }
 
   createAssessment = async () => {
@@ -29,14 +29,15 @@ export class ImportanceDimensionAssessment extends ScopedRegistryHost(InputAsses
 
   render() {
     if (this.loading) {
-      return html`<sl-spinner class="icon-spinner"></sl-spinner>`
+      return html`<mwc-progress indeterminate class="icon-spinner"></mwc-progress>`
     }
     return html`<nh-icon @select=${this.createAssessment}>⭐️<nh-icon>`
   }
 
   static get elementDefinitions() {
     return {
-      'nh-icon': NHIconContainer
+      'nh-icon': NHIconContainer,
+      'mwc-progress': CircularProgress
     };
   }
 
@@ -44,13 +45,11 @@ export class ImportanceDimensionAssessment extends ScopedRegistryHost(InputAsses
     return [
       variables,
       css`
-      .icon-spinner {
-        font-size: 2.15rem;
-        --speed: 10000ms;
-        --track-width: 4px;
-        --indicator-color: var(--nh-theme-bg-muted);
-        margin: 3px
-      }
+        .icon-spinner {
+          height: 100%;
+          width: 34px;
+          --mdc-theme-primary: var(--nh-theme-accent-emphasis);
+        }
     `]
   }
 }

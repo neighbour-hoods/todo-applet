@@ -1,6 +1,5 @@
 import { css, html } from 'lit';
-import { property, queryAll, state } from 'lit/decorators.js';
-import { EntryHash } from '@holochain/client';
+import { state } from 'lit/decorators.js';
 import {
   InputAssessmentControl, RangeValueInteger,
 } from '@neighbourhoods/client';
@@ -8,6 +7,7 @@ import { variables } from '../../../styles/variables';
 import { NHIconContainer } from '@neighbourhoods/design-system-components';
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
 import { NHDelegateReceiver, InputAssessmentWidgetDelegate } from '@neighbourhoods/client';
+import { CircularProgress } from '@scoped-elements/material-web';
 
 export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentControl) implements NHDelegateReceiver<InputAssessmentWidgetDelegate> {
   @state() loading = true;
@@ -64,7 +64,7 @@ export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentC
 
   render() {
     if (this.loading) {
-      return html`<span>l o a d i n g</span>`
+      return html`<mwc-progress indeterminate class="wide-spinner"></mwc-progress>`
     }
     return html`
       <div class="heat-scale">
@@ -75,7 +75,8 @@ export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentC
 
   static get elementDefinitions() {
     return {
-      'nh-icon': NHIconContainer
+      'nh-icon': NHIconContainer,
+      'mwc-progress': CircularProgress
     };
   }
 
@@ -90,6 +91,12 @@ export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentC
           display: flex;
           flex-direction: row;
           flex-wrap: nowrap;
+        }
+        
+        .wide-spinner {
+          width: 34px;
+          --mdc-theme-primary: var(--nh-theme-accent-emphasis);
+          padding: 12px 72px;
         }
       `,
     ];
