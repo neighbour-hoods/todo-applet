@@ -1,24 +1,22 @@
-import { property, state } from "lit/decorators.js";
+import { state } from "lit/decorators.js";
 import { ScopedRegistryHost } from "@lit-labs/scoped-registry-mixin";
 import { html } from "lit";
 import { Task, WrappedEntry } from "../types";
-import { AppAgentCallZomeRequest, AppAgentClient, EntryHash } from "@holochain/client";
+import { AppAgentCallZomeRequest } from "@holochain/client";
 import { TaskItem } from "./task-item";
 import { RenderBlock } from "@neighbourhoods/client";
+import { CircularProgress } from "@scoped-elements/material-web";
 
 export class TaskDisplayWrapper extends ScopedRegistryHost(RenderBlock) {
-    @property()
-    resourceHash!: EntryHash;
-
-    @property()
-    appAgentWebsocket!: AppAgentClient;
-
-    @state()
-    fetchingResource = true;
+    @state() fetchingResource = true;
 
     task?: WrappedEntry<Task>
 
-    loadData = async () => {
+    async loadData() {
+        await super.loadData();
+        
+        if(!this.resourceHash) throw new Error('Could not fetch resource in resource renderer');
+
         const req: AppAgentCallZomeRequest = {
             cap_secret: null,
             role_name: "todo_lists",
@@ -35,7 +33,7 @@ export class TaskDisplayWrapper extends ScopedRegistryHost(RenderBlock) {
         this.fetchingResource = false;
     }
     render() {
-        if(this.fetchingResource) return html`loading!`
+        if(this.fetchingResource) return html`<mwc-circular-progress style="margin-top: 16px;" indeterminate></mwc-circular-progress>`
         else {
             return html`
                 <task-item .task=${this.task}></task-item>
@@ -43,10 +41,9 @@ export class TaskDisplayWrapper extends ScopedRegistryHost(RenderBlock) {
         }
     }
 
-    static get scopedElements() {
-        return {
-            "task-item": TaskItem,
-        }
+    static elementDefinitions = {
+        "task-item": TaskItem,
+        'mwc-circular-progress': CircularProgress,
     }
 }
 
