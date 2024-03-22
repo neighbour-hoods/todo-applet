@@ -6,8 +6,9 @@ import { AppletConfig, SensemakerStore } from "@neighbourhoods/client";
 import { StoreSubscriber } from "lit-svelte-stores";
 import { repeat } from 'lit/directives/repeat.js';
 import { NHComponent } from "@neighbourhoods/design-system-components";
-import { createInputAssessmentWidgetDelegate, createOutputAssessmentWidgetDelegate } from "@neighbourhoods/app-loader";
+import { createInputAssessmentWidgetDelegate, createOutputAssessmentWidgetDelegate,  OutputAssessmentRenderer, InputAssessmentRenderer } from "@neighbourhoods/app-loader";
 import { EntryHash } from "@holochain/client";
+import applet from "../applet-index";
 
 export class TaskList extends NHComponent {
     @property() todoStore!: TodoStore
@@ -64,10 +65,20 @@ export class TaskList extends NHComponent {
                             .task=${task}
                             .todoStore=${this.todoStore}
                             .completed=${('Complete' in task.entry.status)}
-                            .inputDelegate=${this.createInputAssessmentDelegate(task.entry_hash)}
-                            .outputDelegate=${this.createOutputAssessmentDelegate(task.entry_hash)}
                             @task-toggle=${() => this.todoStore.toggleTaskStatus(task)}
-                        ></task-item>
+                        >
+                            <output-assessment-renderer
+                                slot="output-assessment"
+                                .component=${applet.assessmentWidgets.heatOutput.component}
+                                .nhDelegate=${this.createOutputAssessmentDelegate(task.entry_hash)}
+                            ></output-assessment-renderer>
+
+                            <input-assessment-renderer
+                                slot="input-assessment"
+                                .component=${applet.assessmentWidgets.heatAssessment.component}
+                                .nhDelegate=${this.createInputAssessmentDelegate(task.entry_hash)}
+                            ></input-assessment-renderer>
+                        </task-item>
                     `
                 }) : null}
             `
@@ -76,5 +87,7 @@ export class TaskList extends NHComponent {
 
     static elementDefinitions = {
         'task-item': TaskItem,
+        'input-assessment-renderer': InputAssessmentRenderer,
+        'output-assessment-renderer': OutputAssessmentRenderer,
     };
 }

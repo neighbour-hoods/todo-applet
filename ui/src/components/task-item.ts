@@ -3,26 +3,16 @@ import { html, css, CSSResult } from "lit";
 import { Task, WrappedEntry } from "../types";
 import { TodoStore } from "../todo-store";
 import { NHCheckbox, NHComponent } from "@neighbourhoods/design-system-components";
-import { InputAssessmentWidgetDelegate, OutputAssessmentWidgetDelegate } from "@neighbourhoods/client";
-import applet from "../applet-index";
-import { InputAssessmentRenderer, OutputAssessmentRenderer } from "@neighbourhoods/app-loader";
 
 export class TaskItem extends NHComponent {
     @property() todoStore!: TodoStore
-    @property() inputDelegate!: InputAssessmentWidgetDelegate
-    @property() outputDelegate!: OutputAssessmentWidgetDelegate
 
     @state() task!: WrappedEntry<Task>
 
     render() {
-        // TODO: slotify this or else add the component as a prop so that we can use different dimensions for the same list item formats
         return html`
             <div class="task-item-container">
-                <output-assessment-renderer
-                    .component=${applet.assessmentWidgets.heatOutput.component}
-                    .nhDelegate=${this.outputDelegate}
-                ></output-assessment-renderer>
-                
+                <slot name="output-assessment"></slot>
                 <div class="task-details">
                     <nh-checkbox
                         .size=${"auto"}
@@ -35,10 +25,8 @@ export class TaskItem extends NHComponent {
 
                     <label for="task-item">${this.task.entry.description}</label>
                 </div>
-                <input-assessment-renderer
-                    .component=${applet.assessmentWidgets.heatAssessment.component}
-                    .nhDelegate=${this.inputDelegate}
-                ></input-assessment-renderer>
+
+                <slot name="input-assessment"></slot>
             </div>
         `
     }
@@ -53,8 +41,6 @@ export class TaskItem extends NHComponent {
 
     static elementDefinitions = {
         'nh-checkbox': NHCheckbox,
-        'input-assessment-renderer': InputAssessmentRenderer,
-        'output-assessment-renderer': OutputAssessmentRenderer,
     }
 
     static styles: CSSResult[] = [
