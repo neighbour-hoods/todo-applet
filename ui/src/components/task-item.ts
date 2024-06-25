@@ -12,7 +12,7 @@ export class TaskItem extends NHComponent {
     render() {
         return html`
             <div class="task-item-container">
-                <slot name="output-assessment"></slot>
+                <slot name="vote"></slot>
                 <div class="task-details">
                     <nh-checkbox
                         .size=${"auto"}

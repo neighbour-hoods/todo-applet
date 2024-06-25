@@ -2,11 +2,11 @@ import { property } from "lit/decorators.js";
 import { html } from "lit";
 import { TaskItem } from "./task-item";
 import { TodoStore } from "../todo-store";
-import { AppletConfig, SensemakerStore } from "@neighbourhoods/client";
+import { AppletConfig, Dimension, InputAssessmentControlDelegate, OutputAssessmentControlDelegate, SensemakerStore } from "@neighbourhoods/client";
 import { StoreSubscriber } from "lit-svelte-stores";
 import { repeat } from 'lit/directives/repeat.js';
 import { NHComponent } from "@neighbourhoods/design-system-components";
-import { createInputAssessmentWidgetDelegate, createOutputAssessmentWidgetDelegate,  OutputAssessmentRenderer, InputAssessmentRenderer } from "@neighbourhoods/app-loader";
+import { createInputAssessmentControlDelegate, createOutputAssessmentControlDelegate,  OutputAssessmentRenderer, InputAssessmentRenderer } from "@neighbourhoods/app-loader";
 import { EntryHash } from "@holochain/client";
 import applet from "../applet-index";
 
@@ -15,6 +15,8 @@ export class TaskList extends NHComponent {
     @property() sensemakerStore!: SensemakerStore
     @property() listName: string | undefined
     @property() config!: AppletConfig;
+
+    @property() existingDimensionEntries: Array<Dimension & { dimension_eh: EntryHash }> = [];
 
     listTasks = new StoreSubscriber(
         this as any,
@@ -32,34 +34,54 @@ export class TaskList extends NHComponent {
         }
     }
 
-    createOutputAssessmentDelegate(resourceEh: EntryHash) {
-        if(!this?.config) return
-        const d = createOutputAssessmentWidgetDelegate(
-            this.sensemakerStore,
-            this.config.dimensions['Priority'],
-            resourceEh
-        )
-        return d
+    createInputDelegate(dimensionName: string, resourceDefName: string, taskEh: EntryHash) : InputAssessmentControlDelegate | undefined {
+        const assessableDimension = (this.config?.dimensions?.[dimensionName] || this.existingDimensionEntries?.find(dim => dim.name == dimensionName)?.dimension_eh);
+        let delegate;
+        try {
+            if(!assessableDimension || !taskEh) {
+                console.log('assessableDimension, taskEh, resourceDefName :>> ', assessableDimension, taskEh, resourceDefName);
+                throw new Error("Not enough details to create delegate")
+            }
+            delegate = createInputAssessmentControlDelegate(
+                this.sensemakerStore,
+                assessableDimension,
+                this.config.resource_defs[resourceDefName],
+                taskEh
+            )
+        } catch (error) {
+            console.error('Could not create working delegate :>> ', error);
+        }
+        return delegate
     }
 
-    createInputAssessmentDelegate(resourceEh: EntryHash) {
-        if(!this?.config) return
-        const d = createInputAssessmentWidgetDelegate(
-            this.sensemakerStore,
-            this.config.dimensions['Priority'],
-            this.config.resource_defs['task_item'],
-            resourceEh
-        )
-        return d
+    createOutputDelegate(dimensionName: string, taskEh: EntryHash) : OutputAssessmentControlDelegate | undefined {
+        const assessableDimension = (this.config?.dimensions?.[dimensionName] || this.existingDimensionEntries?.find(dim => dim.name == dimensionName)?.dimension_eh);
+
+        let delegate;
+        try {
+            if(!assessableDimension || !taskEh) {
+                throw new Error("Not enough details to create delegate")
+            }
+            delegate = createOutputAssessmentControlDelegate(
+                this.sensemakerStore,
+                assessableDimension,
+                taskEh
+            )
+        } catch (error) {
+            console.error('Could not create working delegate :>> ', error);
+        }
+        return delegate
     }
 
     renderTaskList() {
         if (this.listName) {
-            console.log('this.listTasks?.value :>> ', this.listTasks?.value);
             const tasks = this.listTasks?.value;
             if(!tasks) return;
             return html`
                 ${tasks.length > 0 ? repeat(tasks, (task) => task.entry_hash, (task, _idx) => {
+                    const d1 = this.createInputDelegate('Vote', 'task_item', task.entry_hash);
+                    const d2 = this.createInputDelegate('Priority', 'task_item', task.entry_hash);
+
                     return html`
                         <task-item
                             .task=${task}
@@ -67,16 +89,18 @@ export class TaskList extends NHComponent {
                             .completed=${('Complete' in task.entry.status)}
                             @task-toggle=${() => this.todoStore.toggleTaskStatus(task)}
                         >
-                            <output-assessment-renderer
-                                slot="output-assessment"
-                                .component=${applet.assessmentWidgets.heatOutput.component}
-                                .nhDelegate=${this.createOutputAssessmentDelegate(task.entry_hash)}
-                            ></output-assessment-renderer>
+                            <input-assessment-renderer
+                                style="display:flex; justify-content: center; cursor: pointer;"
+                                slot="vote"
+                                .component=${applet.assessmentControls.importanceAssessment.component}
+                                .nhDelegate=${d1}
+                            ></input-assessment-renderer>
 
                             <input-assessment-renderer
+                                style="display:flex; justify-content: center"
                                 slot="input-assessment"
-                                .component=${applet.assessmentWidgets.heatAssessment.component}
-                                .nhDelegate=${this.createInputAssessmentDelegate(task.entry_hash)}
+                                .component=${applet.assessmentControls.heatAssessment.component}
+                                .nhDelegate=${d2}
                             ></input-assessment-renderer>
                         </task-item>
                     `
