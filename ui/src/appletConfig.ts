@@ -3,13 +3,13 @@ export const INSTALLED_APP_ID = 'todo-sensemaker';
 
 // ==========RANGES==========
 const importanceRange: Range = {
-    "name": "1-scale",
+    "name": "another-1-scale",
     "kind": {
         "Integer": { "min": 0, "max": 1 }
     }
 }
 const perceivedHeatRange: Range = {
-    "name": "perceived_heat_range",
+    "name": "another-perceived_heat_range",
     "kind": {
         "Integer": { "min": 0, "max": 4 }
     }
@@ -17,7 +17,7 @@ const perceivedHeatRange: Range = {
 const totalImportanceRange: Range = {
     "name": "1-scale-total",
     "kind": {
-        "Integer": { "min": 0, "max": 1000000 }
+        "Float": { "min": 0, "max": 1000000 }
     }
 }
 
@@ -45,6 +45,7 @@ const averageHeatDimension = {
 }
 
 // ==========RESOURCE DEFS==========
+//@ts-ignore
 const taskItemResourceDef: ConfigResourceDef = {
     "resource_name": "task_item",
     "base_types": [{ "entry_index": 0, "zome_index": 0, "visibility": { "Public": null } }],
@@ -97,6 +98,7 @@ const hottestTasksContext: ConfigCulturalContext = {
 }
 
 // ==========APPLET CONFIG==========
+//@ts-ignore
 const appletConfig: AppletConfigInput = {
     "name": INSTALLED_APP_ID,
     "resource_defs": [taskItemResourceDef],

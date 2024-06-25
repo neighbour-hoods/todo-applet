@@ -1,8 +1,8 @@
-import { CSSResult, css, html } from 'lit';
+import { CSSResult, PropertyValueMap, css, html } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
 import { TodoStore } from './todo-store';
-import { AppBlock, NHDelegateReceiver, AppBlockDelegate, SensemakerStore, AppletConfig } from '@neighbourhoods/client';
+import { AppBlock, NHDelegateReceiver, AppBlockDelegate, SensemakerStore, AppletConfig, Dimension } from '@neighbourhoods/client';
 import { TaskItem, TaskList, appletConfig, getCellId } from './index';
 import { get } from 'svelte/store';
 // import { ContextSelector } from './components/sensemaker/context-selector';
@@ -11,6 +11,7 @@ import { AddItem } from './components/add-item';
 import { ListItem } from './components/list-item';
 import { StoreSubscriber } from 'lit-svelte-stores';
 import { repeat } from 'lit/directives/repeat.js';
+import { EntryHash } from '@holochain/client';
 
 export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelegateReceiver<AppBlockDelegate> {
   nhDelegate : AppBlockDelegate;
@@ -23,6 +24,8 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
   @state() activeList: string | undefined;
   @state() activeContext: string | undefined;
   @state() config!: AppletConfig;
+
+  @state() existingDimensionEntries: Array<Dimension & { dimension_eh: EntryHash }> = [];
 
   lists: StoreSubscriber<string[]> = new StoreSubscriber(this as any, () =>
     this?.todoStore?.getLists(),
@@ -55,11 +58,37 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
         this.config = config
       }
       
+      await this.fetchNeighbourhoodDimensions();
+
       this.loaded = true;
     } catch (e) {
       console.log('error in first update', e);
     }
   };
+
+  async fetchNeighbourhoodDimensions() {
+    try {
+        console.log('Fetching existing neighbourhood dimensions..')
+        await this.fetchDimensionEntries();
+    } catch (error) {
+        console.error('Could not fetch neighbourhood dimension data: ', error);
+    }
+  }
+
+  private async fetchDimensionEntries() {
+    if(!this.sensemakerStore) return;
+    try {
+        const entryRecords = await this.sensemakerStore?.getDimensions();
+        this.existingDimensionEntries = entryRecords!.map(entryRecord => {
+        return {
+            ...entryRecord.entry,
+            dimension_eh: entryRecord.entryHash
+        }
+        })
+    } catch (error) {
+        console.log('Error fetching dimension details: ', error);
+    }
+  }
 
   renderContextResults() {
     
@@ -112,6 +141,7 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
       <div>
         <div class="task-list-header">${this.activeList || 'Create/select a list!'}</div>
         <task-list
+          .existingDimensionEntries=${this.existingDimensionEntries}
           .listName=${this.activeList}
           .todoStore=${this.todoStore}
           .config=${this.config}

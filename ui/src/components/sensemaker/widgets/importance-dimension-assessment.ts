@@ -22,7 +22,7 @@ export class ImportanceDimensionAssessment extends ScopedRegistryHost(InputAsses
 
   createAssessment = async () => {
     if (!this.assessed) {
-      this.assessment = await this.nhDelegate.createAssessment({ Integer: 1 })
+      this.assessment = (await this.nhDelegate.createAssessment({ Integer: 1 }))!.entry
       this.assessed = true
     }
   }

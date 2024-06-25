@@ -6,10 +6,10 @@ import {
 import { variables } from '../../../styles/variables';
 import { NHIconContainer } from '@neighbourhoods/design-system-components';
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
-import { NHDelegateReceiver, InputAssessmentWidgetDelegate } from '@neighbourhoods/client';
+import { NHDelegateReceiver, InputAssessmentControlDelegate } from '@neighbourhoods/client';
 import { CircularProgress } from '@scoped-elements/material-web';
 
-export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentControl) implements NHDelegateReceiver<InputAssessmentWidgetDelegate> {
+export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentControl) implements NHDelegateReceiver<InputAssessmentControlDelegate> {
   @state() loading = true;
 
   /**
@@ -18,7 +18,7 @@ export class HeatDimensionAssessment extends ScopedRegistryHost(InputAssessmentC
   icons = ['🧊', '❄️', '💧', '🌶️', '🔥']
 
   assessor(value: RangeValueInteger): () => {} {
-    return async () => this.assessment =  await this.nhDelegate.createAssessment(value)
+    return async () => this.assessment =  (await this.nhDelegate.createAssessment(value))!.entry
   }
 
   public async loadData(): Promise<void> {
