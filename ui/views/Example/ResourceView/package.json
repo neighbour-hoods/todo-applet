@@ -1,0 +1,42 @@
+{
+  "name": "example-resourceview",
+  "version": "0.0.1",
+  "keywords": [],
+  "author": "Neighbourhoods",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      }
+    },
+    "./*": {
+      "types": "./dist/",
+      "import": "./dist/"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "description": "Resource view Webcomponent for the Example resource",
+  "scripts": {
+    "build": "npx tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+
+  "devDependencies": {
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@neighbourhoods/design-system-components": "workspace:*",
+    "@neighbourhoods/design-system-styles": "workspace:*",
+    "lit": "^3.0.0"
+  }
+}

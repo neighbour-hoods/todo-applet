@@ -1,3 +1,3 @@
 packages:
-  - "ui/views/**"
+  - "ui/views/Post/**"
   - "ui/old-applet-structure"
