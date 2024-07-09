@@ -1,10 +1,6 @@
 {
   "name": "todo-dev",
   "private": true,
-  "workspaces": [
-    "ui",
-    "tests"
-  ],
   "scripts": {
     "start": "npm run network:dev2",
     "dev": "dotenv -- npm run network:dev",
