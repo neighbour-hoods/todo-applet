@@ -19,7 +19,7 @@ const applet: NeighbourhoodApplet = {
   resourceRenderers: {
     "task_item": TaskDisplayWrapper
   },
-  assessmentWidgets: {
+  assessmentControls: {
     importanceAssessment: {
       name: "Importance Assessment",
       component: ImportanceDimensionAssessment,
