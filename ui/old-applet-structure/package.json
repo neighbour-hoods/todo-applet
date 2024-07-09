@@ -15,7 +15,7 @@
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
     "build": "vite build --mode production",
-    "package:ui": "rimraf ui.zip && npm run build && cd ./dist && bestzip ../ui.zip index.js icon.png"
+    "package:ui": "rimraf ../ui.zip && npm run build && cd ./dist && bestzip ../../ui.zip index.js icon.png"
   },
   "dependencies": {
     "@holochain/client": "^0.17.0",
@@ -36,8 +36,14 @@
     "@neighbourhoods/design-system-components": "workspace:*",
     "@neighbourhoods/dev-util-components": "workspace:*",
     "@scoped-elements/material-web": "^0.0.19",
+    "@sveltejs/vite-plugin-svelte": "^1.0.0",
     "@type-craft/content": "^0.0.7",
-    "@type-craft/title": "^0.0.8"
+    "@type-craft/title": "^0.0.8",
+    "lit": "^2.0.2",
+    "lit-element": "^4.0.6",
+    "lit-svelte-stores": "0.2.5",
+    "neighbourhoods-design-system-components": "^0.0.12",
+    "svelte": "^3.0.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.15.0",
