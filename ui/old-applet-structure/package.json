@@ -38,7 +38,8 @@
     "@type-craft/title": "^0.0.8",
     "lit": "^3.0.0",
     "lit-svelte-stores": "0.2.5",
-    "neighbourhoods-design-system-components": "workspace:*"
+    "neighbourhoods-design-system-components": "workspace:*",
+    "task-resource-view": "workspace:*"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.15.0",
