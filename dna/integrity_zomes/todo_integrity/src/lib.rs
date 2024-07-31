@@ -1,9 +1,8 @@
 use hdi::prelude::*;
 
-#[hdk_entry_defs]
+#[hdk_entry_types]
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
-    #[entry_def()]
     Task(Task),
 }
 #[hdk_entry_helper]
@@ -16,8 +15,8 @@ pub struct Task {
 
 #[derive(Debug, Clone, Serialize, Deserialize, SerializedBytes)]
 pub enum TaskStatus {
-  Complete,
-  Incomplete,
+    Complete,
+    Incomplete,
 }
 
 #[hdk_link_types]

@@ -18,7 +18,7 @@
     "package:ui": "rimraf ui.zip && npm run build && cd ./dist && bestzip ../ui.zip index.js icon.png"
   },
   "dependencies": {
-    "@holochain/client": "0.16.7",
+    "@holochain/client": "^0.17.0",
     "@lit/context": "^1.1.0",
     "@lit/task": "^1.0.0",
     "@lit-labs/scoped-registry-mixin": "^1.0.3",

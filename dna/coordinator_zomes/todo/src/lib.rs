@@ -123,7 +123,7 @@ pub fn create_new_list(list_name: String) -> ExternResult<()> {
     // send signal to other peers with the list
     let signal = Signal::NewList { list: list_name };
     let encoded_signal = ExternIO::encode(signal).map_err(|err| wasm_error!(WasmErrorInner::Guest(err.into())))?;
-    remote_signal(encoded_signal, get_all_agents(())?)?;
+    send_remote_signal(encoded_signal, get_all_agents(())?)?;
     Ok(())
 }
 
@@ -156,7 +156,7 @@ pub fn add_task_to_list(
     // send signal to other peers with the task
     let signal = Signal::NewTask { task: wrapped_task.clone() };
     let encoded_signal = ExternIO::encode(signal).map_err(|err| wasm_error!(WasmErrorInner::Guest(err.into())))?;
-    remote_signal(encoded_signal, get_all_agents(())?)?;
+    send_remote_signal(encoded_signal, get_all_agents(())?)?;
 
     Ok(wrapped_task)
 }
@@ -215,9 +215,10 @@ pub fn get_lists(_: ()) -> ExternResult<Vec<String>> {
 pub fn get_tasks_in_list(list: String) -> ExternResult<Vec<WrappedEntry<Task>>> {
     let mut tasks = Vec::<WrappedEntry<Task>>::new();
     let links = get_links(
-        list_typed_path(list)?.path_entry_hash()?,
-        LinkTypes::ListToTask,
-        None,
+        GetLinksInputBuilder::try_new(
+            list_typed_path(list)?.path_entry_hash()?,
+            LinkTypes::ListToTask,
+        )?.build()
     )?;
     for list in links {
         let task = get_latest_task(list.target.clone().into_action_hash().ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Invalid link target"))))?)?.ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
