@@ -1,3 +1,4 @@
 packages:
-  - "ui/views/Post/**"
+  - "ui/views/Task/**"
   - "ui/old-applet-structure"
+  - "../../ui/libs/**"
