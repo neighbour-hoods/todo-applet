@@ -36,7 +36,6 @@
   "dependencies": {
     "@neighbourhoods/client": "workspace:*",
     "@holochain/client": "0.16.7",
-    "@scoped-elements/material-web": "^0.0.19",
     "@neighbourhoods/design-system-components": "workspace:*",
     "@neighbourhoods/design-system-styles": "workspace:*",
     "lit": "^3.0.0"

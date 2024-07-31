@@ -4,7 +4,7 @@ import { NHCheckbox, NHComponent } from "@neighbourhoods/design-system-component
 import { CSSResult, css, html } from "lit";
 
 export class TaskResourceView extends NHComponent {
-  @property() @state()
+  @property()
   task!: Task
 
   render() {

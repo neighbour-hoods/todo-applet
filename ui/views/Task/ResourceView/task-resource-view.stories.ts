@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/web-components';
 import { TaskResourceView } from './dist/task-resource-view';
 import { WrappedEntry, Task } from './dist/types';
 
-customElements.define('task-resource-view', TaskResourceView)
+!customElements.get('task-resource-view') && customElements.define('task-resource-view', TaskResourceView)
 
 interface TaskResourceViewProps {
   task: Task;
