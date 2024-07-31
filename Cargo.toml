@@ -6,10 +6,11 @@ members = [
 ]
 
 [workspace.dependencies]
-hdi = { version = "0.3.0" }
-hdk = { version = "0.2.0" }
+hdk = "0.3.1"
+hdi = "0.4.1"
 serde = "1"
-holochain = {version = "0.2.0"}
+serde_json = "1"
+holochain = "^0.3.1"
 
 [profile.dev]
 opt-level = "z"
