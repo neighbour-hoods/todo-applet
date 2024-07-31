@@ -1,9 +1,9 @@
 {
-  "name": "task-list-view",
+  "name": "task-list-views",
   "version": "0.0.1",
   "keywords": [],
   "author": "Neighbourhoods",
-  "description": "List view Webcomponent for the Task resource",
+  "description": "List view Webcomponents for the Task resource",
   "license": "MIT",
   "type": "module",
   "files": [
@@ -34,8 +34,11 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@neighbourhoods/client": "workspace:*",
     "@holochain/client": "0.16.7",
+    "task-resource-view": "workspace:*",
+    "task-assessment-controls": "workspace:*",
+    "@neighbourhoods/client": "workspace:*",
+    "@neighbourhoods/app-loader": "workspace:*",
     "@neighbourhoods/design-system-components": "workspace:*",
     "@neighbourhoods/design-system-styles": "workspace:*",
     "lit": "^3.0.0"
