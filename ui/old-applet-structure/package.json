@@ -38,7 +38,6 @@
     "@type-craft/title": "^0.0.8",
     "lit": "^3.0.0",
     "lit-svelte-stores": "0.2.5",
-    "neighbourhoods-design-system-components": "workspace:*",
     "task-resource-view": "workspace:*"
   },
   "devDependencies": {
@@ -73,7 +72,7 @@
     "run-singleton-cli": "^0.0.5",
     "tslib": "^2.3.1",
     "typescript": "^5.2.2",
-    "vite": "^4.4.3"
+    "vite": "^5.3.5"
   },
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",
