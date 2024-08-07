@@ -2,7 +2,6 @@
 manifest_version: "1"
 name: todo_lists
 integrity:
-  uuid: 00000000-0000-0000-0000-000000000000
   properties: ~
   origin_time: 2022-09-10T04:13:46.720Z
   zomes:

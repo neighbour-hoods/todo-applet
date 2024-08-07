@@ -1,4 +1,4 @@
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig(({ mode }) => {
@@ -26,5 +26,10 @@ export default defineConfig(({ mode }) => {
         formats: ['es'],
       }
     },
+    resolve: {
+      alias: {
+        fs: require.resolve('rollup-plugin-node-builtins'),
+      }
+    }
   } : {}
 })
