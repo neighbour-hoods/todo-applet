@@ -2,16 +2,17 @@ import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
 
-import { AppWebsocket, AppInfo, AdminWebsocket, encodeHashToBase64, CellInfo, AppAgentWebsocket, ProvisionedCell, CellType, CellId, ClonedCell, } from '@holochain/client';
+import { AppWebsocket, AppInfo, AdminWebsocket, encodeHashToBase64, CellInfo, ProvisionedCell, CellType, CellId, ClonedCell, } from '@holochain/client';
 
-import { connectHolochainApp, getAppAgentWebsocket, createAppDelegate, AppBlockRenderer } from "@neighbourhoods/app-loader"
+import { connectHolochainApp, createAppDelegate, AppBlockRenderer } from "@neighbourhoods/app-loader"
 import { CreateOrJoinNH } from '@neighbourhoods/dev-util-components';
-import { SensemakerStore } from '@neighbourhoods/client';
+import { ConfigDimension, SensemakerStore, Range } from '@neighbourhoods/client';
 
 import { CircularProgress } from '@scoped-elements/material-web';
-
 import { INSTALLED_APP_ID, appletConfig } from './appletConfig'
 import TodoApplet from './applet-index'
+
+export const sleep = (ms: number) => new Promise((r) => setTimeout(() => r(null), ms));
 
 @customElement('applet-test-harness')
 export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
@@ -19,9 +20,8 @@ export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
   @state() isSensemakerCloned: boolean = false;
   
   private _agentPubkey!: string;
-  private _appWebsocket!: AppWebsocket;
   private _adminWebsocket!: AdminWebsocket;
-  private _appAgentWebsocket!: AppAgentWebsocket;
+  private _appWebsocket!: AppWebsocket;
   
   private _sensemakerStore!: SensemakerStore;
   private _appInfo!: AppInfo;
@@ -35,7 +35,6 @@ export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
         appInfo
       } = await connectHolochainApp(INSTALLED_APP_ID);
       const installedCells = appInfo.cell_info
-
       this._adminWebsocket = adminWebsocket
       this._appWebsocket = appWebsocket
       this._appInfo = appInfo
@@ -63,13 +62,13 @@ export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
   }
 
   async initializeSensemakerStore(clonedSensemakerRoleName: string) {
-    this._appAgentWebsocket = await getAppAgentWebsocket(INSTALLED_APP_ID);
-    this._sensemakerStore = new SensemakerStore(this._appAgentWebsocket, clonedSensemakerRoleName);
+    const connection = await connectHolochainApp(INSTALLED_APP_ID);
+    this._appWebsocket = connection.appWebsocket; 
+    this._sensemakerStore = new SensemakerStore(this._appWebsocket, clonedSensemakerRoleName);
   }
 
   async cloneSensemakerCell(ca_pubkey: string) {
     const clonedSensemakerCell: ClonedCell = await this._appWebsocket.createCloneCell({
-      app_id: INSTALLED_APP_ID,
       role_name: "sensemaker",
       modifiers: {
         network_seed: 'test',
@@ -88,10 +87,30 @@ export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
   }
 
   async createNeighbourhood(_e: CustomEvent) {
-    console.log('this._agentPubkey :>> ', this._agentPubkey);
+    
     await this.cloneSensemakerCell(this._agentPubkey)
+    await sleep(300)
+    //@ts-ignore
+    const clonedCellId = this._appWebsocket.cachedAppInfo.cell_info.sensemaker[1]['cloned'].cell_id;
+    await this._adminWebsocket.authorizeSigningCredentials(clonedCellId);
+    await sleep(300)
+    const dummyEntry = await this._appWebsocket.callZome({
+      cell_id: clonedCellId,
+      zome_name: "sensemaker",
+      fn_name: "create_range",
+      payload: {
+        "name": "10-scale",
+        "kind": {
+          "Integer": { "min": 0, "max": 10 }
+        },
+      }
+    })
+    const dummyEh = dummyEntry.signed_action.hashed.content.entry_hash;
+    appletConfig.applet_eh = dummyEh;
+    appletConfig.resource_defs.forEach((resourceDef) => {
+      resourceDef.applet_eh = dummyEh
+    })
     const config = await this._sensemakerStore.registerApplet(appletConfig);
-    console.log('App config :>> ', config);
     this.loading = false;
   }
 
@@ -110,7 +129,7 @@ export class AppletTestHarness extends ScopedRegistryHost(LitElement) {
         <create-or-join-nh @create-nh=${this.createNeighbourhood} @join-nh=${this.joinNeighbourhood}></create-or-join-nh>
       `;
     const delegate = createAppDelegate(
-      this._appAgentWebsocket,
+      this._appWebsocket,
       this._appInfo,
       {
         logoSrc: "",
