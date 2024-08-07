@@ -31,7 +31,7 @@ export class ContextView extends ScopedRegistryHost(LitElement) {
             ${this.tasksInContext.value.map((task) => html`
                     <task-item
                         .task=${task}
-                        .completed=${('Complete' in task.entry.status)}
+                        .completed=${('Complete' in Object.values(task.entry.status))}
                         @task-toggle=${() => this.todoStore.toggleTaskStatus(task)}
                     ></task-item>
             `)}

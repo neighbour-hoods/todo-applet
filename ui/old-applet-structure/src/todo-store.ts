@@ -127,7 +127,7 @@ export class TodoStore {
 
   async toggleTaskStatus(wrappedTask: WrappedEntry<Task>) {
     let updatedTask = wrappedTask;
-    if(('Complete' in wrappedTask.entry.status)) {
+    if(('Complete' in Object.values(wrappedTask.entry.status))) {
       await this.service.uncompleteTask(wrappedTask.action_hash);
       updatedTask.entry.status = { Incomplete: null };
     }

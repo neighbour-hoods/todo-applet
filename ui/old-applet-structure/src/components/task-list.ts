@@ -86,7 +86,7 @@ export class TaskList extends NHComponent {
                         <task-item
                             .task=${task}
                             .todoStore=${this.todoStore}
-                            .completed=${('Complete' in task.entry.status)}
+                            .completed=${('Complete' in Object.values(task.entry.status))}
                             @task-toggle=${() => this.todoStore.toggleTaskStatus(task)}
                         >
                             <input-assessment-renderer
