@@ -1,0 +1,46 @@
+{
+  "name": "task-create-or-update-views",
+  "version": "0.0.1",
+  "keywords": [],
+  "author": "Neighbourhoods",
+  "description": "Create/Update view Webcomponents for the Task resource",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      }
+    },
+    "./*": {
+      "types": "./dist/",
+      "import": "./dist/"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@holochain/client": "0.16.7",
+    "task-resource-view": "workspace:*",
+    "task-assessment-controls": "workspace:*",
+    "@neighbourhoods/client": "workspace:*",
+    "@neighbourhoods/app-loader": "workspace:*",
+    "@neighbourhoods/design-system-components": "workspace:*",
+    "@neighbourhoods/design-system-styles": "workspace:*",
+    "lit": "^3.0.0"
+  }
+}
