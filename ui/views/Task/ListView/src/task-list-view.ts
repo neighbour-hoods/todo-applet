@@ -37,7 +37,7 @@ export class TaskListView extends NHComponent {
   firstUpdated(): void {
     if(!!this.taskResourceView && !customElements.get('task-resource-view')) {
       customElements.define('task-resource-view', this.taskResourceView);
-      this.requestUpdate()
+      // this.requestUpdate()
     }
   }
 
