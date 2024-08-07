@@ -41,7 +41,7 @@ export class TodoApplet extends ScopedRegistryHost(AppBlock) implements NHDelega
       const installAppId = this.nhDelegate.appInfo.installed_app_id;
       appletConfig.name = installAppId;
       this.todoStore = new TodoStore(
-        this.nhDelegate.appAgentWebsocket,
+        this.nhDelegate.appWebsocket,
         cellId!,
         appletRoleName
       );
